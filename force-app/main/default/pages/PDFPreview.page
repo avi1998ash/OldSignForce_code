@@ -1,0 +1,522 @@
+<!--
+  @description       : PDF Preview — responsive re-render on container resize
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @last modified on  : 05-15-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+
+  CHANGES vs previous version:
+    1. `desiredWidth` is no longer hardcoded to 762 — read from
+       `document.body.clientWidth` so the PDF always paints at the actual
+       container width (sharp at any zoom level, correct on mobile).
+    2. The whole render pipeline is exposed as `window.__rerender()` so a
+       resize message from the parent LWC can trigger a fresh render.
+    3. ArrayBuffer of the PDF is cached as `_lastPdfData` after first load
+       so re-render doesn't need to re-download.
+    4. `containerResize` message handler + native window.resize listener,
+       both debounced 150ms.
+    5. `notifyParent()` runs after every render (initial AND re-renders).
+-->
+<apex:page showHeader="false" sidebar="false"
+    standardStylesheets="false"
+    controller="PDFPreviewController"
+    contentType="text/html">
+<html>
+<head>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body { width:100%; background:#525659; overflow-x:hidden; }
+        /* ?bg=light — DocuSign-style light viewer backdrop (guest signing). */
+        html.light, html.light body { background:#eceef1; }
+        html.light .page-wrapper {
+            box-shadow:0 1px 3px rgba(0,0,0,0.16), 0 6px 18px rgba(0,0,0,0.10);
+            border:1px solid #d9dce1;
+        }
+        html.light .page-label { color:#8a8f98; }
+        html.light #loading, html.light .loading-text { color:#555; }
+        html.light .loading-sub { color:#888; }
+        html.light .spinner { border-color:#d9dce1; border-top-color:#4f46e5; }
+        .page-container {
+            display:none;
+            flex-direction:column;
+            align-items:center;
+            padding:16px;
+            gap:16px;
+            width:100%;
+        }
+        .page-wrapper {
+            background:white;
+            box-shadow:0 4px 16px rgba(0,0,0,0.6);
+            width:calc(100% - 32px);
+            line-height:0;
+        }
+        .page-wrapper canvas { width:100%; height:auto; display:block; }
+        .page-label {
+            color:#bbb; font-size:11px; font-family:Arial;
+            text-align:center; padding:2px 0;
+        }
+        #loading {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            height:100vh;
+            color:#ccc;
+            font-family:Arial;
+            gap:16px;
+        }
+        .spinner {
+            width:40px; height:40px;
+            border:3px solid #444;
+            border-top:3px solid #0070d2;
+            border-radius:50%;
+            animation:spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+    </style>
+    <script>
+        (function() {
+            if ((window.location.search || '').indexOf('bg=light') !== -1) {
+                document.documentElement.className += ' light';
+            }
+        })();
+    </script>
+    <style>
+        .loading-text { font-size:14px; color:#ccc; }
+        .loading-sub { font-size:12px; color:#888; }
+        .error-msg {
+            color:#ff6b6b; font-family:Arial; font-size:14px;
+            text-align:center; padding:40px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading document...</div>
+        <div class="loading-sub" id="loading-sub">Preparing pages</div>
+    </div>
+    <div class="page-container" id="pages"></div>
+    <div id="error" style="display:none;"></div>
+
+    <script src="{!URLFOR($Resource.pdfjs)}"></script>
+    <script>
+        var cvId = '{!JSENCODE(cvId)}';
+        var pdfUrl = '{!JSENCODE(pdfUrl)}';
+        var usePublicUrl = {!usePublicUrl};
+        var mode = new URLSearchParams(window.location.search).get('mode');
+        // Anchor mode: also extract every text item's position (via pdf.js
+        // getTextContent) and post it to the parent. Used to bind signature
+        // fields to merge tags so they track content reflow after merge.
+        // Coordinates are normalised to the same 762px reference the editor uses.
+        var ANCHOR_REF_WIDTH = 762;
+        var _extractText = new URLSearchParams(window.location.search).get('sfAnchor') === '1';
+        var _textItems = [];
+
+        console.log('PDF PREVIEW DEBUG:', 'cvId=' + cvId, 'pdfUrl=' + pdfUrl, 'usePublicUrl=' + usePublicUrl, 'mode=' + mode, 'sfAnchor=' + _extractText);
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '{!URLFOR($Resource.pdfjs_worker)}';
+        // Standard (Foxit/Liberation) fonts so non-embedded Helvetica/Times text
+        // renders instead of disappearing (LibreOffice-converted PDFs use them).
+        var STD_FONTS_URL = '{!URLFOR($Resource.pdfjs_standard_fonts)}/';
+
+        // ── Responsive re-render state ─────────────────────────────────────
+        // Cache the decoded PDF document and its raw bytes so we can re-render
+        // at a new width without re-downloading.
+        var _pdfDoc = null;
+        var _lastPdfData = null;
+        var _resizeTimer = null;
+        var _lastRenderedWidth = 0;
+        var _isRendering = false;
+
+        // ── MODE: receive — wait for PDF data from parent LWC ──
+        if (mode === 'receive') {
+            document.getElementById('loading-sub').textContent = 'Waiting for document...';
+
+            window.addEventListener('message', function msgHandler(e) {
+                var msg = e.data;
+                if (typeof msg === 'string') {
+                    try { msg = JSON.parse(msg); } catch(err) { return; }
+                }
+                if (msg && msg.type === 'loadPdfBase64') {
+                    window.removeEventListener('message', msgHandler);
+                    document.getElementById('loading-sub').textContent = 'Decoding document...';
+                    console.log('PDF PREVIEW: Received PDF data from LWC, length:', msg.data.length);
+
+                    try {
+                        var raw = atob(msg.data);
+                        var arr = new Uint8Array(raw.length);
+                        for (var i = 0; i < raw.length; i++) {
+                            arr[i] = raw.charCodeAt(i);
+                        }
+                        renderPdf(arr.buffer);
+                    } catch(err) {
+                        showError('Failed to decode PDF: ' + err.message);
+                    }
+                }
+            });
+
+        // ── MODE: normal — public URL (guest users) ──
+        } else if (usePublicUrl && pdfUrl) {
+            document.getElementById('loading-sub').textContent = 'Downloading PDF...';
+            fetch(pdfUrl, { redirect: 'follow' })
+                .then(function(r) {
+                    // S3 returns a NON-200 XML error body for expired / signature /
+                    // checksum / missing-object — never feed that to pdf.js.
+                    if (!r.ok) {
+                        return r.text().then(function(t) {
+                            throw new Error('The document download failed (HTTP ' + r.status
+                                + '). The preview link may have expired — re-open the document. '
+                                + (t ? t.slice(0, 140) : ''));
+                        });
+                    }
+                    return r.arrayBuffer();
+                })
+                .then(function(data) { renderPdf(data); })
+                .catch(function(err) { showError('Download failed: ' + err.message); });
+
+        // ── MODE: normal — internal user with cvId ──
+        } else if (cvId) {
+            document.getElementById('loading-sub').textContent = 'Loading PDF...';
+
+            if (typeof Visualforce !== 'undefined' && Visualforce.remoting) {
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.PDFPreviewController.getPDFBase64}',
+                    cvId,
+                    function(base64, ev) {
+                        if (ev.status) {
+                            var raw = atob(base64);
+                            var arr = new Uint8Array(raw.length);
+                            for (var i = 0; i < raw.length; i++) {
+                                arr[i] = raw.charCodeAt(i);
+                            }
+                            renderPdf(arr.buffer);
+                        } else {
+                            console.log('Remoting failed, trying fallback...');
+                            document.getElementById('loading-sub').textContent = 'Loading large document...';
+                            loadViaRestProxy(cvId);
+                        }
+                    },
+                    { buffer: true, escape: false, timeout: 300000 }
+                );
+            } else {
+                fetchPdfFallback(cvId);
+            }
+        }
+
+        function loadViaEmbed(versionId) {
+            document.getElementById('loading').style.display = 'none';
+            var container = document.getElementById('pages');
+            container.style.display = 'flex';
+
+            var wrapper = document.createElement('div');
+            wrapper.className = 'page-wrapper';
+            wrapper.id = 'page-1';
+            wrapper.setAttribute('data-page', '1');
+            wrapper.style.cssText = 'width:calc(100% - 32px);min-height:1000px;position:relative;background:#fff;';
+
+            var msg = document.createElement('div');
+            msg.style.cssText = 'text-align:center;padding:60px 20px;font-family:Arial;';
+            msg.innerHTML =
+                '<div style="font-size:48px;margin-bottom:16px;">📄</div>' +
+                '<p style="font-size:16px;color:#1a1f2e;font-weight:600;margin:0 0 8px;">Document Preview</p>' +
+                '<p style="font-size:13px;color:#888;margin:0 0 24px;">This document is too large to preview inline.<br/>Please scroll down to sign — your signature fields are positioned below.</p>' +
+                '<p style="font-size:11px;color:#aaa;">Document will be visible in the completed PDF after signing.</p>';
+            wrapper.appendChild(msg);
+            container.appendChild(wrapper);
+
+            setTimeout(function() { notifyParent(); }, 500);
+            setTimeout(function() { notifyParent(); }, 2000);
+        }
+
+        function loadViaRestProxy(versionId) {
+            document.getElementById('loading-sub').textContent = 'Downloading large PDF...';
+            // No Authorization header: PDFProxyRestService.cls authorizes requests
+            // via a signer `token` query param (see its class header), and never
+            // reads this header server-side. Embedding the session id here would
+            // expose it for no benefit, so it's omitted.
+            fetch('/services/apexrest/pdfproxy?cvId=' + versionId, {
+                credentials: 'same-origin'
+            })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.arrayBuffer();
+            })
+            .then(function(data) {
+                console.log('REST proxy: Got PDF,', data.byteLength, 'bytes');
+                renderPdf(data);
+            })
+            .catch(function(err) {
+                console.log('REST proxy failed, using embed fallback...');
+                loadViaEmbed(versionId);
+            });
+        }
+
+        function fetchPdfFallback(versionId) {
+            document.getElementById('loading-sub').textContent = 'Downloading PDF...';
+            var downloadUrl = '/sfc/servlet.shepherd/version/download/' + versionId;
+            fetch(downloadUrl, { credentials: 'same-origin', redirect: 'follow' })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.arrayBuffer();
+            })
+            .then(function(data) { renderPdf(data); })
+            .catch(function(err) { showError('Failed to load PDF: ' + err.message); });
+        }
+
+        /**
+         * Pick the width to render the PDF at. Reads the live container
+         * width every time so we always paint at the current size.
+         *
+         * Subtract the same 32px we lose to .page-wrapper's
+         * `calc(100% - 32px)` so the canvas pixel-size matches the on-screen
+         * width — keeps the PDF sharp at any zoom level.
+         */
+        function getDesiredWidth() {
+            var w = document.body.clientWidth;
+            // Account for the wrapper's 16px gutter on each side.
+            return Math.max(320, w - 32);
+        }
+
+        /**
+         * Top-level entry point. Stores the raw bytes + decoded pdf doc
+         * so we can re-render on resize without re-downloading.
+         */
+        // Scan the first ~1KB for the "%PDF" signature. Real PDFs start with it
+        // (some have a few leading bytes). Anything else — an S3 error XML, an
+        // HTML login page, a DOCX (PK\x03\x04) stored as .pdf — must NOT be handed
+        // to pdf.js (it would throw a cryptic "Invalid PDF structure").
+        function looksLikePdf(buf) {
+            try {
+                var b = new Uint8Array(buf);
+                if (!b || b.length < 5) return false;
+                var limit = Math.min(b.length - 4, 1024);
+                for (var i = 0; i <= limit; i++) {
+                    if (b[i] === 0x25 && b[i+1] === 0x50 && b[i+2] === 0x44 && b[i+3] === 0x46) return true;
+                }
+                return false;
+            } catch (e) { return false; }
+        }
+
+        function renderPdf(data) {
+            _lastPdfData = data;
+
+            // Central guard: only valid PDF bytes reach pdf.js. Catches DOCX-as-.pdf,
+            // S3 error pages, HTML login pages, expired-link bodies, empty buffers.
+            if (!looksLikePdf(data)) {
+                showError('This document could not be displayed. It may be a Word file (not a PDF), '
+                    + 'or the document link expired or failed to download. Please re-open or re-upload the document.');
+                return;
+            }
+
+            document.getElementById('loading-sub').textContent = 'Rendering pages...';
+
+            pdfjsLib.getDocument({ data: data, standardFontDataUrl: STD_FONTS_URL }).promise.then(function(pdf) {
+                _pdfDoc = pdf;
+                _lastRenderedWidth = getDesiredWidth();
+                renderAllPages(pdf, _lastRenderedWidth, /*isRerender*/ false);
+            }).catch(function(err) {
+                showError('PDF render error: ' + err.message);
+            });
+        }
+
+        /**
+         * Render every page of the supplied pdf doc into the #pages
+         * container at the given target CSS width. Clears any existing
+         * pages first so this is safe to call repeatedly (resize).
+         */
+        function renderAllPages(pdf, desiredWidth, isRerender) {
+            if (_isRendering) return; // guard against overlapping renders
+            _isRendering = true;
+
+            var totalPages = pdf.numPages;
+            var container = document.getElementById('pages');
+
+            // Wipe existing pages — re-renders rebuild from scratch.
+            container.innerHTML = '';
+            _textItems = [];   // rebuilt each render when anchor extraction is on
+
+            var rendered = 0;
+
+            function renderPage(pageNum) {
+                if (pageNum > totalPages) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('pages').style.display = 'flex';
+                    _isRendering = false;
+
+                    // Post fresh page positions to parent. Multiple
+                    // retries cover the case where the parent LWC isn't
+                    // fully wired up on the first paint.
+                    notifyParent();
+
+                    // Anchor mode: hand the parent every text item's position so
+                    // it can reassemble merge tags and bind fields to them.
+                    if (_extractText) {
+                        try {
+                            window.parent.postMessage(JSON.stringify({
+                                type: 'textItems',
+                                items: _textItems,
+                                refWidth: ANCHOR_REF_WIDTH
+                            }), '*');
+                        } catch (e) { /* best-effort */ }
+                    }
+                    var retryCount = 0;
+                    var retryInterval = setInterval(function() {
+                        notifyParent();
+                        retryCount++;
+                        if (retryCount >= (isRerender ? 3 : 10)) {
+                            clearInterval(retryInterval);
+                        }
+                    }, isRerender ? 100 : 500);
+                    return;
+                }
+
+                pdf.getPage(pageNum).then(function(page) {
+                    var viewport = page.getViewport({ scale: 1 });
+                    // Use the LIVE container width — no more hardcoded 762.
+                    // Multiplying by devicePixelRatio keeps the canvas
+                    // crisp on retina / zoomed displays.
+                    var dpr = window.devicePixelRatio || 1;
+                    var cssScale = desiredWidth / viewport.width;
+                    var scaledViewport = page.getViewport({ scale: cssScale * dpr });
+
+                    var canvas = document.createElement('canvas');
+                    canvas.width = scaledViewport.width;
+                    canvas.height = scaledViewport.height;
+                    // CSS size — what the browser actually shows.
+                    canvas.style.width = '100%';
+                    canvas.style.height = 'auto';
+
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'page-wrapper';
+                    wrapper.id = 'page-' + pageNum;
+                    wrapper.setAttribute('data-page', pageNum);
+                    wrapper.appendChild(canvas);
+                    container.appendChild(wrapper);
+
+                    var label = document.createElement('div');
+                    label.className = 'page-label';
+                    label.textContent = 'Page ' + pageNum;
+                    container.appendChild(label);
+
+                    page.render({
+                        canvasContext: canvas.getContext('2d'),
+                        viewport: scaledViewport
+                    }).promise.then(function() {
+                        rendered++;
+                        if (!isRerender) {
+                            document.getElementById('loading-sub').textContent =
+                                rendered + ' / ' + totalPages + ' pages rendered';
+                        }
+                        if (_extractText) {
+                            // viewport is at scale 1 (PDF points); normalise every
+                            // text item to the 762-ref, top-left-origin space the
+                            // field editor stores coordinates in.
+                            var refScale = ANCHOR_REF_WIDTH / viewport.width;
+                            page.getTextContent().then(function(tc) {
+                                (tc.items || []).forEach(function(it) {
+                                    if (!it || !it.str || !it.str.trim()) return;
+                                    var tr = it.transform || [1, 0, 0, 1, 0, 0];
+                                    var h = it.height || Math.abs(tr[3]) || 10;
+                                    _textItems.push({
+                                        page: pageNum,
+                                        str: it.str,
+                                        x: tr[4] * refScale,
+                                        y: (viewport.height - (tr[5] + h)) * refScale,
+                                        w: (it.width || 0) * refScale,
+                                        h: h * refScale
+                                    });
+                                });
+                                renderPage(pageNum + 1);
+                            }).catch(function() { renderPage(pageNum + 1); });
+                        } else {
+                            renderPage(pageNum + 1);
+                        }
+                    });
+                });
+            }
+
+            renderPage(1);
+        }
+
+        /**
+         * Re-render at the current container width. Safe to call on
+         * resize — no-ops if width hasn't changed or PDF isn't loaded.
+         */
+        function rerenderAtCurrentWidth() {
+            if (!_pdfDoc) return;
+            var w = getDesiredWidth();
+            // Skip if width didn't change by more than 2px (filters out
+            // sub-pixel jitter from ResizeObserver).
+            if (Math.abs(w - _lastRenderedWidth) < 2) return;
+            _lastRenderedWidth = w;
+            renderAllPages(_pdfDoc, w, /*isRerender*/ true);
+        }
+        window.__rerender = rerenderAtCurrentWidth;
+
+        function showError(msg) {
+            console.error(msg);
+            document.getElementById('loading').style.display = 'none';
+            var errorDiv = document.getElementById('error');
+            errorDiv.style.display = 'block';
+            // msg can carry attacker-influenced text (e.g. a slice of an S3 error
+            // response body — see the usePublicUrl fetch above), so build the
+            // element via textContent rather than innerHTML to keep it inert.
+            errorDiv.innerHTML = '';
+            var p = document.createElement('p');
+            p.className = 'error-msg';
+            p.textContent = msg;
+            errorDiv.appendChild(p);
+        }
+
+        function notifyParent() {
+            var wrappers = document.querySelectorAll('.page-wrapper');
+            var pageData = [];
+            wrappers.forEach(function(p) {
+                pageData.push({
+                    page: parseInt(p.getAttribute('data-page')),
+                    top: p.offsetTop,
+                    left: p.offsetLeft,
+                    height: p.offsetHeight,
+                    width: p.offsetWidth
+                });
+            });
+            window.parent.postMessage(JSON.stringify({
+                type: 'pagePositions',
+                pages: pageData,
+                totalPages: wrappers.length
+            }), '*');
+        }
+
+        /* ── Resize handling ──────────────────────────────────────────────
+         * Both the parent LWC's `containerResize` postMessage and the
+         * native window resize event funnel through the same debounced
+         * handler. 150ms debounce keeps PDF.js from re-rendering during
+         * an active drag-resize.
+         */
+        function scheduleRerender() {
+            if (_resizeTimer) clearTimeout(_resizeTimer);
+            _resizeTimer = setTimeout(function() {
+                _resizeTimer = null;
+                rerenderAtCurrentWidth();
+            }, 150);
+        }
+
+        window.addEventListener('message', function(e) {
+            var msg = e.data;
+            if (typeof msg === 'string') {
+                try { msg = JSON.parse(msg); } catch(err) { return; }
+            }
+            if (msg && msg.type === 'scrollToPage') {
+                var el = document.getElementById('page-' + msg.page);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            if (msg && msg.type === 'containerResize') {
+                scheduleRerender();
+            }
+        });
+
+        window.addEventListener('resize', scheduleRerender);
+    </script>
+</body>
+</html>
+</apex:page>

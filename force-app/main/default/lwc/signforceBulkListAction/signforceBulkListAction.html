@@ -1,0 +1,256 @@
+<template>
+    <div class="bla-shell">
+
+        <!-- ── header ──
+             The subtitle is not decoration. Arriving here from a list-view
+             button, there is nothing on screen that says what the button was
+             about to do, so it says it in one sentence. -->
+        <div class="bla-head">
+            <div class="bla-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+            </div>
+            <div class="bla-head-text">
+                <p class="bla-eyebrow">eSignforce</p>
+                <h1 class="bla-title">Generate documents</h1>
+                <p class="bla-sub">{headerSubtitle}</p>
+            </div>
+        </div>
+
+        <template if:true={isLoading}>
+            <div class="bla-loading">
+                <div class="bla-spinner"></div>
+                <p class="bla-loading-text">Checking what you selected&hellip;</p>
+            </div>
+        </template>
+
+        <!-- Sits ABOVE the steps and outside every other if: a failure while
+             working out the object or loading templates happens before any step
+             renders, and the earlier markup put this note inside step 3 — so
+             those failures appeared nowhere at all. -->
+        <template if:true={hasError}>
+            <div class="bla-alert">
+                <div class="bla-alert-head">
+                    <span class="bla-alert-mark">!</span>
+                    <div>
+                        <p class="bla-alert-title">{fault.title}</p>
+                        <p class="bla-alert-text">{fault.text}</p>
+                    </div>
+                </div>
+                <button class="bla-alert-toggle" onclick={toggleFaultDetail} type="button">
+                    {faultDetailLabel}
+                </button>
+                <template if:true={showFaultDetail}>
+                    <pre class="bla-alert-detail">{fault.detail}</pre>
+                </template>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+
+            <!-- Nothing ticked in the list view -->
+            <template if:true={hasNoRecords}>
+                <div class="bla-note bla-note-warn">
+                    <p><strong>No records were selected.</strong></p>
+                    <p>Go back to the list, tick the checkbox next to each record you want, then press Generate Documents again.</p>
+                </div>
+                <!-- Dead ends need a way out. With the flow footer switched off
+                     this is the only one on the screen. -->
+                <div class="bla-actions">
+                    <a class="bla-btn bla-btn-primary bla-link" href={listUrl} target="_top">
+                        Back to the list
+                    </a>
+                </div>
+            </template>
+
+            <template if:false={hasNoRecords}>
+
+                <!-- ══════════ STEP 1 · what you selected ══════════ -->
+                <section class="bla-step">
+                    <div class="bla-step-head">
+                        <span class="bla-num">1</span>
+                        <div>
+                            <h2 class="bla-step-title">These records</h2>
+                            <p class="bla-step-sub">{recordsSubtitle}</p>
+                        </div>
+                        <span class="bla-badge">{recordCount}</span>
+                    </div>
+
+                    <div class="bla-names">
+                        <template for:each={visibleRecords} for:item="r">
+                            <span key={r.id} class="bla-name">{r.name}</span>
+                        </template>
+                        <template if:true={hasMoreRecords}>
+                            <button class="bla-more" onclick={toggleAllRecords} type="button">
+                                {moreLabel}
+                            </button>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- ══════════ STEP 2 · template ══════════ -->
+                <section class="bla-step">
+                    <div class="bla-step-head">
+                        <span class={step2NumClass}>2</span>
+                        <div>
+                            <h2 class="bla-step-title">Which document</h2>
+                            <p class="bla-step-sub">{templateSubtitle}</p>
+                        </div>
+                    </div>
+
+                    <!-- No template exists for this object -->
+                    <template if:false={hasTemplates}>
+                        <div class="bla-note bla-note-warn">
+                            <p><strong>There is no template for {objectLabelSingular} yet.</strong></p>
+                            <p>
+                                An administrator creates one on the <strong>Dynamic Document</strong> tab.
+                                It has to be switched on and have a document uploaded before it can
+                                be used here.
+                            </p>
+                        </div>
+                        <div class="bla-actions">
+                            <a class="bla-btn bla-btn-primary bla-link" href={listUrl} target="_top">
+                                Back to the list
+                            </a>
+                        </div>
+                    </template>
+
+                    <template if:true={hasTemplates}>
+                        <!-- Cards, not a dropdown: a closed combobox showing
+                             "Choose a template" hides the fact that there is
+                             anything to choose from at all. -->
+                        <div class="bla-cards">
+                            <template for:each={templateCards} for:item="t">
+                                <button key={t.id} class={t.cardClass} data-id={t.id}
+                                        onclick={handleTemplateCard} type="button"
+                                        aria-pressed={t.selectedStr} disabled={locked}>
+                                    <span class="bla-radio"></span>
+                                    <span class="bla-card-text">
+                                        <span class="bla-card-name">{t.name}</span>
+                                        <span class="bla-card-meta">{t.metaLabel}</span>
+                                    </span>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+                </section>
+
+                <!-- ══════════ STEP 3 · review and run ══════════ -->
+                <template if:true={hasTemplates}>
+                    <section class="bla-step">
+                        <div class="bla-step-head">
+                            <span class={step3NumClass}>3</span>
+                            <div>
+                                <h2 class="bla-step-title">Run it</h2>
+                                <p class="bla-step-sub">{runSubtitle}</p>
+                            </div>
+                        </div>
+
+                        <!-- Before the run: plain-language description of the outcome -->
+                        <template if:false={batch}>
+                            <template if:true={selectedTemplate}>
+                                <div class="bla-review">
+                                    <p class="bla-review-line">{planSentence}</p>
+                                    <ul class="bla-review-list">
+                                        <li>Each document is saved on its own record,
+                                            under <strong>Generated Documents</strong>.</li>
+                                        <li>Nothing is emailed and nothing is sent for signature.</li>
+                                        <li>Existing documents are kept &mdash; a repeat run is saved
+                                            alongside as a new version.</li>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <div class="bla-actions">
+                                <!-- The reason lives next to the button. A grey
+                                     button that says nothing is the single
+                                     biggest source of "it does not work". -->
+                                <template if:true={blockReason}>
+                                    <span class="bla-blocked">{blockReason}</span>
+                                </template>
+                                <a class="bla-btn bla-btn-ghost bla-link" href={listUrl} target="_top">
+                                    Cancel
+                                </a>
+                                <button class="bla-btn bla-btn-primary" onclick={handleStart}
+                                        disabled={startDisabled} type="button">
+                                    <template if:false={running}>{startLabel}</template>
+                                    <template if:true={running}>Starting&hellip;</template>
+                                </button>
+                            </div>
+                        </template>
+
+                        <!-- During and after the run -->
+                        <template if:true={batch}>
+                            <div class="bla-progress">
+                                <div class="bla-progress-head">
+                                    <span class="bla-progress-title">{progressLabel}</span>
+                                    <span class="bla-progress-pct">{percent}%</span>
+                                </div>
+                                <div class="bla-bar"><span style={barStyle}></span></div>
+
+                                <div class="bla-chips">
+                                    <span class="bla-chip bla-chip-ok">{batch.succeeded} done</span>
+                                    <template if:true={hasFailures}>
+                                        <span class="bla-chip bla-chip-bad">{batch.failed} failed</span>
+                                    </template>
+                                    <template if:true={hasQueued}>
+                                        <span class="bla-chip bla-chip-wait">{queued} waiting</span>
+                                    </template>
+                                </div>
+
+                                <!-- Per-record outcome. "2 failed" on its own
+                                     tells nobody which two. -->
+                                <template if:true={hasResultsNote}>
+                                    <p class="bla-results-note">{resultsNote}</p>
+                                </template>
+                                <template if:true={showResultRows}>
+                                    <ul class="bla-results">
+                                        <template for:each={resultRows} for:item="row">
+                                            <li key={row.recordId} class={row.rowClass}>
+                                                <span class={row.dotClass}></span>
+                                                <span class="bla-result-name">{row.name}</span>
+                                                <span class="bla-result-state">{row.stateLabel}</span>
+                                                <template if:true={row.error}>
+                                                    <span class="bla-result-err">{row.error}</span>
+                                                </template>
+                                                <template if:true={row.hasRaw}>
+                                                    <button class="bla-rawtoggle" data-id={row.recordId}
+                                                            onclick={toggleRowRaw} type="button">{row.rawLabel}</button>
+                                                </template>
+                                                <template if:true={row.showRaw}>
+                                                    <pre class="bla-rawtext">{row.rawError}</pre>
+                                                </template>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
+
+                                <template if:true={finished}>
+                                    <p class={doneClass}>{doneMessage}</p>
+                                </template>
+                                <template if:false={finished}>
+                                    <p class="bla-hint">
+                                        This keeps running on the server, so you can leave now
+                                        and the remaining documents will still be created.
+                                    </p>
+                                </template>
+
+                                <div class="bla-actions">
+                                    <a class={leaveButtonClass} href={listUrl} target="_top">
+                                        {leaveLabel}
+                                    </a>
+                                </div>
+                            </div>
+                        </template>
+
+                    </section>
+                </template>
+
+            </template>
+        </template>
+
+    </div>
+</template>

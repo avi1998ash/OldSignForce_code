@@ -1,0 +1,540 @@
+<template>
+    <c-signforce-access-gate>
+        <div class="bc-shell">
+
+            <!-- ── HEADER ─────────────────────────────────────────── -->
+            <div class="bc-header">
+                <div class="bc-brand">
+                    <div class="bc-brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="bc-eyebrow">eSignforce</p>
+                        <h1 class="bc-title">Bulk Operations</h1>
+                    </div>
+                </div>
+            </div>
+
+            <p class="bc-subtitle">
+                Run one template across many records, or send one agreement to many recipients.
+                Both run in the background, so you can leave this page once a batch has started.
+            </p>
+
+            <!-- ── MODE TABS ──────────────────────────────────────── -->
+            <nav class="bc-tabs" role="tablist">
+                <button class={generateTabClass} data-mode="generate" onclick={handleMode}
+                        role="tab" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" class="bc-tab-icon">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <span>Generate documents</span>
+                </button>
+                <button class={sendTabClass} data-mode="send" onclick={handleMode}
+                        role="tab" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" class="bc-tab-icon">
+                        <path d="M22 2 11 13"></path>
+                        <path d="M22 2 15 22l-4-9-9-4z"></path>
+                    </svg>
+                    <span>Send for signature</span>
+                </button>
+            </nav>
+
+            <!-- A failure used to be reported only by a toast, which is gone in
+                 a few seconds and leaves the screen looking as if nothing
+                 happened. This stays until it is dismissed or superseded. -->
+            <template if:true={hasFault}>
+                <div class="bc-alert">
+                    <div class="bc-alert-head">
+                        <span class="bc-alert-mark">!</span>
+                        <div class="bc-alert-body">
+                            <p class="bc-alert-title">{fault.title}</p>
+                            <p class="bc-alert-text">{fault.text}</p>
+                        </div>
+                        <button class="bc-alert-x" onclick={dismissFault}
+                                title="Dismiss" type="button">&times;</button>
+                    </div>
+                    <button class="bc-alert-toggle" onclick={toggleFaultDetail} type="button">
+                        {faultDetailLabel}
+                    </button>
+                    <template if:true={showFaultDetail}>
+                        <pre class="bc-alert-detail">{fault.detail}</pre>
+                    </template>
+                </div>
+            </template>
+
+            <!-- ══════════════ GENERATE ══════════════ -->
+            <template if:true={isGenerate}>
+                <!-- Stats first: the page used to be empty until a template was
+                     picked, which read as "nothing here" rather than "choose one". -->
+                <div class="bc-stats">
+                    <div class="bc-stat">
+                        <span class="bc-stat-num">{templates.length}</span>
+                        <span class="bc-stat-lbl">Templates ready</span>
+                    </div>
+                    <div class="bc-stat">
+                        <span class="bc-stat-num">{statObjects}</span>
+                        <span class="bc-stat-lbl">Objects covered</span>
+                    </div>
+                    <div class="bc-stat">
+                        <span class="bc-stat-num bc-stat-ok">{statWeekDocs}</span>
+                        <span class="bc-stat-lbl">Generated this week</span>
+                    </div>
+                </div>
+
+                <div class="bc-panel">
+                    <div class="bc-panel-head">
+                        <p class="bc-step">STEP 1 &middot; PICK A TEMPLATE</p>
+                    </div>
+
+                    <template if:true={hasTemplates}>
+                        <!-- Cards, not a dropdown: the object and output format are
+                             what decide which template is the right one, and a
+                             dropdown hides both until after you have chosen. -->
+                        <div class="bc-tplgrid" role="radiogroup" aria-label="Template">
+                            <template for:each={templateCards} for:item="t">
+                                <div key={t.id} class={t.cardClass} data-id={t.id}
+                                     role="radio" tabindex="0" aria-checked={t.selectedStr}
+                                     onclick={handleTemplateCard} onkeydown={handleTemplateKey}>
+                                    <div class="bc-tpl-top">
+                                        <span class="bc-tpl-dot"></span>
+                                        <span class="bc-tpl-name">{t.name}</span>
+                                    </div>
+                                    <div class="bc-tpl-meta">
+                                        <span class="bc-tag bc-tag-obj">{t.object}</span>
+                                        <span class="bc-tag">{t.format}</span>
+                                        <template if:true={t.hasTags}>
+                                            <span class="bc-tag bc-tag-quiet">{t.tagCount} tags</span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template if:false={hasTemplates}>
+                        <p class="bc-empty">
+                            No templates are ready to run. A template needs to be active and have a
+                            document uploaded &mdash; set one up on the Dynamic Document tab.
+                        </p>
+                    </template>
+                </div>
+
+                <template if:true={selectedTemplateId}>
+                    <div class="bc-panel">
+                        <div class="bc-panel-head">
+                            <p class="bc-step">STEP 2 &middot; PICK RECORDS</p>
+                            <div class="bc-panel-tools">
+                                <span class="bc-count">{selectedCountLabel}</span>
+                                <button class="bc-btn bc-btn-primary bc-btn-sm" onclick={handleStartGenerate}
+                                        disabled={generateDisabled}>
+                                    <template if:false={genRunning}>Generate</template>
+                                    <template if:true={genRunning}>Working&hellip;</template>
+                                </button>
+                            </div>
+                        </div>
+
+                        <lightning-input
+                            type="search"
+                            label="Search records"
+                            variant="label-hidden"
+                            placeholder="Search by name…"
+                            value={searchTerm}
+                            onchange={handleSearch}>
+                        </lightning-input>
+
+                        <template if:true={isSearching}>
+                            <div class="bc-loading"><div class="bc-spinner"></div></div>
+                        </template>
+
+                        <template if:false={isSearching}>
+                            <template if:true={hasRecords}>
+                                <div class="bc-selectall">
+                                    <button class="bc-link" onclick={selectAllVisible} type="button">
+                                        Select all {visibleCount} shown
+                                    </button>
+                                    <template if:true={hasSelection}>
+                                        <button class="bc-link bc-link-muted" onclick={clearSelection} type="button">
+                                            Clear selection
+                                        </button>
+                                    </template>
+                                </div>
+
+                                <div class="bc-reclist">
+                                    <template for:each={records} for:item="rec">
+                                        <label key={rec.id} class={rec.rowClass}>
+                                            <input type="checkbox" data-id={rec.id}
+                                                   checked={rec.selected} onchange={handleToggleRecord} />
+                                            <span class="bc-rec-name">{rec.name}</span>
+                                        </label>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template if:false={hasRecords}>
+                                <p class="bc-empty">No records found for that search.</p>
+                            </template>
+                        </template>
+                    </div>
+                </template>
+
+                <template if:true={genBatch}>
+                    <div class="bc-progress">
+                        <div class="bc-progress-head">
+                            <span class="bc-progress-title">{genProgressLabel}</span>
+                            <span class="bc-progress-pct">{genPercent}%</span>
+                        </div>
+                        <div class="bc-bar"><span style={genBarStyle}></span></div>
+
+                        <!-- What this run is, not just how far it has got. -->
+                        <dl class="bc-runmeta">
+                            <div><dt>Template</dt><dd>{genRunTemplate}</dd></div>
+                            <div><dt>Object</dt><dd>{genRunObject}</dd></div>
+                            <div><dt>Records</dt><dd>{genBatch.total}</dd></div>
+                        </dl>
+
+                        <div class="bc-progress-meta">
+                            <span class="bc-chip bc-chip-ok">{genBatch.succeeded} completed</span>
+                            <template if:true={genHasFailures}>
+                                <span class="bc-chip bc-chip-bad">{genBatch.failed} failed</span>
+                            </template>
+                            <template if:true={genHasQueued}>
+                                <span class="bc-chip bc-chip-wait">{genQueued} queued</span>
+                            </template>
+                        </div>
+
+                        <!-- Which records failed and why. The count chip alone
+                             left the reader with no way to find out either, and
+                             the log tab is not somewhere most users can go. -->
+                        <template if:true={genShowFailures}>
+                            <p class="bc-fail-head">{genFailureHeading}</p>
+                            <ul class="bc-fails">
+                                <template for:each={genFailureRows} for:item="f">
+                                    <li key={f.recordId} class="bc-fail">
+                                        <span class="bc-fail-name">{f.name}</span>
+                                        <span class="bc-fail-why">{f.reason}</span>
+                                    </li>
+                                </template>
+                            </ul>
+                            <template if:true={genFailureNote}>
+                                <p class="bc-fail-note">{genFailureNote}</p>
+                            </template>
+                        </template>
+
+                        <template if:true={genFinished}>
+                            <template if:true={genProducedAnything}>
+                                <p class="bc-hint">
+                                    <!-- Opening tag on the same line as the word before it: the
+                                         template compiler drops whitespace-only text between a
+                                         text node and an element, so a line break here renders
+                                         as "underGenerated Documents". -->
+                                    Finished. Each document is on its own record,
+                                    under <strong>Generated Documents</strong>.
+                                </p>
+                            </template>
+                            <template if:false={genProducedAnything}>
+                                <p class="bc-hint">
+                                    Finished. No documents were created, so there is nothing to
+                                    open yet - fix the reason above and run it again.
+                                </p>
+                            </template>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- ── RECENT ACTIVITY ────────────────────────────────
+                     Rolled up from the generation log, so it shows runs
+                     started in another session or by someone else. -->
+                <div class="bc-panel bc-panel-activity">
+                    <div class="bc-panel-head">
+                        <div>
+                            <p class="bc-step">RECENT ACTIVITY &middot; LAST 7 DAYS</p>
+                            <!-- The caret alone was not a strong enough hint that
+                                 anything opens; this says it outright. -->
+                            <p class="bc-hint bc-acthint">Open a row to see the documents it produced.</p>
+                        </div>
+                        <button class="bc-link" onclick={loadActivity} type="button">Refresh</button>
+                    </div>
+
+                    <template if:true={activityLoading}>
+                        <div class="bc-loading"><div class="bc-spinner"></div></div>
+                    </template>
+
+                    <template if:false={activityLoading}>
+                        <template if:true={hasActivity}>
+                            <div class="bc-actwrap">
+                                <table class="bc-acttable">
+                                    <thead>
+                                        <tr>
+                                            <th class="bc-actcaret"></th>
+                                            <th>Template</th>
+                                            <th>Object</th>
+                                            <th class="bc-num">Completed</th>
+                                            <th class="bc-num">Failed</th>
+                                            <th>Last run</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={activity} for:item="a">
+                                            <!-- The whole row is the control. The
+                                                 counts are a summary; the documents
+                                                 behind them live one click down. -->
+                                            <tr key={a.key} class="bc-actrow" data-key={a.key}
+                                                onclick={handleActivityRow}>
+                                                <td class="bc-actcaret">
+                                                    <!-- A stroked chevron, not a CSS triangle in a
+                                                         disc: border triangles cannot be centred
+                                                         optically at 18px and rendered as purple
+                                                         blobs. This stays crisp at any size. -->
+                                                    <svg class={a.caretClass} viewBox="0 0 16 16"
+                                                         fill="none" aria-hidden="true">
+                                                        <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor"
+                                                              stroke-width="2" stroke-linecap="round"
+                                                              stroke-linejoin="round"></path>
+                                                    </svg>
+                                                </td>
+                                                <td class="bc-strong">{a.templateName}</td>
+                                                <td>{a.objectApiName}</td>
+                                                <td class="bc-num bc-ok">{a.succeeded}</td>
+                                                <td class={a.failedClass}>{a.failed}</td>
+                                                <td class="bc-muted">{a.lastRunText}</td>
+                                                <!-- A word, not an icon. The caret
+                                                     on its own read as decoration. -->
+                                                <td class="bc-actopen">{a.viewLabel}</td>
+                                            </tr>
+
+                                            <template if:true={a.expanded}>
+                                                <tr key={a.detailKey} class="bc-actdetailrow">
+                                                    <td colspan="7" class="bc-actdetail">
+                                                        <template if:true={a.detailLoading}>
+                                                            <div class="bc-loading"><div class="bc-spinner"></div></div>
+                                                        </template>
+
+                                                        <template if:false={a.detailLoading}>
+                                                            <template if:true={a.hasDetail}>
+                                                                <div class="bc-dochead">
+                                                                    <span class="bc-docsum">{a.detailSummary}</span>
+                                                                    <!-- Only offered when there is
+                                                                         something to filter to. -->
+                                                                    <template if:true={a.detailFailed}>
+                                                                        <button class="bc-link bc-docfilter" data-key={a.key}
+                                                                                onclick={handleDetailFilter} type="button">
+                                                                            {a.filterLabel}
+                                                                        </button>
+                                                                    </template>
+                                                                </div>
+
+                                                                <ul class="bc-docs">
+                                                                    <template for:each={a.detailVisible} for:item="d">
+                                                                        <li key={d.logId} class={d.rowClass}>
+                                                                            <span class={d.dotClass}></span>
+                                                                            <span class="bc-doc-main">
+                                                                                <template if:true={d.hasRecord}>
+                                                                                    <a class="bc-doc-rec bc-doc-reclink" href={d.recordUrl}
+                                                                                       target="_blank" rel="noopener">{d.recordName}</a>
+                                                                                </template>
+                                                                                <template if:false={d.hasRecord}>
+                                                                                    <span class="bc-doc-rec">{d.recordName}</span>
+                                                                                </template>
+                                                                                <span class="bc-doc-file">{d.filename}</span>
+                                                                            </span>
+                                                                            <span class="bc-doc-when">{d.whenText}</span>
+                                                                            <template if:true={d.hasLink}>
+                                                                                <a class="bc-doc-open" href={d.fileUrl}
+                                                                                   target="_blank" rel="noopener">Open file</a>
+                                                                            </template>
+                                                                            <template if:true={d.reason}>
+                                                                                <span class="bc-doc-why">{d.reason}</span>
+                                                                            </template>
+                                                                        </li>
+                                                                    </template>
+                                                                </ul>
+
+                                                                <template if:false={a.hasVisible}>
+                                                                    <p class="bc-empty">{a.emptyText}</p>
+                                                                </template>
+
+                                                                <template if:true={a.showPager}>
+                                                                    <div class="bc-docpager">
+                                                                        <span class="bc-docrange">{a.pageLabel}</span>
+                                                                        <button class="bc-pagebtn" data-key={a.key}
+                                                                                onclick={handleDetailPrev}
+                                                                                disabled={a.prevDisabled} type="button">Previous</button>
+                                                                        <button class="bc-pagebtn" data-key={a.key}
+                                                                                onclick={handleDetailNext}
+                                                                                disabled={a.nextDisabled} type="button">Next</button>
+                                                                    </div>
+                                                                </template>
+
+                                                                <template if:true={a.detailNote}>
+                                                                    <p class="bc-doc-note">{a.detailNote}</p>
+                                                                </template>
+                                                            </template>
+
+                                                            <template if:false={a.hasDetail}>
+                                                                <p class="bc-empty">No documents recorded for this template in the last 7 days.</p>
+                                                            </template>
+                                                        </template>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+
+                        <template if:false={hasActivity}>
+                            <p class="bc-empty">Nothing generated in the last 7 days.</p>
+                        </template>
+                    </template>
+                </div>
+            </template>
+
+            <!-- ══════════════ SEND ══════════════ -->
+            <template if:true={isSend}>
+                <div class="bc-panel">
+                    <p class="bc-step">STEP 1 &middot; PICK THE MASTER AGREEMENT</p>
+                    <lightning-combobox
+                        label="Agreement"
+                        variant="label-hidden"
+                        placeholder="Choose an agreement to copy"
+                        options={agreementOptions}
+                        value={selectedAgreementId}
+                        onchange={handleAgreementChange}>
+                    </lightning-combobox>
+                    <p class="bc-hint">
+                        Every recipient gets their <strong>own copy</strong> of this agreement, with
+                        their own signing link. One person signing has no effect on the others.
+                    </p>
+                </div>
+
+                <template if:true={selectedAgreementId}>
+                    <div class="bc-panel">
+                        <div class="bc-panel-head">
+                            <p class="bc-step">STEP 2 &middot; RECIPIENTS</p>
+                            <span class="bc-count">{recipientCountLabel}</span>
+                        </div>
+
+                        <!-- Two fields per row, not one free-text box. Typing
+                             "Name, email" into a textarea gives no way to say
+                             WHICH line is wrong; here the bad row says so itself. -->
+                        <div class="bc-rows">
+                            <div class="bc-rowhead">
+                                <span>Name</span><span>Email</span><span></span>
+                            </div>
+                            <template for:each={rows} for:item="r">
+                                <div key={r.key} class={r.rowClass}>
+                                    <input class="bc-in" type="text" placeholder="Jane Cooper"
+                                           value={r.name} data-key={r.key} data-field="name"
+                                           onchange={handleRowChange} />
+                                    <input class={r.emailClass} type="email" placeholder="jane@acme.com"
+                                           value={r.email} data-key={r.key} data-field="email"
+                                           onchange={handleRowChange} />
+                                    <button class="bc-rowdel" data-key={r.key} onclick={handleRemoveRow}
+                                            title="Remove" type="button" aria-label="Remove recipient">&times;</button>
+                                    <template if:true={r.error}>
+                                        <p class="bc-rowerr">{r.error}</p>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="bc-rowtools">
+                            <button class="bc-link" onclick={handleAddRow} type="button">+ Add recipient</button>
+                            <span class="bc-sep"></span>
+                            <!-- A label wrapping the input is the only way to style a
+                                 file picker; the input itself is hidden, not removed,
+                                 so the label still opens it and keyboard focus works. -->
+                            <label class="bc-link bc-link-muted bc-file">
+                                Import a CSV
+                                <input type="file" accept=".csv,text/csv,text/plain"
+                                       onchange={handleCsvFile} />
+                            </label>
+                            <!-- A plain anchor with download + a data URI. Building
+                                 one in JS and clicking it needs document.body, which
+                                 Lightning Web Security blocks outside this shadow
+                                 root — that threw "Script error. null". -->
+                            <a class="bc-link bc-link-muted bc-dl" href={sampleCsvHref}
+                               download="signforce-recipients-sample.csv">
+                                Download sample CSV
+                            </a>
+                            <button class="bc-link bc-link-muted" onclick={togglePaste} type="button">
+                                {pasteToggleLabel}
+                            </button>
+                        </div>
+                        <p class="bc-hint bc-hint-tools">
+                            The CSV needs a <code>Name</code> column and an <code>Email</code> column.
+                            Extra columns are ignored and the order does not matter.
+                            Rows with a problem still get imported, marked in red, so you can fix them here.
+                        </p>
+
+                        <template if:true={showPaste}>
+                            <div class="bc-paste">
+                                <lightning-textarea
+                                    label="Paste a list"
+                                    variant="label-hidden"
+                                    placeholder="Jane Cooper, jane@acme.com&#10;Ravi Patel, ravi@acme.com"
+                                    value={pasteRaw}
+                                    onchange={handlePasteChange}
+                                    class="bc-textarea">
+                                </lightning-textarea>
+                                <div class="bc-rowtools">
+                                    <button class="bc-btn bc-btn-primary bc-btn-sm"
+                                            onclick={handleApplyPaste} type="button">
+                                        Add {pasteCount} to the list
+                                    </button>
+                                    <span class="bc-hint">
+                                        One per line, as <code>Name, email</code>. An email on its own works too.
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template if:true={hasDupes}>
+                            <p class="bc-warn">{dupeMessage}</p>
+                        </template>
+                    </div>
+
+                    <div class="bc-actions">
+                        <span class="bc-sendnote">{sendReadyLabel}</span>
+                        <button class="bc-btn bc-btn-primary" onclick={handleStartSend}
+                                disabled={sendDisabled}>
+                            <template if:false={sendRunning}>Send to {recipientCount} recipients</template>
+                            <template if:true={sendRunning}>Sending&hellip;</template>
+                        </button>
+                    </div>
+                </template>
+
+                <template if:true={sendBatch}>
+                    <div class="bc-progress">
+                        <div class="bc-progress-head">
+                            <span class="bc-progress-title">{sendProgressLabel}</span>
+                            <span class="bc-progress-pct">{sendPercent}%</span>
+                        </div>
+                        <div class="bc-bar"><span style={sendBarStyle}></span></div>
+                        <div class="bc-progress-meta">
+                            <span class="bc-chip bc-chip-ok">{sendBatch.sent} sent</span>
+                            <template if:true={sendHasCompleted}>
+                                <span class="bc-chip bc-chip-ok">{sendBatch.completed} completed</span>
+                            </template>
+                            <template if:true={sendHasDeclined}>
+                                <span class="bc-chip bc-chip-bad">{sendBatch.declined} declined or voided</span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+        </div>
+    </c-signforce-access-gate>
+</template>

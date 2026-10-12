@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>GuestSigningApiInternal</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <description>Internal-user access to GuestSigningApiInternal, the with-sharing data-access helpers for the PDF preview and PDF-rendering controllers. Assign to internal users only; the guest permission set must not contain it.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>eSignforce Internal Signing Access</label>
+</PermissionSet>

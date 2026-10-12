@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>Hosts the Google Picker in an iframe for the Integrations step of the SignForce Admin Configuration screen. Admin-only: it is embedded by a component whose Apex is gated on Customize Application.</description>
+    <label>Google Picker Host</label>
+</ApexPage>

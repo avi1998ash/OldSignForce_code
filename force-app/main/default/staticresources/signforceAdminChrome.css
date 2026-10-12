@@ -1,0 +1,41 @@
+/*
+ * SignForce Admin — full-bleed page-chrome removal.
+ *
+ * Every rule is scoped under `body.sf-admin-chrome`. The signforceAdminConfig
+ * LWC adds that class to <body> ONLY while it is mounted and removes it on
+ * unmount, so none of this leaks to other tabs/pages in the Lightning SPA.
+ *
+ * These target standard internal-LEX page wrappers. They are best-effort: if a
+ * future Lightning release renames a wrapper, a selector may need a tweak — but
+ * the component's own :host background still keeps the canvas clean.
+ */
+
+/* 1. Neutralize the gray page canvas around the wizard */
+body.sf-admin-chrome .oneCenterStage,
+body.sf-admin-chrome .homeMainContent,
+body.sf-admin-chrome .slds-template_default,
+body.sf-admin-chrome .oneOneColumn {
+    background: transparent !important;
+}
+
+/* 2. Remove the region/template padding so the app sits edge-to-edge */
+body.sf-admin-chrome .oneCenterStage .center,
+body.sf-admin-chrome .slds-template__container,
+body.sf-admin-chrome .forceCommunityThemeBody,
+body.sf-admin-chrome .flexipage-region {
+    padding: 0 !important;
+}
+
+/* 3. Hide the standard Lightning App/Home page header — the bar with the page
+   icon + label ("SignForce Home page") that App pages render above the content.
+   Only light-DOM (page chrome) headers match — a component's own header lives in
+   its shadow DOM and global CSS can't reach it, so this is safe. */
+body.sf-admin-chrome .slds-page-header,
+body.sf-admin-chrome .slds-page-header_object-home,
+body.sf-admin-chrome .slds-page-header_joined,
+body.sf-admin-chrome .oneCenterStageHeader,
+body.sf-admin-chrome .forcePageHeader,
+body.sf-admin-chrome .forceHighlightsPanel,
+body.sf-admin-chrome .appHomePageHeader {
+    display: none !important;
+}

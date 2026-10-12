@@ -1,0 +1,36 @@
+<template>
+    <template if:true={agentforceAvailable}>
+        <!-- ──────── FLOATING ACTION BUTTON (FAB) ──────── -->
+        <template if:false={isOpen}>
+            <button class="sf-fab" onclick={toggleChat} title="Open eSignforce Assistant">
+                <div class="sf-fab-pulse"></div>
+                <svg class="sf-fab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h4"></path>
+                    <path d="M15 11h4a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-4"></path>
+                    <circle cx="12" cy="5" r="2"></circle>
+                    <path d="M12 7v4"></path>
+                    <line x1="8" y1="16" x2="8" y2="16"></line>
+                    <line x1="16" y1="16" x2="16" y2="16"></line>
+                </svg>
+                <span class="sf-fab-badge">AI</span>
+            </button>
+        </template>
+
+        <!-- ──────── CHAT POPUP ──────── -->
+        <template if:true={isOpen}>
+            <div class="sf-chat-overlay" onclick={handleOverlayClick}>
+                <div class="sf-chat-window" onclick={stopPropagation}>
+                    <!-- Close button overlaid on top -->
+                    <!-- <button class="sf-chat-close" onclick={toggleChat} title="Close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button> -->
+                    <!-- Embedded Voice Assistant -->
+                    <c-signforce-voice-assistant></c-signforce-voice-assistant>
+                </div>
+            </div>
+        </template>
+    </template>
+</template>

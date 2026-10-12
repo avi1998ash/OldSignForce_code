@@ -1,0 +1,134 @@
+/* Signer-mapping styles, shared by every caller of this control. */
+
+/* ── Eyebrows / labels ───────────────────────────────────── */
+.sf-eyebrow {
+    margin: 0 0 6px 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--brand-600);
+}
+.sf-eyebrow-small {
+    margin: 0 0 8px 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--warm-600);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-transform: uppercase;
+}
+.sf-section-title {
+    margin: 0 0 14px 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--navy-900);
+}
+/* ── Combobox styling — subtle Lightning override ────────── */
+.sf-combobox {
+    --slds-c-input-color-background: var(--warm-white);
+    --slds-c-input-color-border: var(--warm-100);
+    --slds-c-input-radius-border: var(--radius-sm);
+    --slds-c-input-spacing-block: 11px;
+}
+.sf-section-title {
+        font-size: 16px;
+    }
+/* ── STEP 2 — Signer email mapping ───────────────────────── */
+.sf-signer-help {
+    margin: 0 0 14px 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--warm-600);
+}
+.sf-signer-map {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.sf-signer-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 14px;
+    padding: 12px 14px;
+    background: var(--warm-white);
+    border: 1px solid var(--warm-100);
+    border-radius: 10px;
+    transition: border-color 0.15s ease;
+}
+.sf-signer-row:hover {
+    border-color: var(--warm-200);
+}
+.sf-signer-id {
+    flex: 0 0 auto;
+    min-width: 130px;
+    max-width: 190px;
+}
+.sf-signer-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy-900);
+}
+.sf-signer-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+}
+.sf-signer-role {
+    font-size: 11px;
+    color: var(--warm-600);
+}
+.sf-signer-dot {
+    font-size: 11px;
+    color: var(--warm-400);
+}
+.sf-signer-order {
+    font-size: 11px;
+    color: var(--warm-600);
+    white-space: nowrap;
+}
+/* Email controls stack in one column so the row never wraps awkwardly. */
+.sf-signer-email-col {
+    flex: 1 1 240px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.sf-signer-combobox {
+    width: 100%;
+}
+.sf-signer-manual {
+    width: 100%;
+}
+/* Sub-heading separating UNASSIGNED-field rows from signer rows. */
+.sf-signer-subheading {
+    margin: 4px 0 0 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--warm-600);
+}
+/* Small tag on an UNASSIGNED-field row (mirrors .sf-signer-role placement). */
+.sf-signer-tag {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 1px 6px;
+    border-radius: var(--radius-xs);
+    background: var(--amber-50);
+    color: var(--amber-600);
+}
+
+.sf-map-loading {
+    position: relative;
+    min-height: 96px;
+}

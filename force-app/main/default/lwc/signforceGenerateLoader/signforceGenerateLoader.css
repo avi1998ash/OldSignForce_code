@@ -1,0 +1,163 @@
+:host {
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-400: #a78bfa;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;
+    --brand-700: #6d28d9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-500: #64748b;
+    --slate-900: #0f172a;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Covers the panel it belongs to, not the viewport.
+ *
+ * This was position:fixed so it would dim the whole screen. It never got there:
+ * Generate Document runs inside a modal whose container clamps a fixed child, so
+ * the veil came out as a grey band the width of the modal and full height of the
+ * page — which looked broken. Absolute inside the panel is honest about what it
+ * can cover, and covering the panel is what actually matters: it is the panel's
+ * Generate button that must not be clicked twice.
+ *
+ * The scrim is light, not dark. Inside a Salesforce modal there is already a
+ * dark backdrop behind this, and dark on dark just reads as muddy.
+ */
+.gl-veil {
+    position: absolute; inset: 0; z-index: 9500;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    animation: gl-in 0.18s ease-out;
+
+    /* Keeps a scroll gesture from reaching the modal behind. These cover the
+       trackpad and touch cases; the wheel listener in the JS covers the rest. */
+    overscroll-behavior: contain;
+    touch-action: none;
+}
+@keyframes gl-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* No panel of its own — a white card on a white scrim is an edge with nothing
+   behind it. The artwork and the words sit straight on the surface. */
+.gl-card {
+    width: 100%; max-width: 400px;
+    text-align: center;
+    animation: gl-rise 0.24s cubic-bezier(0.34, 1.4, 0.5, 1);
+
+    /* Stays in the visible band instead of at the veil's midpoint.
+     *
+     * The veil is as tall as its panel, and the generated-documents list grows
+     * with every document, so the panel does too. Centred in a veil measured at
+     * 3122px the card sat at y=1421 — with the list scrolled to its head and an
+     * 800px viewport, not one pixel of it was on screen. The user got a dimmed
+     * panel and no message at all, which is what "runs but is not positioned
+     * properly" is describing.
+     *
+     * Both offsets are needed, not just top. A top-only sticky can push a box
+     * down but never up, so at the head of the list the card kept its centred
+     * position below the fold — measured unchanged at y=1421. `bottom` is the
+     * one that pulls it back into view there.
+     *
+     * On a panel that fits the screen neither offset is violated and the card
+     * keeps its centred position to the pixel, so the short case is untouched.
+     * 1.5rem matches the veil's own padding, so the gutter reads the same
+     * whether the card is centred or pinned.
+     */
+    position: sticky;
+    top: 1.5rem;
+    bottom: 1.5rem;
+}
+@keyframes gl-rise {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+}
+
+.gl-art { display: flex; justify-content: center; }
+.gl-svg { width: 232px; height: 220px; }
+
+/* ── the page ──
+   A slightly stronger outline than the card version used: on a near-white scrim
+   a slate-200 hairline all but disappears. */
+.gl-page { fill: #fff; stroke: var(--slate-300); stroke-width: 2.5; }
+
+/* Lines already on the page. They keep it from looking blank between cycles —
+   a document that empties itself every three seconds reads as failure. */
+.gl-static { fill: var(--slate-200); }
+
+/* ── the merged text ──
+   Grows from the left as its tag lands, which is the whole point of the
+   animation: the tag becomes the value. */
+.gl-line {
+    fill: var(--slate-300);
+    transform-origin: left center;
+    transform: scaleX(0);
+    animation: gl-land 3s ease-out infinite;
+}
+.gl-line-hd { fill: var(--brand-600); }
+.gl-line:nth-of-type(2) { animation-delay: 0.62s; }
+.gl-line:nth-of-type(3) { animation-delay: 1.24s; }
+
+@keyframes gl-land {
+    0%, 46%   { transform: scaleX(0); }
+    62%, 100% { transform: scaleX(1); }
+}
+
+/* ── the tags ── */
+.gl-chip rect { fill: var(--brand-100); stroke: var(--brand-200); stroke-width: 1.5; }
+.gl-chip text {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    font-size: 13px; font-weight: 600; fill: var(--brand-600); text-anchor: middle;
+}
+.gl-chip {
+    opacity: 0;
+    animation: gl-fly 3s cubic-bezier(0.32, 0.9, 0.35, 1) infinite;
+}
+.gl-chip:nth-of-type(2) { animation-delay: 0.62s; }
+.gl-chip:nth-of-type(3) { animation-delay: 1.24s; }
+
+/* Flies in from the left — from the record — settles on its line, then hands
+   over to the text underneath it. */
+@keyframes gl-fly {
+    0%        { transform: translateX(-78px); opacity: 0; }
+    16%       { opacity: 1; }
+    44%       { transform: translateX(0); opacity: 1; }
+    56%       { transform: translateX(0); opacity: 0; }
+    100%      { transform: translateX(0); opacity: 0; }
+}
+
+.gl-title {
+    margin: 0.9rem 0 0; font-size: 1.05rem; font-weight: 700;
+    letter-spacing: -0.01em; color: var(--slate-900);
+}
+.gl-msg {
+    margin: 0.35rem 0 0; font-size: 0.84rem; line-height: 1.55; color: var(--slate-500);
+}
+
+/* An indeterminate bar, deliberately: the server reports no progress back, so a
+   percentage here would be invented. This says "working", nothing more. */
+.gl-track {
+    margin-top: 1.25rem; height: 4px; border-radius: 99px;
+    background: var(--brand-100); overflow: hidden;
+}
+.gl-track span {
+    display: block; width: 40%; height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--brand-400), var(--brand-600));
+    animation: gl-slide 1.5s ease-in-out infinite;
+}
+@keyframes gl-slide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gl-veil, .gl-card { animation: none; }
+    .gl-chip, .gl-line { animation-duration: 7s; }
+    .gl-track span { animation-duration: 3s; }
+}
+
+@media (max-width: 480px) {
+    .gl-svg { width: 190px; height: 180px; }
+}

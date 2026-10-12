@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Public</cacheControl>
+    <contentType>application/zip</contentType>
+    <description>Handwriting fonts for typed signatures (SIL Open Font License). Bundled so the signing UI and stamped-PDF page never load styling from fonts.googleapis.com. cacheControl must stay Public: the Site Guest User reads this during guest signing.</description>
+</StaticResource>

@@ -1,0 +1,2136 @@
+/* ════════════════════════════════════════════════════════════════
+   SIGNFORCE DESIGN SYSTEM — TEMPLATE LIBRARY (v3 with tabs)
+   ════════════════════════════════════════════════════════════════ */
+
+:host {
+    /* Brand Accent Tokens */
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;  /* Primary brand accent */
+    --brand-700: #6d28d9;
+    --brand-900: #4c1d95;
+
+    /* Neutrals - Slate */
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    /* Semantic States */
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-200: #a7f3d0;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+
+    /* Border Radii */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-full: 9999px;
+
+    /* Shadows & Transitions */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Salesforce styling hook overrides */
+    --slds-c-input-color-background: var(--slate-50);
+    --slds-c-input-color-border: var(--slate-200);
+    --slds-c-input-radius-border: var(--radius-sm);
+    --slds-c-combobox-color-background: var(--slate-50);
+    --slds-c-combobox-color-border: var(--slate-200);
+    --slds-c-combobox-radius-border: var(--radius-sm);
+    --slds-c-textarea-color-background: var(--slate-50);
+    --slds-c-textarea-color-border: var(--slate-200);
+    --slds-c-textarea-radius-border: var(--radius-sm);
+
+    /* Map legacy variables to prevent visual breakage and apply brand accents */
+    --sf-navy: var(--brand-600);
+    --sf-navy-hover: var(--brand-700);
+    --sf-orange: var(--brand-600);
+    --sf-orange-hover: var(--brand-700);
+    --sf-bg: var(--slate-100);
+    --sf-card: #ffffff;
+    --sf-border: var(--slate-200);
+    --sf-border-strong: var(--slate-300);
+    --sf-text-primary: var(--slate-900);
+    --sf-text-secondary: var(--slate-600);
+    --sf-text-muted: var(--slate-400);
+    --sf-success: var(--emerald-500);
+    --sf-success-bg: var(--emerald-50);
+    --sf-danger: var(--red-500);
+    --sf-danger-bg: var(--red-50);
+    --sf-warning-bg: var(--amber-50);
+    --sf-warning-border: var(--amber-500);
+    --sf-info-bg: var(--brand-50);
+    --sf-info-text: var(--brand-700);
+    --sf-radius-sm: var(--radius-sm);
+    --sf-radius-md: var(--radius-md);
+    --sf-radius-lg: var(--radius-lg);
+    --sf-shadow-sm: var(--shadow-sm);
+    --sf-shadow-md: var(--shadow-md);
+    --sf-shadow-lg: var(--shadow-lg);
+}
+
+.library-shell {
+    padding: 2rem 2.5rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--sf-text-primary);
+    background: var(--sf-bg);
+    min-height: 100vh;
+}
+
+/* ── Page header ───────────────────────────────────────── */
+.library-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    gap: 2rem;
+}
+
+.brand-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.brand-mark {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+    color: #fff;
+    border-radius: var(--sf-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(124, 58, 237, 0.25);
+}
+
+.brand-mark-sm {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
+}
+
+.brand-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.brand-mark-sm .brand-icon { width: 18px; height: 18px; }
+
+.brand-eyebrow {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--sf-text-muted);
+    text-transform: uppercase;
+}
+
+.brand-eyebrow-sm { font-size: 0.65rem; }
+
+.library-title {
+    margin: 0.1rem 0 0 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--sf-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.library-subtitle {
+    margin: 0 0 2rem 0;
+    font-size: 0.9rem;
+    color: var(--sf-text-secondary);
+    max-width: 720px;
+    line-height: 1.5;
+}
+
+/* ── Buttons ───────────────────────────────────────────── */
+.btn-primary-dark,
+.btn-secondary,
+.btn-danger-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.2;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.btn-primary-dark {
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-700));
+    color: #fff;
+    border: 1px solid var(--brand-600);
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
+}
+
+.btn-primary-dark:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--brand-700), var(--brand-900));
+    border-color: var(--brand-700);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.btn-primary-dark:disabled {
+    background: #c5c0b3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-secondary {
+    background: #fff;
+    color: var(--sf-text-primary);
+    border-color: var(--sf-border-strong);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #fafaf6;
+    border-color: var(--sf-text-secondary);
+}
+
+/* Delete.
+ * It was borderless red text floating in the footer next to two real buttons —
+ * it didn't look clickable, and it read as a warning label rather than a
+ * control. It's still the quiet option (destructive actions shouldn't be the
+ * loudest thing on screen), but now it's visibly a button and commits to red
+ * only on hover. */
+.btn-danger-text {
+    background: #ffffff;
+    color: var(--sf-danger);
+    border: 1px solid #fca5a5;
+    padding: 0.75rem 1.25rem;
+}
+
+.btn-danger-text:hover {
+    background: var(--sf-danger-bg);
+    border-color: var(--sf-danger);
+}
+
+.btn-danger-text:focus-visible {
+    outline: 2px solid var(--sf-danger);
+    outline-offset: 2px;
+}
+
+.btn-icon { width: 16px; height: 16px; }
+.btn-icon-sm { width: 14px; height: 14px; }
+
+/* ── Loading / empty ───────────────────────────────────── */
+.loading-state {
+    display: flex;
+    justify-content: center;
+    padding: 5rem;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5rem 2rem;
+    text-align: center;
+    background: var(--sf-card);
+    border-radius: var(--sf-radius-lg);
+    border: 1px solid var(--sf-border);
+    box-shadow: var(--sf-shadow-sm);
+}
+
+.empty-icon-wrap {
+    width: 72px;
+    height: 72px;
+    background: var(--sf-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.empty-icon {
+    width: 36px;
+    height: 36px;
+    color: var(--sf-text-muted);
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--sf-text-primary);
+}
+
+.empty-state p {
+    margin: 0 0 2rem 0;
+    color: var(--sf-text-secondary);
+    font-size: 0.95rem;
+}
+
+/* ── Template grid ─────────────────────────────────────── */
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.pagination-btn {
+    background: var(--sf-card);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-lg);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--sf-navy);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    border-color: var(--sf-navy);
+    box-shadow: var(--sf-shadow-sm);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.pagination-label {
+    font-size: 0.85rem;
+    color: var(--sf-text-muted, #64748b);
+}
+
+.template-card {
+    background: var(--sf-card);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-lg);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--sf-shadow-sm);
+    position: relative;
+}
+
+.template-card:hover {
+    border-color: var(--sf-navy);
+    transform: translateY(-2px);
+    box-shadow: var(--sf-shadow-md);
+}
+
+.template-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+/* Flat tint + coloured glyph. A saturated gradient tile on every card made the
+   grid read as a wall of purple squares, with the template's name — the thing
+   you're actually scanning for — second in line. */
+.template-icon-tile {
+    width: 36px;
+    height: 36px;
+    background: #eef2ff;
+    color: #4f46e5;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.15);
+}
+
+.template-tile-icon { width: 20px; height: 20px; }
+
+/* Status chips — same shape and dot the dashboard and the admin wizard use, so
+   a status reads as a status everywhere. The dot carries the state alongside the
+   colour rather than relying on it. */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem 0.15rem 0.4rem;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+    flex-shrink: 0;
+}
+
+.badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+
+.badge-active   { background: #ecfdf5; border-color: #a7f3d0; color: #067a5b; }
+.badge-inactive { background: #f8fafc; border-color: #e2e8f0; color: #94a3b8; }
+/* Hollow dot = not live, so the two states differ in shape as well as hue. */
+.badge-inactive::before {
+    background: transparent;
+    border: 1.5px solid currentColor;
+    width: 6px;
+    height: 6px;
+    box-sizing: border-box;
+}
+
+.template-name {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--sf-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+}
+
+.template-object {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.85rem;
+    color: var(--sf-text-secondary);
+}
+
+.template-object strong {
+    color: var(--sf-text-primary);
+    font-weight: 600;
+}
+
+.template-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.meta-pill {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    background: var(--sf-bg);
+    color: var(--sf-text-primary);
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+}
+
+.meta-text {
+    font-size: 0.8rem;
+    color: var(--sf-text-secondary);
+}
+
+.template-description {
+    margin: 0.75rem 0 0 0;
+    font-size: 0.85rem;
+    color: var(--sf-text-secondary);
+    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    border-top: 1px solid var(--sf-border);
+    padding-top: 0.75rem;
+}
+
+/* Warning icon, drawn as a mask so it inherits the text colour. Replaces the
+   emoji that used to be typed into the copy — those render differently on every
+   OS and can't follow the palette. */
+.sf-warn-icon::before {
+    content: '';
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-right: 6px;
+    vertical-align: -2px;
+    background-color: currentColor;
+    -webkit-mask: var(--sf-warn-glyph) center / contain no-repeat;
+    mask: var(--sf-warn-glyph) center / contain no-repeat;
+}
+
+.template-error-flag,
+.parse-error-title {
+    --sf-warn-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E");
+}
+
+/* A failed parse is recoverable — the admin reopens the template and fixes it —
+   so it reads as a warning (amber), not as the destructive red used for delete. */
+.template-error-flag {
+    margin: 0.75rem 0 0 0;
+    font-size: 0.78rem;
+    color: #92600b;
+    font-weight: 600;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+}
+
+.template-error-flag::before {
+    content: '';
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-right: 6px;
+    vertical-align: -2px;
+    background-color: currentColor;
+    -webkit-mask: var(--sf-warn-glyph) center / contain no-repeat;
+    mask: var(--sf-warn-glyph) center / contain no-repeat;
+}
+
+/* ── Modal ─────────────────────────────────────────────── */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 35, 50, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    padding: 1.5rem;
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-card-wide {
+    background: var(--sf-card);
+    border-radius: var(--sf-radius-lg);
+    width: 100%;
+    max-width: 1180px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--sf-shadow-lg);
+    overflow: hidden;
+    animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--sf-border);
+    flex-shrink: 0;
+    background: var(--sf-card);
+}
+
+.modal-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.modal-title {
+    margin: 0.1rem 0 0 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--sf-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.icon-button {
+    background: none;
+    border: 1px solid var(--slate-200);
+    font-size: 1.2rem;
+    color: var(--slate-500);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s var(--ease-out);
+}
+
+.icon-button:hover {
+    background: var(--red-50);
+    color: var(--red-500);
+    border-color: var(--red-200);
+    transform: rotate(90deg);
+}
+
+/* ── TABS NAV (new) ────────────────────────────────────── */
+.tabs-nav {
+    display: flex;
+    gap: 0;
+    background: var(--sf-bg);
+    padding: 0 2rem;
+    border-bottom: 1px solid var(--sf-border);
+    flex-shrink: 0;
+}
+
+.tab-button {
+    background: transparent;
+    border: none;
+    padding: 0.85rem 1.25rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--sf-text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px; /* align active border with bottom border */
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    font-family: inherit;
+    line-height: 1.2;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: var(--sf-text-primary);
+    background: rgba(26, 35, 50, 0.03);
+}
+
+.tab-button.tab-active {
+    color: var(--sf-navy);
+    font-weight: 600;
+    border-bottom-color: var(--sf-orange);
+    background: var(--sf-card);
+}
+
+.tab-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 0.4rem;
+    background: var(--sf-navy);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    border-radius: 10px;
+    line-height: 1;
+}
+
+.tab-active .tab-count {
+    background: var(--sf-orange);
+}
+
+.tab-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.tab-dot-success { background: var(--sf-success); }
+.tab-dot-error   { background: var(--sf-danger); }
+
+/* ── TAB BODY ──────────────────────────────────────────── */
+.modal-body-tabs {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 0;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Adjusts to single column when right pane hidden */
+.modal-body-tabs:has(.modal-form-pane-full) {
+    grid-template-columns: 1fr;
+}
+
+/* Fallback for browsers without :has() */
+.modal-form-pane-full {
+    grid-column: 1 / -1;
+}
+
+/* Template tab only: reference pane on the left, upload form on the right.
+   The panes keep their place in the DOM (see bodyTabsClass) so nothing
+   remounts; only the column widths and the visual order change. */
+.modal-body-tabs-swapped {
+    grid-template-columns: 380px 1fr;
+}
+
+.modal-body-tabs-swapped .modal-fields-pane {
+    order: 1;
+    border-right: 1px solid var(--sf-border);
+}
+
+.modal-body-tabs-swapped .modal-form-pane {
+    order: 2;
+    border-right: none;
+}
+
+.modal-form-pane {
+    padding: 2rem 2.25rem;
+    overflow-y: auto;
+    border-right: 1px solid var(--sf-border);
+    background: var(--sf-card);
+}
+
+.modal-form-pane.modal-form-pane-full {
+    border-right: none;
+}
+
+.modal-fields-pane {
+    background: var(--sf-bg);
+    /* hidden, NOT auto: scrolling belongs to .fields-scroll alone. With auto,
+       this pane grew its own second scrollbar (the child could never shrink,
+       see min-height below), and dragging that outer bar scrolled the header
+       and search box away with the list. */
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Section eyebrows + headings ───────────────────────── */
+.step-eyebrow {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--sf-orange);
+    text-transform: uppercase;
+}
+
+.section-heading {
+    margin: 0 0 0.4rem 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--sf-text-primary);
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+}
+
+.section-subheading {
+    margin: 0 0 1.25rem 0;
+    font-size: 0.9rem;
+    color: var(--sf-text-secondary);
+    line-height: 1.5;
+}
+
+.section-divider {
+    margin: 2rem 0 1.5rem 0;
+    border: none;
+    border-top: 1px solid var(--sf-border);
+}
+
+/* ── Form layout ───────────────────────────────────────── */
+.form-stack > * {
+    margin-bottom: 1rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.modal-form-pane lightning-input,
+.modal-form-pane lightning-combobox,
+.modal-form-pane lightning-textarea {
+    --slds-c-input-color-border: var(--sf-border-strong);
+    --slds-c-input-radius-border: 8px;
+    --slds-c-input-color-background: #fff;
+    --slds-c-input-spacing-vertical-end: 0.6rem;
+    --slds-c-input-spacing-vertical-start: 0.6rem;
+}
+
+/* ── Toggles ───────────────────────────────────────────── */
+.toggle-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.toggle-label-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.85rem 1rem;
+    background: var(--sf-bg);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-sm);
+    transition: all 0.15s;
+}
+
+.toggle-label-card:hover {
+    border-color: var(--sf-border-strong);
+    background: #fafaf6;
+}
+
+.toggle-checkbox {
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+    --slds-c-checkbox-color-background: var(--sf-card);
+    --slds-c-checkbox-color-border: var(--sf-border-strong);
+    --slds-c-checkbox-color-background-checked: var(--sf-orange);
+    --slds-c-checkbox-color-border-checked: var(--sf-orange);
+}
+
+.toggle-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    cursor: default;
+}
+
+.toggle-text strong {
+    font-size: 0.85rem;
+    color: var(--sf-text-primary);
+    font-weight: 600;
+}
+
+/* Title + info icon sit on one line; .toggle-text itself stacks vertically. */
+.toggle-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Muted icon so the tooltip reads as a hint, not an alert. */
+.toggle-help {
+    --slds-c-icon-color-foreground-default: var(--sf-text-secondary);
+    line-height: 1;
+}
+
+.toggle-hint {
+    font-size: 0.75rem;
+    color: var(--sf-text-secondary);
+    line-height: 1.3;
+}
+
+/* ── Upload section ────────────────────────────────────── */
+.upload-block {
+    background: var(--sf-bg);
+    border: 1px dashed var(--sf-border-strong);
+    border-radius: var(--sf-radius-md);
+    padding: 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.file-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #067a5b;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+/* Small secondary button.
+ * The markup already asked for `.sf-btn .sf-btn_secondary`, but those classes
+ * only ever existed in signforceAdminConfig — and LWC scopes styles per
+ * component, so nothing reached these buttons. They were rendering as bare
+ * browser default buttons held together by inline overrides. */
+.sf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--slate-200, #e2e8f0);
+    background: #ffffff;
+    color: var(--slate-700, #334155);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.5;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.sf-btn:hover {
+    background: #eef2ff;
+    border-color: #6366f1;
+    color: #4338ca;
+}
+
+.sf-btn:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+.sf-btn_secondary {
+    /* Reserved for future variants; the base already renders the secondary look. */
+    background: #ffffff;
+}
+
+.sf-btn-icon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+.pill-icon { width: 14px; height: 14px; }
+.muted { color: var(--sf-text-secondary); font-weight: 400; }
+
+.parsing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--sf-text-secondary);
+}
+
+/* ── Info banner (used on Template tab when no object selected) ── */
+.info-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.15rem;
+    background: var(--sf-info-bg);
+    border-left: 3px solid var(--sf-info-text);
+    border-radius: var(--sf-radius-sm);
+    margin-top: 1.25rem;
+}
+
+.info-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--sf-info-text);
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+}
+
+.info-banner p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--sf-info-text);
+    line-height: 1.5;
+}
+
+.info-banner strong {
+    font-weight: 700;
+}
+
+/* ── Parse error box ───────────────────────────────────── */
+.parse-error-box {
+    margin-top: 1rem;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: var(--sf-radius-sm);
+    padding: 1rem;
+}
+
+.parse-error-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #92600b;
+    display: flex;
+    align-items: center;
+}
+
+.parse-error-title::before {
+    content: '';
+    width: 13px;
+    height: 13px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: var(--sf-warn-glyph) center / contain no-repeat;
+    mask: var(--sf-warn-glyph) center / contain no-repeat;
+}
+
+.parse-error-text {
+    margin: 0;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.72rem;
+    color: #78350f;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* ── Detected merge tags list ──────────────────────────── */
+.field-list {
+    background: var(--sf-bg);
+    border-radius: var(--sf-radius-sm);
+    border: 1px solid var(--sf-border);
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+.field-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.85rem;
+    border-bottom: 1px solid var(--sf-border);
+    font-size: 0.82rem;
+}
+
+.field-row:last-child { border-bottom: none; }
+
+.field-type {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+/* Unlike the data-type tags above, these DO differ in behaviour — a loop repeats
+   a block, a conditional hides one, an image embeds a file — so the colour is
+   doing real work. Aligned to the app palette. */
+.field-type-field        { background: #eef2ff; color: #4338ca; }
+.field-type-loop         { background: #f5f3ff; color: #6d28d9; }
+.field-type-conditional  { background: #fffbeb; color: #92600b; }
+.field-type-image        { background: #ecfdf5; color: #067a5b; }
+.field-type-builtin      { background: #f1f5f9; color: #64748b; }
+
+.field-tag {
+    font-family: 'Monaco', 'Menlo', monospace;
+    color: var(--sf-text-primary);
+    font-size: 0.8rem;
+}
+
+.field-modifier {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.72rem;
+    color: var(--sf-text-muted);
+}
+
+/* ── Tag resolution column ─────────────────────────────── */
+/* Right-hand side of each detected-tag row: the field the tag will pull from,
+   or the reason it will pull nothing. Pushed right with auto margin so the tag
+   name stays left-aligned however long the answer is. */
+.tag-map {
+    margin-left: auto;
+    padding-left: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    justify-content: flex-end;
+    text-align: right;
+    font-size: 0.78rem;
+    min-width: 0;
+}
+
+.tag-map-label {
+    color: var(--sf-text-primary);
+    font-weight: 600;
+}
+
+.tag-map-where {
+    color: var(--sf-text-muted);
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+
+/* A tag that resolves to nothing is the one thing on this tab worth
+   interrupting for, so the whole row carries it, not just the message. */
+.tag-map-error {
+    align-items: flex-start;
+    color: var(--sf-danger);
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.tag-map-error-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+}
+
+.field-row-broken {
+    background: #fef2f2;
+}
+
+.field-row-broken .field-tag {
+    color: var(--sf-danger);
+}
+
+.tag-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.8rem 1rem;
+    margin: 0 0 0.85rem 0;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--sf-radius-sm);
+}
+
+.tag-alert-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+    color: var(--sf-danger);
+}
+
+.tag-alert-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #991b1b;
+}
+
+.tag-alert-body {
+    margin: 0.15rem 0 0 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: #7f1d1d;
+}
+
+/* ── Field reference panel ─────────────────────────────── */
+.fields-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.75rem;
+    text-align: center;
+    color: var(--sf-text-secondary);
+    height: 100%;
+}
+
+.fields-empty-icon-wrap {
+    width: 56px;
+    height: 56px;
+    background: var(--sf-card);
+    border: 1px solid var(--sf-border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--sf-shadow-sm);
+}
+
+.fields-empty-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--sf-text-muted);
+}
+
+.fields-empty h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: var(--sf-text-primary);
+    font-weight: 700;
+}
+
+.fields-empty p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-width: 240px;
+}
+
+.fields-header {
+    padding: 1.5rem 1.25rem 1rem 1.25rem;
+    background: var(--sf-bg);
+    flex-shrink: 0;
+}
+
+.fields-eyebrow {
+    margin: 0 0 0.4rem 0;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--sf-orange);
+    text-transform: uppercase;
+}
+
+.fields-title {
+    margin: 0 0 0.3rem 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--sf-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.fields-subtitle {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--sf-text-secondary);
+    line-height: 1.4;
+}
+
+.fields-search {
+    padding: 0.75rem 1.25rem;
+    background: var(--sf-bg);
+    border-bottom: 1px solid var(--sf-border);
+    flex-shrink: 0;
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: var(--sf-text-muted);
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.6rem 0.85rem 0.6rem 2.25rem;
+    border: 1px solid var(--sf-border-strong);
+    border-radius: var(--sf-radius-sm);
+    font-size: 0.85rem;
+    color: var(--sf-text-primary);
+    background: #fff;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: all 0.15s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--sf-navy);
+    box-shadow: 0 0 0 3px rgba(26, 35, 50, 0.1);
+}
+
+/* "Browse related object" dropdown (below the field search) */
+.fields-related-picker {
+    padding: 0 1.25rem 0.75rem;
+    background: var(--sf-bg);
+    border-bottom: 1px solid var(--sf-border);
+    flex-shrink: 0;
+}
+
+/* Custom searchable dropdown (search sits inside, above the option list) */
+.related-combo {
+    position: relative;
+}
+.related-combo-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--sf-border-strong);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    font-size: 0.85rem;
+    color: var(--sf-text-primary);
+    cursor: pointer;
+    text-align: left;
+}
+.related-combo-trigger:hover {
+    border-color: var(--sf-navy);
+}
+.related-combo-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.related-combo-chevron {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--sf-text-muted);
+}
+.related-combo-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+}
+.related-combo-panel {
+    position: absolute;
+    top: calc(100% + 3px);
+    left: 0;
+    right: 0;
+    z-index: 9001;
+    display: flex;
+    flex-direction: column;
+    max-height: 300px;
+    background: #fff;
+    border: 1px solid var(--sf-border-strong);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+.related-combo-search {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--sf-border);
+    flex-shrink: 0;
+}
+.related-search-input {
+    width: 100%;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--sf-border-strong);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    color: var(--sf-text-primary);
+    background: #fff;
+    box-sizing: border-box;
+}
+.related-search-input:focus {
+    outline: none;
+    border-color: var(--sf-navy);
+    box-shadow: 0 0 0 3px rgba(26, 35, 50, 0.1);
+}
+.related-combo-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem 0;
+    overflow-y: auto;
+}
+.related-combo-item {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.82rem;
+    color: var(--sf-text-primary);
+    cursor: pointer;
+}
+.related-combo-item:hover {
+    background: var(--brand-50);
+}
+.related-combo-item.is-selected {
+    background: var(--brand-100);
+    font-weight: 600;
+}
+.related-combo-empty {
+    padding: 0.6rem 0.7rem;
+    font-size: 0.8rem;
+    color: var(--sf-text-muted);
+}
+
+/* Caption + copyable loop example shown above a child-collection's field list */
+.loop-hint-caption {
+    margin: 0 0 0.3rem 0;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--sf-text-secondary);
+}
+.loop-hint {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--sf-text-primary);
+    background: var(--brand-50);
+    border: 1px solid var(--brand-200);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.7rem;
+    font-family: 'Monaco', 'Menlo', monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.fields-loading {
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.fields-scroll {
+    flex: 1;
+    /* A flex child's default min-height:auto stops it shrinking below its
+       content, so overflow-y:auto here never engaged and the PARENT pane
+       scrolled instead - two scrollbars, and the draggable one moved the
+       whole panel. min-height:0 lets this box actually be the scroller. */
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem 1.25rem 1.5rem 1.25rem;
+}
+
+.fields-section-block {
+    margin-bottom: 1.5rem;
+}
+
+.fields-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--sf-text-muted);
+    margin: 0 0 0.6rem 0;
+    padding: 0 0.25rem;
+}
+
+/* ── Field card (click anywhere to copy — matches the "Click any tag to copy"
+   panel instruction; the real copy bug was the toast, not this handler) ── */
+.field-card {
+    background: var(--sf-card);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-sm);
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.4rem;
+    cursor: pointer;
+    transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--sf-shadow-sm);
+}
+
+.field-card:hover {
+    border-color: var(--sf-navy);
+    transform: translateX(-2px);
+    box-shadow: var(--sf-shadow-md);
+}
+
+.field-card-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    grid-column: 1;
+}
+
+.field-card-label {
+    font-size: 0.82rem;
+    color: var(--sf-text-primary);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.field-card-tag {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.72rem;
+    color: var(--sf-text-secondary);
+    background: var(--sf-bg);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    grid-column: 1;
+    width: fit-content;
+    margin-top: 0.25rem;
+    /* Long tags ({{ns__Field__c:format=...}}) must wrap inside the card instead
+       of widening the grid column — that pushed the Copy button out of the panel
+       and produced a horizontal scrollbar. min-width:0 lets the 1fr column
+       shrink; break-all wraps mid-token since merge tags have no spaces. */
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-all;
+    /* BUG-030/032 FIX (true cause): a manual drag-select + Ctrl+C used to paste
+       only "}". The earlier user-select:all attempt was the wrong surface — in
+       Chromium, user-select:all on this <code> element combined with
+       user-select:none on the surrounding siblings FRAGMENTS the drag selection
+       at those boundaries, collapsing it to a single trailing character. Worse,
+       the card itself carried onclick={handleCopyTag}; the click that fires on
+       mouseup ran the copy handler (whose textarea .select() fallback wipes the
+       live selection and fires a toast), stomping on the manual selection.
+       FIX: plain user-select:text so a normal character-by-character selection
+       works, and the card-level onclick has been removed in the HTML so only
+       the explicit Copy button copies. The Copy button remains the reliable,
+       full-tag copy path. */
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+}
+
+.copy-btn {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    background: transparent;
+    border: 1px solid var(--sf-border-strong);
+    color: var(--sf-text-primary);
+    padding: 0.35rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.copy-btn:hover {
+    background: var(--sf-navy);
+    color: #fff;
+    border-color: var(--sf-navy);
+}
+
+.field-card-nested {
+    background: var(--sf-bg);
+    margin-left: 0.75rem;
+    grid-template-columns: 1fr auto;
+}
+
+.field-card-nested .field-card-tag { grid-row: 1; background: #fff; }
+.field-card-nested .copy-btn { grid-row: 1; }
+
+.field-card-label-small {
+    font-size: 0.72rem;
+    color: var(--sf-text-secondary);
+    grid-column: 1;
+    margin-top: 0.2rem;
+}
+
+/* ── Tag badges ────────────────────────────────────────── */
+.tag-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.2rem 0.45rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+}
+
+/* Data-type labels, not statuses.
+ * These were coloured like statuses and the colours meant nothing: EMAIL, PHONE,
+ * CURRENCY and NUMBER all shared the success green, and DATE wore the warning
+ * amber — so a field list read as a scatter of alerts, and a phone number looked
+ * like something had succeeded. The badge already spells the type out, so the
+ * type stays neutral and the eye goes to the field NAME, which is what you're
+ * scanning for. */
+.tag-string,
+.tag-picklist,
+.tag-email,
+.tag-phone,
+.tag-url,
+.tag-bool,
+.tag-date,
+.tag-currency,
+.tag-number,
+.tag-id {
+    background: var(--slate-100, #f1f5f9);
+    color: var(--slate-500, #64748b);
+    border: 1px solid transparent;
+}
+
+/* The one type that genuinely behaves differently: it walks to another object,
+   so it earns the accent. */
+.tag-rel {
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+}
+.tag-builtin  { background: var(--slate-100); color: var(--slate-600); }
+.tag-loop     { background: var(--brand-50); color: var(--brand-700); border: 1px solid var(--brand-200); }
+.tag-field    { background: var(--slate-100); color: var(--slate-700); border: 1px solid var(--slate-200); }
+
+/* ── Relationships block ───────────────────────────────── */
+.rel-block {
+    background: var(--sf-card);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-sm);
+    padding: 0.5rem;
+    margin-bottom: 0.6rem;
+    box-shadow: var(--sf-shadow-sm);
+}
+
+.rel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.55rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--sf-border);
+}
+
+.rel-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--sf-text-primary);
+}
+
+.rel-target {
+    font-size: 0.72rem;
+    color: var(--sf-text-secondary);
+}
+
+/* ── Loop block ────────────────────────────────────────── */
+.loop-block {
+    background: var(--sf-card);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-md);
+    padding: 0.85rem;
+    margin-bottom: 0.6rem;
+    box-shadow: var(--sf-shadow-sm);
+}
+
+.loop-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+
+.loop-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--sf-text-primary);
+    flex: 1;
+}
+
+.loop-snippet {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.72rem;
+    color: var(--sf-text-primary);
+    background: #f8f7f2;
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-sm);
+    padding: 0.7rem 0.85rem;
+    margin: 0 0 0.65rem 0;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.6;
+}
+
+.snippet-copy-btn {
+    background: var(--brand-600);
+    color: #fff;
+    border: none;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--sf-radius-sm);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.15s var(--ease-out);
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.snippet-copy-btn:hover {
+    background: var(--brand-700);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+.copy-icon { width: 14px; height: 14px; }
+
+.fields-no-matches {
+    padding: 2rem 1.25rem;
+    text-align: center;
+    color: var(--sf-text-secondary);
+    font-size: 0.88rem;
+}
+
+/* ── Modal footer ──────────────────────────────────────── */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--sf-border);
+    flex-shrink: 0;
+    background: var(--sf-card);
+}
+
+.modal-footer .btn-danger-text {
+    margin-right: auto;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 960px) {
+    .modal-body-tabs,
+    .modal-body-tabs-swapped {
+        grid-template-columns: 1fr;
+    }
+    /* Stacked, the swap would bury the upload area under a long field list.
+       Put the form back on top and let the reference follow. */
+    .modal-body-tabs-swapped .modal-form-pane {
+        order: 1;
+    }
+    .modal-body-tabs-swapped .modal-fields-pane {
+        order: 2;
+        border-right: none;
+    }
+    .modal-form-pane {
+        border-right: none;
+        border-bottom: 1px solid var(--sf-border);
+    }
+    .modal-fields-pane {
+        max-height: 50vh;
+    }
+    .form-row,
+    .toggle-row {
+        grid-template-columns: 1fr;
+    }
+    .library-shell {
+        padding: 1rem;
+    }
+    .tabs-nav {
+        padding: 0 1rem;
+        overflow-x: auto;
+    }
+    .tab-button {
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 600px) {
+    .library-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .modal-form-pane {
+        padding: 1.25rem;
+    }
+    .modal-header,
+    .modal-footer {
+        padding: 1rem 1.25rem;
+    }
+    .tab-button {
+        padding: 0.7rem 0.85rem;
+        font-size: 0.82rem;
+    }
+}
+
+/* ── Signers & Fields tab — template-level signer editor ──────────── */
+.signer-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.signer-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.signer-row-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--sf-bg);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-md);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.signer-row-card:hover {
+    border-color: var(--sf-border-strong);
+    box-shadow: var(--sf-shadow-sm);
+}
+
+.signer-row-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.4fr 1.6fr 0.9fr 0.7fr;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.signer-row-card lightning-input,
+.signer-row-card lightning-combobox {
+    --slds-c-input-color-border: var(--sf-border-strong);
+    --slds-c-input-radius-border: 8px;
+    --slds-c-input-color-background: #fff;
+    --slds-c-input-spacing-vertical-end: 0.5rem;
+    --slds-c-input-spacing-vertical-start: 0.5rem;
+}
+
+.signer-remove-btn {
+    flex-shrink: 0;
+    margin-top: 1.55rem; /* align with input box, below stacked label */
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid var(--sf-border-strong);
+    color: var(--sf-text-muted);
+    border-radius: var(--sf-radius-sm);
+    cursor: pointer;
+    transition: all 0.15s var(--ease-out);
+}
+
+.signer-remove-btn svg { width: 15px; height: 15px; }
+
+.signer-remove-btn:hover {
+    background: var(--sf-danger-bg);
+    color: var(--sf-danger);
+    border-color: var(--red-200);
+}
+
+.signer-empty {
+    padding: 1.5rem;
+    background: var(--sf-bg);
+    border: 1px dashed var(--sf-border-strong);
+    border-radius: var(--sf-radius-md);
+    text-align: center;
+}
+
+.signer-empty p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--sf-text-secondary);
+    line-height: 1.5;
+}
+
+.signer-add-btn {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.1rem;
+    background: #fff;
+    border: 1px solid var(--sf-border-strong);
+    color: var(--sf-text-primary);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s var(--ease-out);
+}
+
+.signer-add-btn .btn-icon { width: 15px; height: 15px; }
+
+.signer-add-btn:hover {
+    border-color: var(--sf-navy);
+    color: var(--sf-navy);
+    background: var(--brand-50);
+}
+
+.signer-future-note {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.78rem;
+    color: var(--sf-text-muted);
+    font-style: italic;
+}
+
+/* ── Fields tab — embedded drag-drop field editor ─────────────────── */
+/* Give the embedded canvas room to render the PDF preview + palette inside
+   the modal. Full width is provided by leftPaneClass (the merge-tag
+   reference pane is hidden on this tab). */
+.template-fields-canvas {
+    min-height: 420px;
+    width: 100%;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.template-fields-canvas c-template-field-editor {
+    flex: 1;
+    min-height: 0;
+    display: block;
+}
+
+/* ── Fields tab: sample-data preview bar ── */
+.sample-preview-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px 14px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    background: #f6f7fb;
+    border: 1px solid #e8eaf0;
+    border-radius: 10px;
+}
+.sample-record-picker {
+    flex: 1 1 260px;
+    min-width: 220px;
+}
+.sample-clear-btn {
+    flex: 0 0 auto;
+    height: 34px;
+    padding: 0 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #4f46e5;
+    background: #ffffff;
+    border: 1px solid #e0e7ff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.sample-clear-btn:hover {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+}
+.sample-hint {
+    flex: 1 1 100%;
+    margin: 0;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--sf-text-muted, #64748b);
+}
+
+/* ── Fields tab: brief "preparing" state while the fast preview
+   id resolves (a quick SOQL), before the editor mounts ── */
+.fields-preparing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 360px;
+    height: 100%;
+}
+
+.fields-preparing-spinner {
+    width: 34px;
+    height: 34px;
+    border: 3px solid var(--sf-border, #e8eaf0);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: fieldsPreparingSpin 0.75s linear infinite;
+}
+
+.fields-preparing-text {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sf-text-muted, #64748b);
+}
+
+@keyframes fieldsPreparingSpin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fields-preparing-spinner { animation-duration: 1.4s; }
+}
+
+/* ── Fields tab: only the document canvas scrolls ──────────
+   The pane itself must not scroll, or the whole modal moves under the
+   user while they drag a field. The intro block keeps its natural
+   height and the editor takes whatever is left; the editor scrolls its
+   own document viewport internally. */
+.modal-form-pane-fields {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-form-pane-fields .template-fields-canvas {
+    flex: 1;
+    min-height: 0;
+    margin-bottom: 0;
+}
+
+/* Outer rules on the host beat the component's own :host defaults, which
+   would otherwise pin it to a fixed 700px / 550px-min and overflow. */
+.modal-form-pane-fields c-template-field-editor {
+    --editor-height: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+@media (max-width: 960px) {
+    .signer-row-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .signer-row-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Fields tab: the sample-data record picker used to sit between the subheading
+   and the canvas. With it gone, the subheading's bottom margin and the canvas's
+   top margin stack into ~36px of dead space above the document. */
+/* Fields tab: shrink the intro block so the document canvas gets the room —
+   the header used to eat a third of the modal height, leaving the page barely
+   visible. */
+.modal-form-pane-fields .step-eyebrow {
+    margin-bottom: 0.15rem;
+}
+
+.modal-form-pane-fields .section-heading {
+    font-size: 1.05rem;
+    margin-bottom: 0.15rem;
+}
+
+.modal-form-pane-fields .section-subheading {
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+    line-height: 1.35;
+}
+
+.modal-form-pane-fields .template-fields-canvas {
+    margin-top: 0.5rem;
+}
+
+/* Signers / Fields while the uploaded document is still being read. Both tabs are
+   built from its merge tags, so they are unusable until the parse finishes. */
+.tab-button.tab-disabled,
+.tab-button[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* ── "Number of signers" box ────────────────────────────────────────────
+   Sits beside Add Signer rather than replacing it: one row at a time is
+   still the natural action, this is the shortcut for "I know it's five". */
+.signer-add-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.signer-count-sep {
+    font-size: 0.8rem;
+    color: var(--sf-text-secondary, #64748b);
+}
+
+.signer-count-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* lightning-input has no width control of its own, so constrain the host. */
+.signer-count-input {
+    width: 5.5rem;
+}
+
+.signer-count-hint {
+    font-size: 0.8rem;
+    color: var(--sf-text-secondary, #64748b);
+    white-space: nowrap;
+}
+
+/* ── "The email is optional here" note ──────────────────────────────────
+   Deliberately a panel and not a one-line hint. The blank-vs-filled choice
+   is the thing template authors get wrong, and the consequence only shows
+   up later when the wrong address is pre-filled on a real agreement. */
+.signer-note {
+    display: flex;
+    gap: 0.7rem;
+    margin: 0 0 1.15rem;
+    padding: 0.9rem 1rem;
+    background: #f6f4fe;
+    border: 1px solid #ddd0fb;
+    border-radius: var(--radius-md, 10px);
+}
+
+.signer-note-icon {
+    width: 17px;
+    height: 17px;
+    flex: none;
+    margin-top: 1px;
+    color: #6d28d9;
+}
+
+.signer-note-title {
+    margin: 0 0 0.45rem;
+    font-size: 0.83rem;
+    font-weight: 650;
+    color: #4c1d95;
+}
+
+.signer-note-list {
+    margin: 0;
+    padding-left: 1.05rem;
+    list-style: disc;
+}
+
+.signer-note-list li {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--sf-text-secondary, #475569);
+    margin-bottom: 0.35rem;
+}
+
+.signer-note-list li b { color: var(--sf-text-primary, #1e293b); font-weight: 650; }
+
+.signer-note-foot {
+    margin: 0.55rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: var(--sf-text-secondary, #475569);
+}
+
+/* ── Short screens: the modal chrome above the form (header + tab strip +
+   section heading block) stacked up to ~230px before the first input.
+   On laptops that pushed half the Setup form below the fold. Compress the
+   chrome, not the form: paddings and type shrink, nothing is removed. ── */
+@media (max-height: 820px) {
+    .modal-header { padding: 0.7rem 1.5rem; }
+    .modal-title  { font-size: 1.05rem; }
+
+    .tabs-nav   { padding: 0 1.5rem; }
+    .tab-button { padding: 0.55rem 1rem; font-size: 0.84rem; }
+
+    .modal-form-pane { padding: 1.1rem 2.25rem 1.5rem; }
+
+    .step-eyebrow       { margin-bottom: 0.25rem; font-size: 0.65rem; }
+    .section-heading    { font-size: 1.15rem; margin-bottom: 0.2rem; }
+    .section-subheading { font-size: 0.84rem; margin-bottom: 0.85rem; }
+}

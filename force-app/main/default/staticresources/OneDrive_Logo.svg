@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="60" height="60" role="img" aria-label="OneDrive">
+    <defs>
+        <linearGradient id="odA" x1="12" y1="46" x2="56" y2="46" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#2086dd"/>
+            <stop offset="1" stop-color="#37c6f4"/>
+        </linearGradient>
+        <linearGradient id="odB" x1="16" y1="20" x2="48" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#0f78d4"/>
+            <stop offset="1" stop-color="#1e9ae8"/>
+        </linearGradient>
+    </defs>
+    <path fill="url(#odB)" d="M27.6 13.4a13.1 13.1 0 0 1 11.7 7.1 10.6 10.6 0 0 1 9.9 6.6l-3.4 12.4H17.9l-4.5-13.6a13.1 13.1 0 0 1 14.2-12.5z"/>
+    <path fill="url(#odA)" d="M50.9 27.4a9.8 9.8 0 0 1 1.4 19.4l-.7.1H18.4A9.7 9.7 0 0 1 17 27.6a12.2 12.2 0 0 1 22.7-4.4 9.7 9.7 0 0 1 11.2 4.2z"/>
+</svg>

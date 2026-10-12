@@ -1,0 +1,25 @@
+<apex:page controller="SignforcePDFController"
+           showHeader="false"
+           sidebar="false"
+           cache="true">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: white;
+        }
+        embed {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+    <embed src="{!pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" 
+           type="application/pdf" 
+           width="100%" 
+           height="100%"/>
+</apex:page>

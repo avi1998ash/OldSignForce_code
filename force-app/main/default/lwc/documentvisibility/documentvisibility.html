@@ -1,0 +1,74 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 04-15-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <c-signforce-access-gate>
+        <div class="vis-root">
+            <div class="vis-header">
+                <h2 class="vis-title">Document Access</h2>
+                <p class="vis-desc">Control which signers can see each document</p>
+            </div>
+
+            <template if:true={isLoading}>
+                <div class="vis-loading">
+                    <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <template if:true={hasData}>
+                    <div class="vis-table-wrap">
+                        <table class="vis-table">
+                            <thead>
+                                <tr>
+                                    <th class="vis-th vis-th-doc">Document</th>
+                                    <template for:each={signers} for:item="signer">
+                                        <th key={signer.id} class="vis-th vis-th-signer">
+                                            <span class="vis-signer-name">{signer.name}</span>
+                                            <span class="vis-signer-email">{signer.email}</span>
+                                        </th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={documents} for:item="doc">
+                                    <tr key={doc.id}>
+                                        <td class="vis-td vis-td-doc">
+                                            <span class="vis-doc-name">{doc.name}</span>
+                                        </td>
+                                        <template for:each={doc.signerAccess} for:item="access">
+                                            <td key={access.key} class="vis-td vis-td-toggle">
+                                                <button class={access.btnClass}
+                                                    data-doc={access.docId}
+                                                    data-signer={access.signerId}
+                                                    onclick={handleToggle}
+                                                    title={access.title}>
+                                                    <template if:true={access.canView}>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                    </template>
+                                                    <template if:false={access.canView}>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                                                    </template>
+                                                </button>
+                                            </td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <template if:false={hasData}>
+                    <div class="vis-empty">
+                        <p>No documents or signers to configure.</p>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </c-signforce-access-gate>
+</template>

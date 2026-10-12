@@ -1,0 +1,222 @@
+<apex:page controller="StampedPDFController"
+    showHeader="false" sidebar="false" standardStylesheets="false"
+    contentType="text/html">
+<html>
+<head>
+    <style>
+        body { font-family: Arial; background: #f4f4f4; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .status { text-align: center; color: #333; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #ddd; border-top: 3px solid #0070d2; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #msg { font-size: 14px; color: #666; }
+        .done { color: #2e844a; font-weight: bold; }
+        .err { color: #c23934; }
+    </style>
+</head>
+<body>
+<div class="status">
+    <div class="spinner" id="spinner"></div>
+    <div id="msg">Preparing stamped PDF...</div>
+</div>
+
+<script src="{!URLFOR($Resource.pdfjs)}"></script>
+<script src="{!URLFOR($Resource.jspdf)}"></script>
+    <!-- Signature fonts come from this package's own static resource rather
+         than fonts.googleapis.com: a packaged app must not fetch styling from a
+         third-party host. $Resource/URLFOR is the supported way to reference it. -->
+    <apex:stylesheet value="{!URLFOR($Resource.SignForceSignatureFonts, 'fonts.css')}"/>
+
+<script>
+var agreementId = '{!JSENCODE(agreementId)}';
+var pdfBase64   = '{!JSENCODE(pdfBase64)}';
+var fieldsJson  = '{!JSENCODE(fieldsJson)}';
+var envelopeId  = '{!JSENCODE(envelopeId)}';
+
+var fields = [];
+try { fields = JSON.parse(fieldsJson); } catch(e) { console.error('Parse error', e); }
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 
+            '{!URLFOR($Resource.pdfjs_worker)}';
+
+function setMsg(txt) { document.getElementById('msg').textContent = txt; }
+
+// Wait for fonts to load
+document.fonts.ready.then(function() {
+    generateStampedPDF();
+});
+
+function generateStampedPDF() {
+    setMsg('Loading original PDF...');
+
+    var raw = atob(pdfBase64);
+    var arr = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+
+    pdfjsLib.getDocument({ data: arr.buffer }).promise.then(function(pdf) {
+        var totalPages = pdf.numPages;
+        setMsg('Processing ' + totalPages + ' pages...');
+
+        var jsPDF = window.jspdf.jsPDF;
+        var pdfDoc = null;
+        var pageNum = 1;
+
+        function processPage(num) {
+            if (num > totalPages) {
+                finishPDF(pdfDoc);
+                return;
+            }
+
+            setMsg('Stamping page ' + num + ' of ' + totalPages + '...');
+
+            pdf.getPage(num).then(function(page) {
+                var viewport = page.getViewport({ scale: 2 }); // High quality
+                var canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                var ctx = canvas.getContext('2d');
+
+                page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function() {
+
+                    // Get the page width at scale=1 for coordinate mapping
+                    var vp1 = page.getViewport({ scale: 1 });
+                    var pageW = vp1.width;
+                    var pageH = vp1.height;
+                    var scaleX = viewport.width / pageW;
+                    var scaleY = viewport.height / pageH;
+
+                    // Stamp envelope ID on first page
+                    if (num === 1) {
+                        ctx.fillStyle = 'rgba(240,240,240,0.9)';
+                        ctx.fillRect(0, 0, viewport.width, 24 * scaleY);
+                        ctx.fillStyle = '#666666';
+                        ctx.font = (8 * scaleX) + 'px Arial';
+                        ctx.fillText('eSignforce Envelope ID: ' + envelopeId, 10 * scaleX, 16 * scaleY);
+                    }
+
+                    // Stamp fields on this page
+                    var pageFields = fields.filter(function(f) {
+                        return (f.pageNumber || 1) === num && f.isCompleted;
+                    });
+
+                    pageFields.forEach(function(f) {
+                        var editorW = f.pageWidth || pageW;
+                        var fieldScale = pageW / editorW;
+
+                        var fx = (f.xPos || 0) * fieldScale * scaleX;
+                        var fy = (f.yPos || 0) * fieldScale * scaleY;
+                        var fw = (f.width || 150) * fieldScale * scaleX;
+                        var fh = (f.height || 50) * fieldScale * scaleY;
+
+                        var val = f.value || '';
+                        var type = f.fieldType || '';
+
+                        if (type === 'Signature' || type === 'Initial') {
+                            if (val.startsWith('typed:')) {
+                                // Typed signature
+                                var parts = val.split(':');
+                                var name = parts[1] || '';
+                                var font = parts[2] || 'Dancing Script';
+                                ctx.fillStyle = '#1a1a1a';
+                                ctx.font = Math.round(fh * 0.6) + 'px "' + font + '", cursive';
+                                ctx.fillText(name, fx + 4 * scaleX, fy + fh * 0.7);
+                            } else if (val.startsWith('data:')) {
+                                // Upload signature — draw image
+                                // Note: images are async, handled separately
+                            } else if (val.startsWith('[')) {
+                                // Draw signature — render SVG paths on canvas
+                                try {
+                                    var paths = JSON.parse(val);
+                                    ctx.strokeStyle = '#1a1a1a';
+                                    ctx.lineWidth = 2 * scaleX;
+                                    ctx.lineCap = 'round';
+                                    ctx.lineJoin = 'round';
+                                    paths.forEach(function(p) {
+                                        var cmds = p.d.split(/(?=[MLQ])/);
+                                        ctx.beginPath();
+                                        cmds.forEach(function(cmd) {
+                                            cmd = cmd.trim();
+                                            if (cmd.startsWith('M')) {
+                                                var coords = cmd.substring(1).trim().split(/\s+/);
+                                                var mx = fx + (parseFloat(coords[0]) / 600) * fw;
+                                                var my = fy + (parseFloat(coords[1]) / 150) * fh;
+                                                ctx.moveTo(mx, my);
+                                            } else if (cmd.startsWith('L')) {
+                                                var coords = cmd.substring(1).trim().split(/\s+/);
+                                                var lx = fx + (parseFloat(coords[0]) / 600) * fw;
+                                                var ly = fy + (parseFloat(coords[1]) / 150) * fh;
+                                                ctx.lineTo(lx, ly);
+                                            }
+                                        });
+                                        ctx.stroke();
+                                    });
+                                } catch(e) { console.error('Draw parse error', e); }
+                            }
+
+                            // Certificate stamp below signature
+                            if (f.certId) {
+                                var certY = fy + fh + 2 * scaleY;
+                                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                                ctx.fillRect(fx, certY, fw, 36 * scaleY);
+                                ctx.strokeStyle = '#dddddd';
+                                ctx.strokeRect(fx, certY, fw, 36 * scaleY);
+                                ctx.fillStyle = '#888888';
+                                ctx.font = Math.round(6 * scaleX) + 'px Arial';
+                                ctx.fillText('Signed by: ' + (f.signerName || ''), fx + 3 * scaleX, certY + 9 * scaleY);
+                                ctx.fillText(f.certId || '', fx + 3 * scaleX, certY + 18 * scaleY);
+                                ctx.fillText(f.signedDate || '', fx + 3 * scaleX, certY + 27 * scaleY);
+                            }
+
+                        } else if (type === 'Checkbox') {
+                            ctx.fillStyle = '#333333';
+                            ctx.font = Math.round(fh * 0.8) + 'px Arial';
+                            ctx.fillText(val === 'true' ? '☑' : '☐', fx + 2 * scaleX, fy + fh * 0.8);
+
+                        } else {
+                            // Text fields (Full Name, Email, Date, etc.)
+                            ctx.fillStyle = '#333333';
+                            ctx.font = Math.round(Math.min(fh * 0.6, 14 * scaleX)) + 'px Arial';
+                            ctx.fillText(val, fx + 4 * scaleX, fy + fh * 0.65);
+                        }
+                    });
+
+                    // Add page to jsPDF
+                    var imgData = canvas.toDataURL('image/jpeg', 0.92);
+                    var pdfW = 595.28; // A4 width in points
+                    var pdfH = (viewport.height / viewport.width) * pdfW;
+
+                    if (num === 1) {
+                        pdfDoc = new jsPDF({ unit: 'pt', format: [pdfW, pdfH] });
+                    } else {
+                        pdfDoc.addPage([pdfW, pdfH]);
+                    }
+                    pdfDoc.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+
+                    processPage(num + 1);
+                });
+            });
+        }
+
+        processPage(1);
+
+    }).catch(function(err) {
+        setMsg('Error: ' + err.message);
+        document.getElementById('msg').className = 'err';
+        document.getElementById('spinner').style.display = 'none';
+    });
+}
+
+function finishPDF(pdfDoc) {
+    setMsg('PDF ready');
+
+    // ❌ DO NOT send base64
+    // ✅ Just notify parent
+
+    window.parent.postMessage(JSON.stringify({
+        type: 'stampedPDFComplete',
+        status: 'OK'
+    }), '*');
+}
+</script>
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,289 @@
+<apex:page controller="StampedAgreementPDFController"
+           renderAs="pdf"
+           showHeader="false"
+           sidebar="false"
+           standardStylesheets="false"
+           applyBodyTag="false">
+<html>
+<head>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #222; background: white; }
+    .top-bar { background: #1b2a4a; padding: 10px 20px; }
+    .top-bar-brand { color: #ffd700; font-size: 16px; font-weight: bold; }
+    .top-bar-env { color: #aac4e0; font-size: 8px; margin-top: 2px; }
+    .doc-area { padding: 20px; }
+    .field-section { margin-bottom: 24px; }
+    .field-section-title {
+        font-size: 10px; font-weight: bold; color: #1b2a4a;
+        border-bottom: 2px solid #1b2a4a; padding-bottom: 4px; margin-bottom: 12px;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .field-grid { display: table; width: 100%; }
+    .field-row { display: table-row; }
+    .field-label-cell {
+        display: table-cell; width: 30%; padding: 6px 8px;
+        font-size: 9px; color: #888; vertical-align: top;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .field-value-cell {
+        display: table-cell; width: 70%; padding: 6px 8px;
+        font-size: 11px; color: #111; font-weight: 500; vertical-align: top;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .sig-block {
+        border: 1px solid #ddd; border-radius: 4px;
+        padding: 12px; margin-bottom: 12px; background: #fafafa;
+        page-break-inside: avoid;
+    }
+    .sig-block-name { font-size: 13px; font-weight: bold; color: #1b2a4a; margin-bottom: 2px; }
+    .sig-block-email { font-size: 10px; color: #888; margin-bottom: 10px; }
+    .sig-line { border-top: 1px solid #999; margin: 12px 0 6px; }
+    .sig-typed { font-size: 26px; color: #1a1a1a; padding: 4px 0; }
+    .sig-drawn-desc { font-size: 10px; color: #555; font-style: italic; padding: 6px 0; }
+    .sig-cert {
+        margin-top: 8px; padding: 6px 10px;
+        background: #f0f4ff; border: 1px solid #c8d8f0;
+        border-radius: 3px; font-size: 8px; color: #555;
+    }
+    .sig-cert-row { margin-bottom: 2px; }
+    .sig-cert-label { font-weight: bold; color: #1b2a4a; }
+    .badge-signed {
+        display: inline-block; background: #2e844a; color: white;
+        font-size: 8px; font-weight: bold; padding: 2px 8px;
+        border-radius: 10px; margin-left: 6px;
+    }
+    .audit-section { margin-top: 24px; page-break-before: always; }
+    .audit-title {
+        font-size: 13px; font-weight: bold; color: #1b2a4a;
+        border-bottom: 2px solid #1b2a4a; padding-bottom: 6px; margin-bottom: 12px;
+    }
+    .audit-table { display: table; width: 100%; border-collapse: collapse; }
+    .audit-head-row { display: table-row; background: #1b2a4a; }
+    .audit-head-cell {
+        display: table-cell; padding: 6px 8px;
+        font-size: 9px; font-weight: bold; color: white;
+    }
+    .audit-row { display: table-row; }
+    .audit-row-even { display: table-row; background: #f8f9fa; }
+    .audit-cell {
+        display: table-cell; padding: 5px 8px;
+        font-size: 9px; color: #333;
+        border-bottom: 1px solid #eee; vertical-align: top;
+    }
+    .footer {
+        margin-top: 24px; border-top: 1px solid #ddd;
+        padding: 10px 20px; font-size: 8px; color: #999; text-align: center;
+    }
+    .details-box {
+        border: 1px solid #e0e0e0; border-radius: 4px;
+        margin-bottom: 20px; overflow: hidden;
+    }
+    .details-header {
+        background: #f4f6f9; padding: 7px 12px;
+        font-size: 10px; font-weight: bold; color: #1b2a4a;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .details-body { padding: 12px; }
+    .details-grid { display: table; width: 100%; }
+    .details-row { display: table-row; }
+    .details-key {
+        display: table-cell; width: 35%; padding: 4px 6px;
+        font-size: 9px; color: #888; vertical-align: top;
+    }
+    .details-val {
+        display: table-cell; width: 65%; padding: 4px 6px;
+        font-size: 10px; color: #222; font-weight: 500; vertical-align: top;
+    }
+    .banner {
+        background: #e8f5e9; border: 1px solid #2e844a;
+        border-radius: 4px; padding: 8px 14px; margin-bottom: 16px; text-align: center;
+    }
+    .banner p { color: #2e844a; font-weight: bold; font-size: 11px; margin: 0; }
+</style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-bar-brand">eSignforce — Signed Agreement</div>
+        <div class="top-bar-env">
+            This document has been electronically signed via eSignforce eSignature Platform
+        </div>
+        <div class="top-bar-env" style="margin-top:2px;">
+            eSignforce Envelope ID: <apex:outputText value="{!envelopeId}"/>
+        </div>
+    </div>
+
+    <div class="doc-area">
+
+        <div class="banner">
+            <p>All parties have signed this agreement</p>
+        </div>
+
+        <div class="details-box">
+            <div class="details-header">Agreement Details</div>
+            <div class="details-body">
+                <div class="details-grid">
+                    <div class="details-row">
+                        <div class="details-key">Agreement Name</div>
+                        <div class="details-val"><apex:outputText value="{!agreementName}"/></div>
+                    </div>
+                    <div class="details-row">
+                        <div class="details-key">Agreement Type</div>
+                        <div class="details-val"><apex:outputText value="{!agreementType}"/></div>
+                    </div>
+                    <div class="details-row">
+                        <div class="details-key">Sent By</div>
+                        <div class="details-val"><apex:outputText value="{!sentBy}"/></div>
+                    </div>
+                    <div class="details-row">
+                        <div class="details-key">Completed Date</div>
+                        <div class="details-val"><apex:outputText value="{!completedDate}"/></div>
+                    </div>
+                    <div class="details-row">
+                        <div class="details-key">Status</div>
+                        <div class="details-val" style="color:#2e844a;font-weight:bold;">Completed</div>
+                    </div>
+                    <div class="details-row">
+                        <div class="details-key">Generated On</div>
+                        <div class="details-val"><apex:outputText value="{!generatedOn}"/></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-section">
+            <div class="field-section-title">Signatures</div>
+            <apex:repeat value="{!signerWrappers}" var="sw">
+                <div class="sig-block">
+                    <div class="sig-block-name">
+                        <apex:outputText value="{!sw.signerName}"/>
+                        <apex:outputPanel rendered="{!NOT(sw.isCC)}" layout="none">
+                            <span class="badge-signed">Signed</span>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!sw.isCC}" layout="none">
+                            <span class="badge-signed" style="background:#eef2ff;color:#4338ca;">CC &middot; Copy</span>
+                        </apex:outputPanel>
+                    </div>
+                    <div class="sig-block-email">
+                        <apex:outputText value="{!sw.signerEmail}"/>
+                    </div>
+                    <div class="details-grid">
+                        <div class="details-row">
+                            <div class="details-key" style="color:#888;font-size:9px;">Role</div>
+                            <div class="details-val"><apex:outputText value="{!sw.role}"/></div>
+                        </div>
+                        <div class="details-row">
+                            <div class="details-key" style="color:#888;font-size:9px;">Signed Date</div>
+                            <div class="details-val"><apex:outputText value="{!sw.signedDate}"/></div>
+                        </div>
+                    </div>
+                    <div class="sig-line"></div>
+                    <apex:outputPanel rendered="{!sw.isTyped}">
+                        <div style="font-size:9px;color:#888;margin-bottom:2px;">Signature:</div>
+                        <div class="sig-typed">
+                            <apex:outputText value="{!sw.typedName}"/>
+                        </div>
+                        <div style="font-size:8px;color:#aaa;">
+                            Font: <apex:outputText value="{!sw.typedFont}"/>
+                        </div>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!sw.isDrawn}">
+                        <div class="sig-drawn-desc">
+                            Electronically drawn signature by
+                            <apex:outputText value="{!sw.signerName}"/> on
+                            <apex:outputText value="{!sw.signedDate}"/>
+                        </div>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!sw.isUploaded}">
+                        <div style="font-size:9px;color:#888;margin-bottom:4px;">Signature:</div>
+                        <apex:image value="{!sw.signatureImageData}"
+                                    style="max-height:60px;max-width:220px;"/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!sw.isCC}" layout="none">
+                        <div class="sig-cert">
+                            <div class="sig-cert-row" style="color:#94a3b8;">
+                                Copy recipient (CC) &mdash; no signature required
+                            </div>
+                        </div>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!NOT(sw.isCC)}" layout="none">
+                        <div class="sig-cert">
+                            <div class="sig-cert-row">
+                                <span class="sig-cert-label">Signed by: </span>
+                                <apex:outputText value="{!sw.signerName}"/>
+                                (<apex:outputText value="{!sw.signerEmail}"/>)
+                            </div>
+                            <div class="sig-cert-row">
+                                <span class="sig-cert-label">Certificate ID: </span>
+                                <apex:outputText value="{!sw.certificateId}"/>
+                            </div>
+                            <div class="sig-cert-row">
+                                <span class="sig-cert-label">Signed on: </span>
+                                <apex:outputText value="{!sw.signedDate}"/>
+                            </div>
+                            <div class="sig-cert-row">
+                                <span class="sig-cert-label">IP Address: </span>
+                                <apex:outputText value="{!sw.ipAddress}"/>
+                            </div>
+                        </div>
+                    </apex:outputPanel>
+                </div>
+            </apex:repeat>
+        </div>
+
+        <apex:outputPanel rendered="{!hasFieldValues}">
+            <div class="field-section">
+                <div class="field-section-title">Completed Field Values</div>
+                <div class="field-grid">
+                    <apex:repeat value="{!fieldValues}" var="fv">
+                        <div class="field-row">
+                            <div class="field-label-cell">
+                                <apex:outputText value="{!fv.label}"/>
+                                <div style="font-size:8px;color:#bbb;margin-top:1px;">
+                                    <apex:outputText value="{!fv.fieldType}"/>
+                                </div>
+                            </div>
+                            <div class="field-value-cell">
+                                <apex:outputText value="{!fv.displayValue}"/>
+                            </div>
+                        </div>
+                    </apex:repeat>
+                </div>
+            </div>
+        </apex:outputPanel>
+
+        <div class="audit-section">
+            <div class="audit-title">Audit Trail</div>
+            <div class="audit-table">
+                <div class="audit-head-row">
+                    <div class="audit-head-cell" style="width:26%;">Action</div>
+                    <div class="audit-head-cell" style="width:34%;">Signer</div>
+                    <div class="audit-head-cell" style="width:25%;">Timestamp</div>
+                    <div class="audit-head-cell" style="width:15%;">IP Address</div>
+                </div>
+                <apex:repeat value="{!auditRows}" var="ev">
+                    <div class="{!ev.rowClass}">
+                        <div class="audit-cell"><apex:outputText value="{!ev.action}"/></div>
+                        <div class="audit-cell"><apex:outputText value="{!ev.signerEmail}"/></div>
+                        <div class="audit-cell"><apex:outputText value="{!ev.timestamp}"/></div>
+                        <div class="audit-cell"><apex:outputText value="{!ev.ipAddress}"/></div>
+                    </div>
+                </apex:repeat>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <p>This document was electronically signed using eSignforce eSignature Platform</p>
+        <p>
+            Envelope ID: <apex:outputText value="{!envelopeId}"/>
+            | Generated on <apex:outputText value="{!generatedOn}"/>
+        </p>
+        <p>This electronic signature is legally binding under applicable eSignature laws.</p>
+    </div>
+
+</body>
+</html>
+</apex:page>

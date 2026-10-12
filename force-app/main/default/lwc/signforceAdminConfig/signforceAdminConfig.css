@@ -1,0 +1,1095 @@
+/* Full-bleed branded canvas — covers the standard gray page background even if
+   the page-chrome stylesheet can't reach a wrapper. Scoped to the component, so
+   no leakage to other pages. */
+:host {
+    display: block;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #faf9ff 0%, #f4f5fb 100%);
+}
+
+.sf-wizard {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 16px 40px;
+}
+
+/* ---------- header ---------- */
+.sf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+.sf-brand {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    color: #6366f1;
+}
+.sf-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 2px 0 0;
+}
+.sf-progress-badge {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 700;
+    color: #0f172a;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+}
+
+/* ---------- step indicator ---------- */
+.sf-steps {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    margin: 0 6px 26px;
+}
+.sf-steps::before {
+    content: '';
+    position: absolute;
+    top: 17px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 0;
+}
+.sf-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    /* Keep long two-line labels from colliding with the neighbouring step. */
+    padding: 0 4px;
+    min-width: 0;
+}
+/* Locked (after Save): steps are display-only until Edit re-enables them. */
+.sf-steps_locked .sf-step {
+    pointer-events: none;
+    cursor: default;
+}
+.sf-step:not(.sf-step_active):hover .sf-step-circle {
+    border-color: #a5b4fc;
+    color: #6366f1;
+    transform: translateY(-1px);
+}
+.sf-step:not(.sf-step_active):hover .sf-step-label {
+    color: #6366f1;
+}
+.sf-step:focus-visible {
+    outline: none;
+}
+.sf-step:focus-visible .sf-step-circle {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+}
+.sf-step-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    color: #94a3b8;
+    transition: all 0.2s ease;
+}
+.sf-step-label {
+    margin-top: 6px;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    /* Centre single- and multi-line labels under their circle. */
+    text-align: center;
+    line-height: 1.3;
+    max-width: 100%;
+}
+.sf-step_active .sf-step-circle {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.45);
+}
+.sf-step_active .sf-step-label {
+    color: #4f46e5;
+}
+.sf-step_done .sf-step-circle {
+    background: #2e844a;
+    border-color: transparent;
+    color: #fff;
+}
+.sf-step_done .sf-step-label {
+    color: #2e844a;
+}
+/* keep completed steps green on hover (override the indigo hover styles) */
+.sf-step_done:not(.sf-step_active):hover .sf-step-circle {
+    border-color: transparent;
+    color: #fff;
+}
+.sf-step_done:not(.sf-step_active):hover .sf-step-label {
+    color: #2e844a;
+}
+.sf-step-check {
+    --slds-c-icon-color-foreground-default: #fff;
+}
+
+/* Internal / Guest user tabs (segmented control) */
+.sf-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 18px;
+    background: #f1f1f6;
+    border: 1px solid #e5e5ee;
+    border-radius: 12px;
+}
+.sf-tab {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 8px 18px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.sf-tab:hover:not(.sf-tab_active) {
+    color: #4f46e5;
+}
+.sf-tab:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+.sf-tab_active {
+    background: #ffffff;
+    color: #4f46e5;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+/* ---------- card ---------- */
+.sf-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+    padding: 28px 28px 32px;
+    min-height: 220px;
+}
+.sf-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: #7c3aed;
+    margin: 0 0 4px;
+}
+.sf-heading {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #4f46e5;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 0 6px;
+}
+.sf-desc {
+    color: #64748b;
+    margin: 0 0 22px;
+    font-size: 0.92rem;
+}
+.sf-desc code,
+.sf-script-panel code {
+    background: #f1f5f9;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.85em;
+}
+
+/* ---------- verify signature page ---------- */
+.sf-verify {
+    margin-top: 16px;
+    background: #f5f3ff;
+    border: 1px solid #e7e0fb;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+.sf-verify-title {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    color: #4f46e5;
+    font-size: 0.92rem;
+    margin: 0 0 5px;
+}
+.sf-verify-text {
+    font-size: 0.84rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0;
+}
+.sf-verify-text code,
+.sf-verify-title code {
+    background: #ede9fe;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.85em;
+}
+/* "Open /signature page" — native sf-btn for reliable padding + icon/text
+   alignment (lightning-button's inner spacing isn't settable from here). */
+.sf-verify-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    line-height: 1;
+}
+.sf-verify-btn-icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+/* Permissions action buttons — recolor the default Salesforce blue to the
+   SignForce brand purple. SLDS button styling-hooks are CSS custom properties,
+   so they inherit through the lightning-button shadow boundary and apply
+   reliably (set on the wrapper, consumed inside the base component). */
+.sf-perm-actions {
+    /* "Apply changes" (variant=brand) */
+    --slds-c-button-brand-color-background: #7c3aed;
+    --slds-c-button-brand-color-border: #7c3aed;
+    --slds-c-button-brand-color-background-hover: #6d28d9;
+    --slds-c-button-brand-color-border-hover: #6d28d9;
+    --slds-c-button-brand-color-background-active: #6d28d9;
+    --slds-c-button-brand-color-border-active: #6d28d9;
+    /* "Select all" / "Clear all" (neutral) text + icon */
+    --slds-c-button-text-color: #7c3aed;
+    --slds-c-button-text-color-hover: #6d28d9;
+}
+
+/* Internal Users role tabs (Admin / Standard / Community) — same brand purple
+   as the action buttons: active tab solid purple, inactive tabs purple text. */
+.sf-role-tabs {
+    --slds-c-button-brand-color-background: #7c3aed;
+    --slds-c-button-brand-color-border: #7c3aed;
+    --slds-c-button-brand-color-background-hover: #6d28d9;
+    --slds-c-button-brand-color-border-hover: #6d28d9;
+    --slds-c-button-brand-color-background-active: #6d28d9;
+    --slds-c-button-brand-color-border-active: #6d28d9;
+    --slds-c-button-text-color: #7c3aed;
+    --slds-c-button-text-color-hover: #6d28d9;
+}
+
+/* "SignForce Guest User Access" note — brand-tinted card (was neutral grey). */
+.sf-guest-note {
+    background: #f5f3ff;
+    border: 1px solid #e7e0fb;
+    border-radius: 12px;
+}
+.sf-guest-note .slds-text-heading_small {
+    color: #4f46e5;
+    font-weight: 700;
+}
+
+/* ---------- script generator ---------- */
+.sf-scriptgen {
+    margin-top: 22px;
+    border-top: 1px solid #eef2f7;
+    padding-top: 16px;
+}
+.sf-link {
+    background: none;
+    border: none;
+    color: #4f46e5;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+}
+.sf-link_block {
+    display: inline-flex;
+    margin-top: 16px;
+}
+
+/* setup container */
+.sf-setup {
+    margin-top: 14px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 14px;
+    padding: 18px;
+}
+.sf-setup-intro {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 0.84rem;
+    line-height: 1.4;
+}
+
+/* option tabs */
+.sf-opt-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+.sf-opt-tab {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #64748b;
+}
+.sf-opt-tab_active {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #4f46e5;
+}
+.sf-opt-tab_btn {
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.sf-opt-tab_btn:hover {
+    border-color: #a5b4fc;
+    color: #4f46e5;
+    background: #f5f3ff;
+}
+
+/* step cards */
+.sf-step-card {
+    margin-top: 16px;
+    background: #fff;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    padding: 14px 16px 16px;
+}
+.sf-step-card-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+.sf-num {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+}
+
+/* terminal block */
+.sf-terminal {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+}
+.sf-terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #1e293b;
+    padding: 8px 10px;
+}
+.sf-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.sf-dot_r { background: #ff5f56; }
+.sf-dot_y { background: #ffbd2e; }
+.sf-dot_g { background: #27c93f; }
+.sf-terminal-title {
+    color: #94a3b8;
+    font-size: 0.72rem;
+    margin-left: 6px;
+    flex: 1;
+}
+.sf-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #e2e8f0;
+    font-size: 0.74rem;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 4px 9px;
+    cursor: pointer;
+}
+.sf-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+.sf-script {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 14px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+}
+
+/* flag breakdown table */
+.sf-flag-caption {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #94a3b8;
+    margin: 14px 0 6px;
+}
+.sf-flag-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+.sf-flag-table td {
+    padding: 6px 8px;
+    border-top: 1px solid #f1f5f9;
+    vertical-align: top;
+    color: #475569;
+}
+.sf-flag-table td:first-child {
+    white-space: nowrap;
+    width: 1%;
+}
+.sf-flag-table code,
+.sf-url-hint code,
+.sf-doc code {
+    background: #f1f5f9;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.85em;
+}
+
+/* experience builder list */
+.sf-eb-list {
+    margin: 0;
+    padding-left: 4px;
+    list-style: none;
+    font-size: 0.86rem;
+    color: #475569;
+}
+.sf-eb-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 7px;
+    line-height: 1.45;
+}
+.sf-eb-list li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 7px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #a5b4fc;
+}
+
+.sf-url-hint {
+    display: flex;
+    align-items: center;
+    margin-top: 14px;
+    font-size: 0.84rem;
+    color: #64748b;
+}
+
+/* ---------- manual setup modal ---------- */
+.sf-modal__container {
+    max-width: 660px;
+}
+.sf-modal-head {
+    position: relative;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border-radius: 0;
+    padding: 22px 48px 22px 28px;
+    text-align: left;
+}
+.sf-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.sf-modal-close:hover {
+    background: rgba(255, 255, 255, 0.32);
+}
+/* footer button spacing */
+.slds-modal__footer .sf-btn + .sf-btn {
+    margin-left: 12px;
+}
+.sf-modal-eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0 0 4px;
+}
+.sf-modal-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+}
+.sf-modal-sub {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.85rem;
+    margin: 5px 0 0;
+}
+.sf-modal-body {
+    padding: 22px 28px;
+}
+
+/* doc steps */
+.sf-doc {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.sf-doc-step {
+    display: flex;
+    gap: 14px;
+    padding: 0 0 18px;
+    position: relative;
+}
+.sf-doc-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 30px;
+    bottom: 0;
+    width: 2px;
+    background: #e9e5fb;
+}
+.sf-doc-num {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    z-index: 1;
+}
+.sf-doc-text {
+    flex: 1;
+}
+.sf-doc-title {
+    font-weight: 700;
+    color: #0f172a;
+    margin: 4px 0 6px;
+    font-size: 0.94rem;
+}
+.sf-doc-text ul {
+    margin: 0;
+    padding-left: 16px;
+    color: #475569;
+    font-size: 0.85rem;
+    line-height: 1.55;
+}
+.sf-doc-text li {
+    margin-bottom: 3px;
+}
+.sf-doc-tag {
+    display: inline-block;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #6366f1;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+.sf-doc-tag_warn {
+    background: #fff1e6;
+    color: #c2620c;
+}
+.sf-doc-callout {
+    display: flex;
+    align-items: flex-start;
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.84rem;
+    color: #166534;
+    line-height: 1.45;
+    margin-top: 6px;
+}
+.sf-doc-callout-icon {
+    flex: 0 0 auto;
+    margin-top: 1px;
+}
+/* Keep all copy in ONE flex item so it flows as normal inline text — otherwise
+   each text run / <b> / <code> becomes its own flex item and the words weld
+   together and the URL is pushed onto its own line. */
+.sf-doc-callout-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    word-break: break-word;
+}
+.sf-doc-callout code {
+    background: #d6f5e3;
+    word-break: break-all;
+}
+
+/* ---------- review ---------- */
+.sf-review {
+    margin: 0;
+}
+.sf-review-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 4px;
+    border-bottom: 1px solid #eef2f7;
+}
+.sf-review-row dt {
+    color: #64748b;
+    font-weight: 600;
+}
+.sf-review-row dd {
+    color: #0f172a;
+    margin: 0;
+    text-align: right;
+    word-break: break-all;
+    max-width: 60%;
+}
+
+/* ---------- review: permission set assignment summary ---------- */
+.sf-review-subhead {
+    margin: 22px 0 8px;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #7c3aed;
+}
+.sf-perm-review {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.sf-perm-review-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 4px;
+    border-bottom: 1px solid #eef2f7;
+}
+.sf-perm-review-main {
+    min-width: 0;
+}
+.sf-perm-review-label {
+    display: block;
+    color: #0f172a;
+    font-weight: 600;
+    min-width: 0;
+}
+.sf-perm-review-users {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: #64748b;
+    line-height: 1.4;
+    word-break: break-word;
+}
+/* Status chips.
+ * A dot carries the state alongside the colour, so it still reads when the hues
+ * don't (print, colour blindness) — filled means done, hollow means not yet.
+ * The 999px pill made these look like removable tags rather than status. */
+.sf-perm-pill {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px 3px 8px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.sf-perm-pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+
+.sf-perm-pill_on {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #067a5b;
+}
+
+/* Not assigned yet isn't a failure — it's the normal state of a setup step you
+   haven't reached. It stays quiet and lets the green ones stand out by contrast;
+   the notice box above the list is what actually tells the admin to act. */
+.sf-perm-pill_off {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
+}
+
+.sf-perm-pill_off::before {
+    background: transparent;
+    border: 1.5px solid currentColor;
+    width: 7px;
+    height: 7px;
+    box-sizing: border-box;
+}
+
+.sf-perm-pill_info {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #4338ca;
+}
+
+/* ---------- footer nav ---------- */
+.sf-footer {
+    display: flex;
+    align-items: center;
+    margin-top: 22px;
+}
+.sf-footer-spacer {
+    flex: 1;
+}
+.sf-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.sf-btn_primary {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+}
+.sf-btn_primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.sf-btn_secondary {
+    background: #fff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+/* ── "No cloud connected" notice on the Integrations step (mirrors createAgreement) ── */
+/* Wizard notices.
+ * These read as SignForce, not as alarms. Nothing here is broken — an unfinished
+ * step in a setup wizard is the normal state, and "Using Salesforce storage" is
+ * simply what's true right now. Amber on every incomplete step made the wizard
+ * scold the admin for being mid-setup, so these carry the product's indigo.
+ * Genuine failures (a template that won't parse, a callout that errored) keep
+ * their amber/red elsewhere. */
+.sf-storage-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+}
+
+.sf-storage-warning-icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    color: #6366f1;
+}
+
+.sf-storage-warning-body {
+    min-width: 0;
+}
+
+.sf-storage-warning-title {
+    margin: 0 0 3px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #3730a3;
+}
+
+.sf-storage-warning-text {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: #4338ca;
+}
+
+.sf-storage-warning-text strong {
+    font-weight: 700;
+    color: #312e81;
+}
+
+/* ── Inline required-fields warning raised on Continue ── */
+.sf-step-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 20px 0 0;
+    padding: 12px 14px;
+    background: #fef2f2;
+    border: 1px solid #f6d3d1;
+    border-radius: var(--radius-lg, 16px);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #9f1d1d;
+}
+
+.sf-step-error-icon {
+    flex: 0 0 auto;
+    width: 17px;
+    height: 17px;
+    margin-top: 1px;
+    color: #dc2626;
+}
+
+/* ---------- access-denied (no Customize Application) ---------- */
+.sf-denied {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+}
+.sf-denied-card {
+    max-width: 460px;
+    text-align: center;
+    background: #fff;
+    border: 1px solid #e6e8ef;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+    padding: 36px 32px;
+}
+.sf-denied-icon {
+    width: 44px;
+    height: 44px;
+    color: #7c3aed;
+    margin: 0 auto 14px;
+}
+.sf-denied-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 10px;
+}
+.sf-denied-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #475569;
+    margin: 0 0 10px;
+}
+.sf-denied-text:last-child {
+    margin-bottom: 0;
+}
+.sf-denied-text strong {
+    color: #0f172a;
+    font-weight: 600;
+}
+
+/* ── Step 2 · sender choice cards ─────────────────────────────────────
+   Two cards act as one radio group. The org-wide address picker sits inside
+   the card it belongs to, so it reads as part of that choice rather than a
+   separate setting further down the page. */
+
+.sf-sender-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+/* Tablet range: 6 uppercase labels get tight before they collide — shrink them
+   a touch so they stay on two lines and never overlap a neighbour. */
+@media (min-width: 641px) and (max-width: 900px) {
+    .sf-steps { margin-left: 0; margin-right: 0; }
+    .sf-step { padding: 0 2px; }
+    .sf-step-label { font-size: 0.6rem; letter-spacing: 0.03em; }
+    /* Two sender cards side-by-side overflow (right card gets cut off) on
+       tablet-width screens — stack them so both fit. */
+    .sf-sender-cards { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .sf-sender-cards { grid-template-columns: 1fr; }
+
+    /* Compact stepper. On phones the six step labels
+       ("INTERNAL USERS (PERMISSION)", etc.) overlap their neighbours and become
+       unreadable, so show the numbered/checked circles only. The current step is
+       already named by the card's "STEP 0X" eyebrow + heading and the N/6
+       progress badge, so no context is lost. */
+    .sf-step-label { display: none; }
+    .sf-steps { margin: 0 0 20px; justify-content: space-between; }
+    .sf-steps::before { left: 6%; right: 6%; }
+    .sf-step { padding: 0; flex: 0 0 auto; }
+    .sf-step-circle { width: 32px; height: 32px; }
+    .sf-steps::before { top: 16px; }
+}
+
+/* Very narrow phones: keep the six circles from touching. */
+@media (max-width: 380px) {
+    .sf-step-circle { width: 28px; height: 28px; font-size: 0.8rem; }
+    .sf-steps::before { top: 14px; }
+}
+
+.sf-sender-card {
+    border: 1.5px solid #e5e7f0;
+    border-radius: 11px;
+    padding: 15px 16px 16px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    cursor: pointer;
+    /* Let the grid column shrink below the card's content width so the pair
+       never overflows / gets clipped on narrow screens. */
+    min-width: 0;
+    transition: border-color .12s ease, background-color .12s ease;
+}
+
+.sf-sender-card:hover { border-color: #c7c8fb; }
+
+.sf-sender-card:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+.sf-sender-card-on {
+    border-color: #6366f1;
+    background: #f0f0fe;
+}
+
+.sf-sender-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.sf-sender-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid #8a90a4;
+    background: #fff;
+    flex: none;
+    margin-top: 2px;
+    position: relative;
+}
+
+.sf-sender-card-on .sf-sender-dot { border-color: #6366f1; }
+
+.sf-sender-card-on .sf-sender-dot::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: #6366f1;
+}
+
+.sf-sender-title {
+    font-size: .92rem;
+    font-weight: 640;
+    color: #171b2e;
+    line-height: 1.35;
+}
+
+.sf-sender-note {
+    margin: 0;
+    font-size: .79rem;
+    color: #767d92;
+    line-height: 1.45;
+}
+
+.sf-sender-picker { cursor: default; }
+
+/* Example From address on the send-as-the-user card. */
+.sf-sender-from {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .74rem;
+    background: #f4f5fa;
+    border: 1px solid #e5e7f0;
+    border-radius: 7px;
+    padding: 7px 9px;
+    color: #171b2e;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.sf-sender-card-on .sf-sender-from { border-color: #c7c8fb; }
+.sf-sender-from span { color: #767d92; }
+
+.sf-sender-foot {
+    margin: 16px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid #e5e7f0;
+    font-size: .79rem;
+    color: #767d92;
+    line-height: 1.5;
+}

@@ -1,0 +1,104 @@
+<template>
+    <template if:true={isLoading}>
+        <div class="sf-map-loading">
+            <lightning-spinner alternative-text="Loading signers" size="small"></lightning-spinner>
+        </div>
+    </template>
+
+    <template if:false={isLoading}>
+        <template if:true={hasRows}>
+            <p class="sf-eyebrow">STEP 2 - SIGNERS</p>
+            <h3 class="sf-section-title">Map signer emails</h3>
+            <p class="sf-signer-help">
+                Each signer is created as a recipient when the agreement is generated.
+                Confirm or change their email below.
+            </p>
+
+            <div class="sf-signer-map">
+                <!-- DEFINED template signers -->
+                <template for:each={signerRows} for:item="row">
+                    <div key={row.key} class="sf-signer-row">
+                        <div class="sf-signer-id">
+                            <p class="sf-signer-name">{row.displayName}</p>
+                            <div class="sf-signer-meta">
+                                <span class="sf-signer-role">{row.role}</span>
+                                <template if:true={row.orderLabel}>
+                                    <span class="sf-signer-dot">·</span>
+                                    <span class="sf-signer-order">{row.orderLabel}</span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="sf-signer-email-col">
+                            <template if:true={hasRecordEmails}>
+                                <lightning-combobox
+                                    label="Email"
+                                    variant="label-hidden"
+                                    value={row.email}
+                                    options={recordEmailOptions}
+                                    data-key={row.key}
+                                    onchange={handleEmailChange}
+                                    placeholder="Use a field from this record…"
+                                    class="sf-combobox sf-signer-combobox">
+                                </lightning-combobox>
+                            </template>
+                            <template if:true={row.useManual}>
+                                <lightning-input
+                                    type="email"
+                                    label="Email address"
+                                    variant="label-hidden"
+                                    value={row.email}
+                                    data-key={row.key}
+                                    onchange={handleManualChange}
+                                    placeholder="name@example.com"
+                                    class="sf-signer-manual">
+                                </lightning-input>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- UNASSIGNED fields: the template left these without a signer, so
+                     the user picks WHICH defined signer each belongs to. Several
+                     fields may share one signer. -->
+                <template if:true={hasUnassignedFields}>
+                    <p class="sf-signer-subheading">Unassigned fields</p>
+                    <template for:each={fieldRows} for:item="row">
+                        <div key={row.idx} class="sf-signer-row">
+                            <div class="sf-signer-id">
+                                <p class="sf-signer-name">{row.label}</p>
+                                <span class="sf-signer-tag">Unassigned field</span>
+                            </div>
+                            <div class="sf-signer-email-col">
+                                <template if:true={hasSignerPickerOptions}>
+                                    <lightning-combobox
+                                        label="Assign to signer"
+                                        variant="label-hidden"
+                                        value={row.email}
+                                        options={signerPickerOptions}
+                                        data-idx={row.idx}
+                                        onchange={handleEmailChange}
+                                        placeholder="Assign to a signer…"
+                                        class="sf-combobox sf-signer-combobox">
+                                    </lightning-combobox>
+                                </template>
+                                <!-- No signer has an email yet, so enter one directly. -->
+                                <template if:false={hasSignerPickerOptions}>
+                                    <lightning-input
+                                        type="email"
+                                        label="Email address"
+                                        variant="label-hidden"
+                                        value={row.email}
+                                        data-idx={row.idx}
+                                        onchange={handleManualChange}
+                                        placeholder="name@example.com"
+                                        class="sf-signer-manual">
+                                    </lightning-input>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </div>
+        </template>
+    </template>
+</template>

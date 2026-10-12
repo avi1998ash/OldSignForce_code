@@ -1,0 +1,190 @@
+:host {
+    /* Color Palette Design Tokens */
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;  /* Primary brand accent */
+    --brand-700: #6d28d9;
+    --brand-900: #4c1d95;
+
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-200: #a7f3d0;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+    
+    display: block;
+}
+
+.vis-root {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.vis-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.vis-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 4px;
+}
+
+.vis-desc {
+    font-size: 12px;
+    color: var(--slate-500);
+    margin: 0;
+}
+
+.vis-loading {
+    padding: 40px;
+    text-align: center;
+}
+
+.vis-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--slate-400);
+    font-size: 13px;
+}
+
+.vis-table-wrap {
+    overflow-x: auto;
+    padding: 12px;
+}
+
+.vis-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.vis-th {
+    padding: 10px 12px;
+    text-align: center;
+    border-bottom: 1px solid var(--slate-200);
+    font-weight: 600;
+    color: var(--slate-800);
+}
+
+.vis-th-doc {
+    text-align: left;
+    min-width: 160px;
+}
+
+.vis-th-signer {
+    min-width: 100px;
+}
+
+.vis-signer-name {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-900);
+}
+
+.vis-signer-email {
+    display: block;
+    font-size: 10px;
+    color: var(--slate-400);
+    font-weight: 400;
+}
+
+.vis-td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.vis-td-doc {
+    font-weight: 500;
+}
+
+.vis-td-toggle {
+    text-align: center;
+}
+
+.vis-doc-name {
+    font-size: 12px;
+    color: var(--slate-800);
+}
+
+.vis-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vis-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.vis-toggle-on {
+    background: var(--emerald-50);
+    color: var(--emerald-600);
+    border-color: var(--emerald-200);
+}
+
+.vis-toggle-on:hover {
+    background: var(--emerald-500);
+    color: white;
+    border-color: var(--emerald-500);
+}
+
+.vis-toggle-off {
+    background: var(--red-50);
+    color: var(--red-600);
+    border-color: var(--red-200);
+}
+
+.vis-toggle-off:hover {
+    background: var(--red-500);
+    color: white;
+    border-color: var(--red-500);
+}

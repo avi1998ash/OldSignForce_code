@@ -1,0 +1,686 @@
+/* ════════════════════════════════════════════════════════════════
+   SignForce — Uploaded Documents Redesigned SaaS Style Component
+   Features: Shared Brand violet/slate theme, glassmorphism, glows
+   ════════════════════════════════════════════════════════════════ */
+
+:host {
+    /* Color Palette Design Tokens */
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;
+    --brand-700: #6d28d9;
+    --brand-900: #4c1d95;
+
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-200: #a7f3d0;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+
+    /* Purple accent for stamped files */
+    --purple-50: #faf5ff;
+    --purple-100: #f3e8ff;
+    --purple-200: #e9d5ff;
+    --purple-600: #9333ea;
+    --purple-700: #7e22ce;
+
+    /* Border Radius Design Tokens */
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+
+    /* Elevation Design Tokens */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    /* Glassmorphic values */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-blur: blur(12px) saturate(180%);
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Salesforce lightning-card style hook overrides */
+    --slds-c-card-color-background: var(--glass-bg);
+    --slds-c-card-color-border: var(--glass-border);
+    --slds-c-card-radius-border: var(--radius-xl);
+    --slds-c-card-shadow: var(--shadow-lg);
+    --slds-c-card-header-spacing: 20px 24px 12px 24px;
+    --slds-c-card-body-spacing: 0;
+}
+
+/* Base Card Content Padding */
+.sf-shell-content {
+    padding: 0 24px 24px 24px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* Header standard card overrides */
+:host :value(lightning-card) {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* Document count slot badge */
+.doc-count-badge {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 11px;
+    border-radius: var(--radius-full);
+    margin-right: 8px;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.loading-row {
+    text-align: center;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.docs-header {
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.docs-title {
+    font-size: 11px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.docs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ── DOCUMENT CARD ── */
+.doc-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: var(--radius-lg);
+    transition: all 0.25s var(--ease-out);
+    box-shadow: var(--shadow-xs);
+}
+
+.doc-card:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.08), 0 4px 8px rgba(168, 85, 247, 0.04);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* Gradient Thumbnails */
+.doc-icon-pdf,
+.doc-icon-word,
+.doc-icon-signed,
+.doc-icon-stamped {
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.doc-icon-pdf {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+}
+
+.doc-icon-word {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.doc-icon-signed {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+
+.doc-icon-stamped {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+}
+
+.doc-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.doc-name {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 750;
+    color: var(--slate-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.doc-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* File category pills */
+.type-badge-original,
+.type-badge-signed,
+.type-badge-stamped {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid transparent;
+}
+
+.type-badge-original {
+    background: rgba(99, 102, 241, 0.08);
+    color: #4f46e5;
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+.type-badge-signed {
+    background: rgba(16, 185, 129, 0.08);
+    color: #047857;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.type-badge-stamped {
+    background: rgba(168, 85, 247, 0.08);
+    color: #7e22ce;
+    border-color: rgba(168, 85, 247, 0.2);
+}
+
+/* ── ACTION BUTTONS ── */
+.doc-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    padding: 0;
+    box-shadow: var(--shadow-xs);
+}
+
+.action-btn:active {
+    transform: scale(0.95);
+}
+
+.action-btn:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+}
+
+/* Row actions.
+ * Preview was tinted green, download was a solid navy block and delete was red —
+ * three unrelated colours on three peers, with the download (the least
+ * consequential of them) shouting loudest because it was the only filled one.
+ * None of it meant anything: previewing isn't a success state. They're one quiet
+ * set now, and the neon `0 0 15px` glow on hover is gone with them.
+ */
+.action-preview,
+.action-download,
+.action-delete {
+    background: transparent;
+    color: var(--slate-400);
+    border: 1px solid transparent;
+}
+
+.action-preview:hover,
+.action-download:hover {
+    background: var(--brand-50, #eef2ff);
+    border-color: var(--brand-200, #c7d2fe);
+    color: var(--brand-600, #4f46e5);
+}
+
+/* Delete keeps its colour — it's the only one of the three you can't take back. */
+.action-delete:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #dc2626;
+}
+
+/* lightning-icon paints itself; keep it following the button's colour. */
+.action-preview lightning-icon,
+.action-download lightning-icon,
+.action-delete lightning-icon {
+    --sds-c-icon-color-foreground-default: currentColor;
+    --slds-c-icon-color-foreground-default: currentColor;
+}
+
+.action-delete:hover lightning-icon {
+    --sds-c-icon-color-foreground-default: #ffffff !important;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+    /* "Go to Create Agreement" — brand purple instead of default SLDS blue */
+    --slds-c-button-brand-color-background: #7c3aed;
+    --slds-c-button-brand-color-border: #7c3aed;
+    --slds-c-button-brand-color-background-hover: #6d28d9;
+    --slds-c-button-brand-color-border-hover: #6d28d9;
+    --slds-c-button-brand-color-background-active: #6d28d9;
+    --slds-c-button-brand-color-border-active: #6d28d9;
+    text-align: center;
+    padding: 40px 24px;
+    background: rgba(248, 250, 252, 0.6);
+    border-radius: var(--radius-lg);
+    border: 1px dashed rgba(203, 213, 225, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.empty-state-icon-wrap {
+    width: 52px;
+    height: 52px;
+    background: rgba(226, 232, 240, 0.5);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    color: var(--slate-400);
+}
+
+/* Brand-tinted variant for the "go create an agreement" empty state — the grey
+   disc + grey glyph read as disabled; the purple tint says "start here". */
+.empty-state-icon-brand {
+    width: 56px;
+    height: 56px;
+    background: rgba(124, 58, 237, 0.10);
+    --slds-c-icon-color-foreground-default: #7c3aed;
+    color: #7c3aed;
+    margin-bottom: 12px;
+}
+
+.empty-sub {
+    margin: 6px 0 16px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--slate-400);
+    max-width: 30ch;
+}
+
+.empty-cta {
+    /* icon spacing inside the brand button */
+    --slds-c-button-brand-spacing-inline-start: 18px;
+    --slds-c-button-brand-spacing-inline-end: 18px;
+}
+
+.empty-icon {
+    --sds-c-icon-color-foreground-default: var(--slate-400);
+}
+
+.empty-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-600);
+}
+
+/* Spinner */
+.sf-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--slate-200);
+    border-top-color: var(--brand-600);
+    border-radius: var(--radius-full);
+    animation: sf-spin 0.6s linear infinite;
+}
+
+.sf-spinner-md {
+    width: 32px;
+    height: 32px;
+}
+
+@keyframes sf-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone {
+    margin-top: 18px;
+    padding: 20px;
+    border: 1.5px dashed rgba(99, 102, 241, 0.4);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    transition: all 0.25s var(--ease-out);
+    width: 100%;
+    max-width: 340px;
+    box-shadow: var(--shadow-sm);
+}
+
+.upload-zone:hover {
+    border-color: #818cf8;
+    background: rgba(99, 102, 241, 0.05);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+}
+
+.upload-zone-compact {
+    margin-top: 14px;
+    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: var(--radius-md);
+}
+
+.upload-zone-compact:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    background: rgba(99, 102, 241, 0.02);
+}
+
+.upload-hint {
+    margin: 8px 0 0;
+    font-size: 11px;
+    color: var(--slate-400);
+}
+
+/* The compact zone is only 8px tall in padding, so the hint sits tighter
+   under the uploader there than it does in the empty state. */
+.upload-zone-compact .upload-hint {
+    margin-top: 4px;
+}
+
+/* ── PREVIEW MODAL (Glassmorphic) ── */
+.sf-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    padding: 20px;
+    animation: sf-fade-in 0.2s var(--ease-out);
+}
+
+.sf-modal-overlay {
+    display: none !important;
+}
+
+@keyframes sf-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.sf-modal-preview {
+    max-width: 980px;
+    width: 94vw;
+    height: 86vh;
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: sf-fade-up 0.3s var(--ease-spring);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+@keyframes sf-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sf-modal-header-preview {
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    align-items: center;
+    flex-shrink: 0;
+    display: flex;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.sf-modal-icon-info {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.sf-modal-title-block {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.sf-modal-eyebrow {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 1.5px;
+    color: #6366f1;
+    text-transform: uppercase;
+}
+
+.sf-modal-title-truncate {
+    margin: 2px 0 0 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--slate-900);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    display: block;
+}
+
+.sf-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--slate-200) !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    color: var(--slate-600) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease-in-out;
+    padding: 0 !important;
+    position: static !important;
+    box-shadow: none !important;
+}
+
+.sf-modal-close:hover {
+    background: rgba(248, 250, 252, 0.9) !important;
+    color: var(--slate-900) !important;
+    border-color: var(--slate-300) !important;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05) !important;
+}
+
+.sf-modal-close:active {
+    transform: scale(0.95);
+}
+
+.sf-modal-body-preview {
+    flex: 1;
+    padding: 0;
+    background: var(--slate-800) !important;
+    overflow: hidden;
+    position: relative;
+    height: auto !important;
+}
+
+.sf-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #ffffff;
+}
+
+.sf-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    background: rgba(248, 250, 252, 0.5);
+}
+
+/* Footer Modal Buttons */
+.footer-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    font-family: inherit;
+}
+
+.footer-btn:active {
+    transform: scale(0.97);
+}
+
+.footer-btn:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+}
+
+.footer-btn-ghost {
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--slate-700);
+    border: 1px solid var(--slate-200);
+    box-shadow: var(--shadow-xs);
+}
+
+.footer-btn-ghost:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(255, 255, 255, 0.95);
+    color: #6366f1;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.1);
+}
+
+.footer-btn-ghost lightning-icon {
+    --sds-c-icon-color-foreground-default: var(--slate-600);
+}
+
+.footer-btn-primary {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
+}
+
+.footer-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4), 0 0 30px rgba(168, 85, 247, 0.2);
+}
+
+.footer-btn-primary lightning-icon {
+    --sds-c-icon-color-foreground-default: #ffffff;
+}
+
+/* Mobile responsive override */
+@media (max-width: 600px) {
+    .sf-modal-preview {
+        width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .doc-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .doc-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .upload-zone {
+        max-width: 100%;
+    }
+}

@@ -1,0 +1,194 @@
+<template>
+    <c-signforce-access-gate>
+        <div class="dash-root">
+
+            <!-- Header -->
+            <div class="dash-header">
+                <div>
+                    <p class="dash-eyebrow">ESIGNFORCE</p>
+                    <h1 class="dash-title">Agreement Dashboard</h1>
+                </div>
+                <div class="dash-header-right">
+                    <button class="dash-btn-refresh" onclick={handleRefresh} title="Refresh">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <template if:true={isLoading}>
+                <div class="dash-loading">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+
+                <!-- Metric Cards -->
+                <div class="dash-metrics">
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon-total">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        </div>
+                        <div class="metric-data">
+                            <p class="metric-value">{totalAgreements}</p>
+                            <p class="metric-label">Total</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon-sent">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </div>
+                        <div class="metric-data">
+                            <p class="metric-value">{sentCount}</p>
+                            <p class="metric-label">In Progress</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon-completed">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        </div>
+                        <div class="metric-data">
+                            <p class="metric-value">{completedCount}</p>
+                            <p class="metric-label">Completed</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon-rate">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+                        </div>
+                        <div class="metric-data">
+                            <p class="metric-value">{completionRate}%</p>
+                            <p class="metric-label">Completion Rate</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon-time">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <div class="metric-data">
+                            <p class="metric-value">{avgCompletionDisplay}</p>
+                            <p class="metric-label">Avg. Time</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon-pending">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                        <div class="metric-data">
+                            <p class="metric-value">{pendingSigners}</p>
+                            <p class="metric-label">Pending Signers</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="dash-charts">
+
+                    <!-- Status Breakdown -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Status breakdown</h3>
+                        <div class="status-bars">
+                            <template for:each={statusBars} for:item="bar">
+                                <div key={bar.label} class="status-bar-row">
+                                    <div class="status-bar-label">
+                                        <span class="status-dot" style={bar.dotStyle}></span>
+                                        <span>{bar.label}</span>
+                                    </div>
+                                    <div class="status-bar-track">
+                                        <div class="status-bar-fill" style={bar.barStyle}></div>
+                                    </div>
+                                    <span class="status-bar-count">{bar.count}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Trend -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Monthly trend</h3>
+                        <div class="trend-chart">
+                            <template for:each={monthlyTrend} for:item="month">
+                                <div key={month.label} class="trend-col">
+                                    <div class="trend-bars">
+                                        <div class="trend-bar-wrap">
+                                            <template if:true={month.showSent}><span class="trend-val">{month.sent}</span></template>
+                                            <div class="trend-bar trend-bar-sent" style={month.sentBarStyle} title={month.sentLabel}></div>
+                                        </div>
+                                        <div class="trend-bar-wrap">
+                                            <template if:true={month.showCompleted}><span class="trend-val">{month.completed}</span></template>
+                                            <div class="trend-bar trend-bar-completed" style={month.completedBarStyle} title={month.completedLabel}></div>
+                                        </div>
+                                    </div>
+                                    <span class="trend-label">{month.label}</span>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="trend-legend">
+                            <span class="legend-item"><span class="legend-dot legend-dot-sent"></span> Sent</span>
+                            <span class="legend-item"><span class="legend-dot legend-dot-completed"></span> Completed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agreements list with status tabs -->
+                <div class="chart-card">
+                    <div class="agr-list-header">
+                        <h3 class="chart-title" style="margin:0;">Agreements</h3>
+                    </div>
+
+                    <!-- Status tabs -->
+                    <div class="agr-tabs" role="tablist">
+                        <template for:each={tabs} for:item="tab">
+                            <button key={tab.key}
+                                    class={tab.cssClass}
+                                    data-key={tab.key}
+                                    onclick={handleTabClick}
+                                    role="tab"
+                                    aria-selected={tab.isActive}>
+                                <span class="agr-tab-label">{tab.label}</span>
+                                <span class="agr-tab-count">{tab.count}</span>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Empty state -->
+                    <template if:true={isFilteredEmpty}>
+                        <div class="agr-empty">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            <p class="agr-empty-title">No {activeTabLabel} agreements</p>
+                            <p class="agr-empty-sub">Agreements with this status will appear here.</p>
+                        </div>
+                    </template>
+
+                    <!-- Agreement rows -->
+                    <template if:false={isFilteredEmpty}>
+                        <div class="recent-list">
+                            <template for:each={pagedAgreements} for:item="agr">
+                                <div key={agr.id} class="recent-row" onclick={handleNavigate} data-id={agr.id}>
+                                    <div class="recent-info">
+                                        <p class="recent-name">{agr.name}</p>
+                                        <p class="recent-date">{agr.createdDate}</p>
+                                    </div>
+                                    <span class={agr.statusClass}>{agr.canonicalStatus}</span>
+                                </div>
+                            </template>
+                        </div>
+                        <template if:true={showPagination}>
+                            <div class="agr-pagination">
+                                <button class="page-btn" onclick={handlePrevPage} disabled={isFirstPage}>&#8249; Prev</button>
+                                <span class="page-info">{pageInfo}</span>
+                                <button class="page-btn" onclick={handleNextPage} disabled={isLastPage}>Next &#8250;</button>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+
+            </template>
+        </div>
+
+        <c-signforce-chatbot-fab></c-signforce-chatbot-fab>
+    </c-signforce-access-gate>
+</template>

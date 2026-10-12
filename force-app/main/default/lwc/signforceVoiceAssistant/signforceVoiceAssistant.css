@@ -1,0 +1,634 @@
+/* SignForce Voice Assistant — Agentforce-Inspired Premium UI */
+
+:host {
+    --sf-brand: #7c3aed;
+    --sf-brand-dark: #5b21b6;
+    --sf-brand-light: #ede9fe;
+    --sf-brand-gradient: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    --sf-text: #1f2937;
+    --sf-text-light: #4b5563;
+    --sf-muted: #6b7280;
+    --sf-border: #e5e7eb;
+    --sf-border-light: #f3f4f6;
+    --sf-bg: #ffffff;
+    --sf-bg-alt: #fafafa;
+    --sf-bg-chat: #f8f9fb;
+    --sf-danger: #dc2626;
+    --sf-success: #10b981;
+
+    display: block;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Salesforce Sans', Roboto, sans-serif;
+}
+
+.sf-voice-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 540px;
+    background: var(--sf-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(124, 58, 237, 0.06);
+}
+
+/* ─── HEADER ─── */
+.sf-voice-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--sf-brand-gradient);
+    color: #fff;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.sf-voice-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.sf-voice-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.sf-voice-brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.sf-voice-brand-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.sf-voice-eyebrow {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    opacity: .85;
+}
+
+.sf-voice-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.sf-voice-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 11px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    position: relative;
+    z-index: 1;
+}
+
+.sf-voice-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.sf-voice-dot.listening {
+    background: #fbbf24;
+    animation: pulse 1s infinite;
+}
+
+.sf-voice-dot.thinking {
+    background: #60a5fa;
+    animation: pulse 1s infinite;
+}
+
+.sf-voice-dot.speaking {
+    background: #34d399;
+    animation: pulse 1s infinite;
+}
+
+.sf-voice-dot.idle {
+    background: #34d399;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: .55;
+        transform: scale(.8);
+    }
+}
+
+/* ─── MESSAGES AREA ─── */
+.sf-voice-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 18px;
+    background: var(--sf-bg-chat);
+    scroll-behavior: smooth;
+}
+
+.sf-voice-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sf-voice-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sf-voice-messages::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.sf-voice-messages::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* ─── EMPTY STATE ─── */
+.sf-voice-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 24px 16px;
+}
+
+.sf-voice-empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: var(--sf-brand-gradient);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.25);
+}
+
+.sf-voice-empty-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+.sf-voice-empty-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--sf-text);
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+}
+
+.sf-voice-empty-hint {
+    font-size: 13px;
+    color: var(--sf-muted);
+    margin: 0 0 18px;
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+.sf-voice-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 420px;
+}
+
+.sf-voice-chip {
+    background: #fff;
+    border: 1px solid var(--sf-border);
+    border-radius: 18px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    color: var(--sf-text-light);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+    line-height: 1.3;
+}
+
+.sf-voice-chip:hover {
+    background: var(--sf-brand-light);
+    border-color: var(--sf-brand);
+    color: var(--sf-brand-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.12);
+}
+
+/* ─── MESSAGE ROWS ─── */
+.sf-msg-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+    animation: messageIn 0.25s ease-out;
+}
+
+@keyframes messageIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sf-msg-row.user {
+    justify-content: flex-end;
+}
+
+.sf-msg-row.ai,
+.sf-msg-row.system {
+    justify-content: flex-start;
+}
+
+/* ─── AI AVATAR ─── */
+.sf-msg-avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 10px;
+    background: var(--sf-brand-gradient);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+    margin-top: 2px;
+}
+
+.sf-msg-avatar svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ─── MESSAGE BUBBLES ─── */
+.sf-msg-bubble {
+    max-width: 78%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    word-wrap: break-word;
+    position: relative;
+}
+
+.sf-msg-row.user .sf-msg-bubble {
+    background: var(--sf-brand-gradient);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 12px rgba(124, 58, 237, 0.2);
+}
+
+.sf-msg-row.ai .sf-msg-bubble {
+    background: #fff;
+    color: var(--sf-text);
+    border: 1px solid var(--sf-border-light);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.sf-msg-row.system .sf-msg-bubble {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* ─── RICH MESSAGE RENDERING (AI) ─── */
+.sf-msg-rich {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--sf-text);
+}
+
+.sf-msg-para {
+    margin: 0 0 8px;
+}
+
+.sf-msg-para:last-child {
+    margin-bottom: 0;
+}
+
+.sf-msg-rich strong {
+    font-weight: 600;
+    color: var(--sf-text);
+}
+
+.sf-msg-bullet {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 4px 0;
+    padding-left: 2px;
+}
+
+.sf-bullet-dot {
+    color: var(--sf-brand);
+    font-weight: 700;
+    line-height: 1.55;
+    flex-shrink: 0;
+}
+
+.sf-bullet-text {
+    flex: 1;
+}
+
+/* ─── PLAIN TEXT (user/system) ─── */
+.sf-msg-text {
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.sf-msg-time {
+    font-size: 10.5px;
+    margin: 6px 0 0;
+    opacity: .65;
+    font-weight: 500;
+}
+
+.sf-msg-row.user .sf-msg-time {
+    text-align: right;
+    opacity: .85;
+}
+
+/* ─── THINKING DOTS ─── */
+.sf-msg-thinking {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 18px;
+}
+
+.sf-thinking-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--sf-brand);
+    opacity: 0.6;
+    animation: thinkingBounce 1.3s infinite ease-in-out;
+}
+
+.sf-thinking-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.sf-thinking-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes thinkingBounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0.7);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ─── FOOTER ─── */
+.sf-voice-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--sf-border-light);
+    background: var(--sf-bg);
+    flex-shrink: 0;
+}
+
+.sf-voice-mic {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--sf-brand-gradient);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s ease;
+    padding: 0;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, .4);
+}
+
+.sf-voice-mic:hover:not(:disabled) {
+    transform: scale(1.06) translateY(-1px);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, .55);
+}
+
+.sf-voice-mic:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.sf-voice-mic.listening {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, .6);
+    animation: micPulse 1.5s infinite;
+}
+
+@keyframes micPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, .55);
+    }
+
+    70% {
+        box-shadow: 0 0 0 18px rgba(220, 38, 38, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    }
+}
+
+.sf-voice-mic:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.sf-mic-icon {
+    width: 26px;
+    height: 26px;
+}
+
+.sf-voice-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1.5px solid var(--sf-border);
+    border-radius: 24px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    background: var(--sf-bg-alt);
+    color: var(--sf-text);
+    transition: all .2s ease;
+}
+
+.sf-voice-input::placeholder {
+    color: #9ca3af;
+}
+
+.sf-voice-input:focus {
+    border-color: var(--sf-brand);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.sf-voice-input:disabled {
+    opacity: .55;
+}
+
+.sf-voice-send {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--sf-brand-gradient);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+}
+
+.sf-voice-send:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+
+.sf-voice-send:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.sf-send-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* ─── OPTIONS BAR ─── */
+.sf-voice-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 18px 14px;
+    background: var(--sf-bg);
+}
+
+.sf-language {
+    padding: 5px 10px;
+    border: 1px solid var(--sf-border);
+    border-radius: 8px;
+    font-size: 12px;
+    background: var(--sf-bg);
+    color: var(--sf-text-light);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s ease;
+}
+
+.sf-language:hover {
+    border-color: var(--sf-brand);
+}
+
+.sf-voice-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--sf-muted);
+    cursor: pointer;
+    user-select: none;
+}
+
+.sf-voice-toggle input {
+    accent-color: var(--sf-brand);
+    cursor: pointer;
+}
+
+/* ─── MOBILE ─── */
+@media (max-width: 480px) {
+    .sf-voice-mic {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+    }
+
+    .sf-msg-bubble {
+        max-width: 82%;
+    }
+
+    .sf-voice-options {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .sf-voice-empty-title {
+        font-size: 15px;
+    }
+
+    .sf-voice-empty-hint {
+        font-size: 12.5px;
+    }
+}

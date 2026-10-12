@@ -1,0 +1,440 @@
+<!--
+  @description       : SignForce Generated Documents history list LWC template
+  @author            : Antigravity Redesign
+  @last modified on  : 05-21-2026
+-->
+<template>
+    <c-signforce-access-gate>
+      <!-- Positioned so the loader can cover this card. Re-generating runs the
+           same merge and the same callout as the Generate Document button, so it
+           gets the same wait. -->
+      <div class="sf-genwrap">
+
+        <c-signforce-generate-loader
+            visible={isRegenerating}
+            title="Re-building your document"
+            message="Reading the record again and filling in the template. This takes a few seconds.">
+        </c-signforce-generate-loader>
+
+        <c-signforce-generate-loader
+            visible={isCreatingAgreement}
+            title="Creating your agreement"
+            message="Copying the generated document and setting up signers. This takes a few seconds.">
+        </c-signforce-generate-loader>
+
+        <div class="sf-shell">
+            <!-- ── HEADER ──────────────────────────────────────────────── -->
+            <div class="sf-header">
+                <div class="sf-brand">
+                    <div class="sf-brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="9" y1="13" x2="15" y2="13"></line>
+                            <line x1="9" y1="17" x2="15" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div class="sf-brand-text">
+                        <p class="sf-brand-eyebrow">eSignforce</p>
+                        <h2 class="sf-brand-title">Generated Documents</h2>
+                    </div>
+                </div>
+
+                <div class="sf-header-actions">
+                    <!-- Upgraded Toggle Switch -->
+                    <label class="sf-toggle-wrap">
+                        <span class="sf-toggle-label">Show failed</span>
+                        <div class="sf-switch">
+                            <input type="checkbox" checked={includeFailed} onchange={handleToggleFailed} />
+                            <span class="sf-slider"></span>
+                        </div>
+                    </label>
+
+                    <button class="sf-icon-btn-header" onclick={handleRefresh} title="Refresh">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── LOADING ────────────────────────────────────────────── -->
+            <template if:true={isLoading}>
+                <div class="sf-state">
+                    <div class="sf-spinner"></div>
+                    <p class="sf-state-text">Loading history…</p>
+                </div>
+            </template>
+
+            <!-- ── EMPTY ──────────────────────────────────────────────── -->
+            <template if:true={showEmpty}>
+                <div class="sf-state sf-state-empty">
+                    <div class="sf-state-icon-wrap">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="sf-state-icon">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="sf-state-title">No documents generated yet</h3>
+                    <p class="sf-state-body">
+                        Use the <strong>Generate Document</strong> action to create one from this record.
+                    </p>
+                </div>
+            </template>
+
+            <!-- ── ROWS ───────────────────────────────────────────────── -->
+            <template if:true={showRows}>
+                <div class="sf-rows">
+                    <template for:each={rows} for:item="row">
+                        <div key={row.logId} class={row.cardClass}>
+                            <div class="sf-row-top">
+                                <div class="sf-row-icon-wrap">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-row-icon">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="sf-row-text">
+                                    <p class="sf-row-filename">{row.filename}</p>
+                                    <p class="sf-row-meta">
+                                        From <strong>{row.templateName}</strong>
+                                        <span class="sf-row-sep">·</span>
+                                        {row.relativeDate}
+                                        <span class="sf-row-sep">·</span>
+                                        {row.createdBy}
+                                    </p>
+                                    <template if:true={row.agreementName}>
+                                        <p class="sf-row-tag">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="sf-row-tag-icon">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                            Linked to agreement: {row.agreementName}
+                                        </p>
+                                    </template>
+                                </div>
+                                <span class={row.statusBadgeClass}>{row.status}</span>
+                            </div>
+
+                            <template if:true={row.hasError}>
+                                <div class="sf-row-error">
+                                    <p class="sf-row-error-title">{row.errorTitle}</p>
+                                    <p class="sf-row-error-text">{row.errorMessage}</p>
+                                    <template if:true={row.errorDetail}>
+                                        <details class="sf-row-error-details">
+                                            <summary>Show technical details</summary>
+                                            <pre>{row.errorDetail}</pre>
+                                        </details>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <div class="sf-row-actions">
+                                <!-- 1a. Open Agreement: linked rows -->
+                                <template if:true={row.canOpenAgreement}>
+                                    <button class="sf-row-btn sf-row-btn-primary" data-id={row.logId} data-action="openAgreement" onclick={handleRowAction}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                            class="sf-row-btn-icon">
+                                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                            <polyline points="15 3 21 3 21 9"></polyline>
+                                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                                        </svg>
+                                        <span>Open Agreement</span>
+                                    </button>
+                                </template>
+
+                                <!-- 1b. Generate Agreement: unlinked rows -->
+                                <template if:true={row.canGenerateAgreement}>
+                                    <button class="sf-row-btn sf-row-btn-primary" data-id={row.logId} data-action="generateAgreement" onclick={handleRowAction} disabled={isProcessing}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                            class="sf-row-btn-icon">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                                        </svg>
+                                        <span>Generate Agreement</span>
+                                    </button>
+                                </template>
+
+                                <!-- 2. Open File -->
+                                <template if:true={row.canOpenFile}>
+                                    <button class="sf-row-btn sf-row-btn-ghost" data-id={row.logId} data-action="openFile" onclick={handleRowAction}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            class="sf-row-btn-icon">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <span>Open File</span>
+                                    </button>
+                                </template>
+
+                                <!-- 3. Send Email -->
+                                <template if:true={row.canEmail}>
+                                    <button class="sf-row-btn sf-row-btn-ghost" data-id={row.logId} data-action="email" onclick={handleRowAction}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            class="sf-row-btn-icon">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                            <polyline points="22,6 12,13 2,6"></polyline>
+                                        </svg>
+                                        <span>Send Email</span>
+                                    </button>
+                                </template>
+
+                                <!-- 4. Re-generate -->
+                                <button class="sf-row-btn sf-row-btn-ghost" data-id={row.logId} data-action="regenerate" onclick={handleRowAction} disabled={isProcessing}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-row-btn-icon">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <polyline points="1 20 1 14 7 14"></polyline>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    <span>Re-generate</span>
+                                </button>
+
+                                <!-- 5. Delete -->
+                                <button class="sf-row-btn sf-row-btn-danger" data-id={row.logId} data-action="delete" onclick={handleRowAction} disabled={isProcessing}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-row-btn-icon">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                    <span>Delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- ── COUNT + PAGINATION ─────────────────────────────────────
+                 The count shows whenever there is history at all. The
+                 Previous/Next controls only appear once there is a second
+                 page — permanently disabled buttons are just noise. -->
+            <template if:true={showFooter}>
+                <div class="sf-pager">
+                    <span class="sf-pager-range">{rangeLabel}</span>
+
+                    <div class="sf-pager-nav" if:true={showPagination}>
+                        <button class="sf-pager-btn" onclick={handlePrevPage}
+                                disabled={isFirstPage} title="Previous page">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                            <span>Previous</span>
+                        </button>
+
+                        <span class="sf-pager-page">{pageLabel}</span>
+
+                        <button class="sf-pager-btn" onclick={handleNextPage}
+                                disabled={isLastPage} title="Next page">
+                            <span>Next</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ── SIGNER MAPPING ─────────────────────────────────────────
+                 Shown before an agreement is created, but only when the
+                 template actually has signers or unassigned fields to resolve —
+                 the mapper reports that through its `ready` event and we create
+                 the agreement straight away when there is nothing to ask. -->
+            <template if:true={showSignerMapModal}>
+                <section class="sf-modal-backdrop" onclick={cancelSignerMap}>
+                    <div class="sf-modal-dialog sf-modal-wide" onclick={stopPropagation}>
+                        <header class="sf-modal-header">
+                            <h3 class="sf-modal-title">Create agreement</h3>
+                        </header>
+                        <div class="sf-modal-body">
+                            <c-template-signer-mapper
+                                template-id={signerMapTemplateId}
+                                record-id={recordId}
+                                onready={handleMapperReady}>
+                            </c-template-signer-mapper>
+                        </div>
+                        <footer class="sf-modal-footer">
+                            <button class="sf-btn sf-btn-ghost" onclick={cancelSignerMap} disabled={isProcessing}>Cancel</button>
+                            <button class="sf-btn sf-btn-primary" onclick={confirmSignerMap} disabled={isProcessing}>
+                                <template if:true={isProcessing}>
+                                    <div class="sf-spinner sf-spinner-xs"></div>
+                                    <span>Creating…</span>
+                                </template>
+                                <template if:false={isProcessing}>
+                                    <span>Create agreement</span>
+                                </template>
+                            </button>
+                        </footer>
+                    </div>
+                </section>
+            </template>
+
+            <!-- ── DELETE CONFIRMATION ────────────────────────────────── -->
+            <template if:true={deleteConfirmId}>
+                <section class="sf-modal-backdrop" onclick={cancelDelete}>
+                    <div class="sf-modal-dialog" onclick={stopPropagation}>
+                        <header class="sf-modal-header">
+                            <div class="sf-modal-icon-warn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                            </div>
+                            <h3 class="sf-modal-title">Delete this entry?</h3>
+                        </header>
+                        <div class="sf-modal-body">
+                            <template if:true={deleteHasAgreement}>
+                                <p>
+                                    This deletes the document <strong>and its agreement
+                                    “{deleteConfirmAgreementName}”</strong> - including all of
+                                    that agreement's signers, fields, documents and history.
+                                </p>
+                                <p class="sf-modal-hint">
+                                    This can't be undone from here. Deleted records go to the
+                                    Recycle Bin.
+                                </p>
+                            </template>
+                            <template if:false={deleteHasAgreement}>
+                                <p>
+                                    This will remove the document and its file from Salesforce Files.
+                                </p>
+                            </template>
+                        </div>
+                        <footer class="sf-modal-footer">
+                            <button class="sf-btn sf-btn-ghost" onclick={cancelDelete}>Cancel</button>
+                            <button class="sf-btn sf-btn-danger" onclick={confirmDelete} disabled={isProcessing}>
+                                <template if:true={isProcessing}>
+                                    <div class="sf-spinner sf-spinner-xs"></div>
+                                    <span>Deleting…</span>
+                                </template>
+                                <template if:false={isProcessing}>
+                                    <span>Delete</span>
+                                </template>
+                            </button>
+                        </footer>
+                    </div>
+                </section>
+            </template>
+
+            <!-- ── SEND EMAIL MODAL ───────────────────────────────────── -->
+            <template if:true={emailModalRow}>
+                <!-- BUG-031: backdrop no longer closes this modal - it has To/Subject/
+                     Message inputs and an accidental outside-click was wiping them.
+                     Closes only via the Cancel button. -->
+                <section class="sf-modal-backdrop">
+                    <div class="sf-modal-dialog sf-modal-wide" onclick={stopPropagation}>
+                        <header class="sf-modal-header">
+                            <div class="sf-modal-icon-info">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="sf-modal-title-block">
+                                <p class="sf-modal-eyebrow">SEND DOCUMENT</p>
+                                <h3 class="sf-modal-title">Email this document</h3>
+                            </div>
+                        </header>
+                        <div class="sf-modal-body">
+                            <div class="sf-form-row">
+                                <lightning-input type="email" label="To" value={emailTo} onchange={handleEmailToChange} required class="sf-input">
+                                </lightning-input>
+                            </div>
+                            <div class="sf-form-row">
+                                <lightning-input label="Subject" value={emailSubject} onchange={handleEmailSubjectChange} class="sf-input">
+                                </lightning-input>
+                            </div>
+                            <div class="sf-form-row">
+                                <lightning-textarea label="Message" value={emailBody} onchange={handleEmailBodyChange} class="sf-input">
+                                </lightning-textarea>
+                            </div>
+                            <div class="sf-attachment-chip">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-chip-icon">
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                                </svg>
+                                <span class="sf-chip-label">{emailModalRow.filename}</span>
+                            </div>
+                        </div>
+                        <footer class="sf-modal-footer">
+                            <button class="sf-btn sf-btn-ghost" onclick={cancelEmail} disabled={isProcessing}>
+                                Cancel
+                            </button>
+                            <button class="sf-btn sf-btn-primary" onclick={confirmSendEmail} disabled={isProcessing}>
+                                <template if:true={isProcessing}>
+                                    <div class="sf-spinner sf-spinner-xs"></div>
+                                    <span>Sending…</span>
+                                </template>
+                                <template if:false={isProcessing}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-row-btn-icon">
+                                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                    </svg>
+                                    <span>Send Email</span>
+                                </template>
+                            </button>
+                        </footer>
+                    </div>
+                </section>
+            </template>
+
+            <!-- ── FILE PREVIEW MODAL ─────────────────────────────────── -->
+            <template if:true={showPreviewModal}>
+                <section class="sf-modal-backdrop" onclick={closePreview}>
+                    <div class="sf-modal-dialog sf-modal-preview" onclick={stopPropagation}>
+                        <header class="sf-modal-header sf-modal-header-preview">
+                            <div class="sf-modal-icon-info">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                            </div>
+                            <div class="sf-modal-title-block">
+                                <p class="sf-modal-eyebrow">DOCUMENT PREVIEW</p>
+                                <h3 class="sf-modal-title sf-modal-title-truncate" title={previewFileName}>{previewFileName}</h3>
+                            </div>
+                            <button class="sf-modal-close" onclick={closePreview} title="Close">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </header>
+                        <div class="sf-modal-body sf-modal-body-preview">
+                            <template if:true={previewLoading}>
+                                <div class="sf-preview-loading">
+                                    <div class="sf-spinner"></div>
+                                    <p>Loading preview…</p>
+                                </div>
+                            </template>
+                            <template if:true={previewUrl}>
+                                <iframe src={previewUrl} class="sf-preview-frame" onload={handlePreviewLoaded} title="Document preview"></iframe>
+                            </template>
+                        </div>
+                        <footer class="sf-modal-footer">
+                            <button class="sf-btn sf-btn-ghost" onclick={closePreview}>Close</button>
+                            <template if:true={previewDownloadUrl}>
+                                <a href={previewDownloadUrl} target="_blank" rel="noopener" class="sf-btn sf-btn-primary sf-btn-link">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-btn-icon">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    <span>Download</span>
+                                </a>
+                            </template>
+                        </footer>
+                    </div>
+                </section>
+            </template>
+        </div>
+      </div>
+    </c-signforce-access-gate>
+</template>

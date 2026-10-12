@@ -1,0 +1,533 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 04-22-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="signing-container">
+
+        <!-- Loading -->
+        <template if:true={isLoading}>
+            <div class="loading-screen">
+                <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error -->
+        <template if:true={hasError}>
+            <div class="error-screen">
+                <div class="error-card">
+                    <div class="error-icon">!</div>
+                    <p class="error-msg">{errorMessage}</p>
+                </div>
+            </div>
+        </template>
+
+        <!-- Signed Success -->
+        <template if:true={isSigned}>
+            <div class="success-screen">
+                <div class="success-card">
+                    <div class="success-brandbar"></div>
+
+                    <div class="success-body">
+                        <template if:true={hasBrandLogo}>
+                            <img src={brandLogoUrl} alt={brandNameDisplay} class="success-logo"/>
+                        </template>
+
+                        <div class="success-icon" aria-hidden="true"></div>
+                        <h2 class="success-title">You've signed</h2>
+
+                        <!-- Two different truths. The signed copy only goes out once
+                             every signer is done, so a middle signer must not be told
+                             it is on its way to them now. -->
+                        <template if:true={agreementFullySigned}>
+                            <p class="success-sub">
+                                <strong>{displayAgreementName}</strong> is signed by everyone and complete.
+                            </p>
+                            <p class="success-note">A signed copy is being emailed to {internalSignerEmail}</p>
+                        </template>
+                        <template if:false={agreementFullySigned}>
+                            <p class="success-sub">
+                                Your signature on <strong>{displayAgreementName}</strong> has been recorded.
+                            </p>
+                            <p class="success-note">
+                                We're still waiting on the other signers. Once everyone has signed,
+                                a signed copy will be emailed to {internalSignerEmail}
+                            </p>
+                        </template>
+                    </div>
+
+                    <div class="success-receipt">
+                        <p class="receipt-label">Signing receipt</p>
+                        <div class="receipt-row">
+                            <span class="receipt-key">Signed on</span>
+                            <span class="receipt-val">{signedTimestamp}</span>
+                        </div>
+                        <template if:true={signerIpAddress}>
+                            <div class="receipt-row">
+                                <span class="receipt-key">IP address</span>
+                                <span class="receipt-val receipt-num">{signerIpAddress}</span>
+                            </div>
+                        </template>
+                        <div class="receipt-row">
+                            <span class="receipt-key">Certificate</span>
+                            <span class="receipt-val receipt-code">{signedCertificateId}</span>
+                        </div>
+                    </div>
+
+                    <div class="success-foot">Sent securely from {brandNameDisplay}</div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Session timed out (link opened in another window/device) -->
+        <template if:true={sessionTimedOut}>
+            <div class="error-screen">
+                <div class="error-card">
+                    <div class="error-icon">&#128274;</div>
+                    <p class="error-msg">Session timed out</p>
+                    <p class="error-sub">This signing link is already open on another browser or device. For your security, it can only be used from the browser where it was first opened. Please ask the sender to resend the link if you need access here.</p>
+                </div>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <template if:false={hasError}>
+                <template if:false={isSigned}>
+                <template if:false={sessionTimedOut}>
+
+                    <!-- ════════ EMAIL VERIFICATION (OTP) GATE ════════ -->
+                    <!-- Identity check before anything else: the emailed one-time
+                         code proves the person holding this link also controls the
+                         signer's inbox. Rendered IN PLACE of the consent/document
+                         UI (not over it), so no document bytes are fetched or
+                         shown until the code is verified. -->
+                    <template if:true={showOtpGate}>
+                        <div class="otp-screen">
+                            <div class="otp-card">
+                                <template if:true={hasBrandLogo}>
+                                    <img src={brandLogoUrl} alt={brandNameDisplay} class="otp-logo"/>
+                                </template>
+
+                                <div class="otp-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10z"></path>
+                                        <path d="m9 12 2 2 4-4"></path>
+                                    </svg>
+                                </div>
+
+                                <h2 class="otp-title">Verify it's you</h2>
+                                <p class="otp-sub">
+                                    To protect <strong>{displayAgreementName}</strong>, eSignforce has emailed
+                                    a 6-digit verification code to <span class="otp-email">{otpDisplayEmail}</span>.
+                                    Enter it below to open your document.
+                                </p>
+
+                                <input class="otp-input" type="text" inputmode="numeric"
+                                    autocomplete="one-time-code" maxlength="6" placeholder="000000"
+                                    aria-label="6-digit verification code"
+                                    value={otpCode} disabled={otpInputDisabled}
+                                    oninput={handleOtpInput} onpaste={handleOtpPaste} onkeydown={handleOtpKeydown}/>
+
+                                <template if:true={otpErrorDisplay}>
+                                    <p class="otp-error" role="alert">{otpErrorDisplay}</p>
+                                </template>
+
+                                <button class="otp-verify" onclick={handleOtpVerify} disabled={otpVerifyDisabled}>
+                                    {otpVerifyLabel}
+                                </button>
+
+                                <div class="otp-resend-row">
+                                    <span class="otp-resend-hint">Didn't get the code?</span>
+                                    <button class="otp-resend" onclick={handleOtpResend} disabled={otpResendDisabled}>
+                                        {otpResendLabel}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="otp-foot">Sent securely from {brandNameDisplay}</div>
+                        </div>
+                    </template>
+
+                    <template if:false={showOtpGate}>
+
+                    <!-- ════════ E-SIGN CONSENT GATE ════════ -->
+                    <!-- Shown once, before signing. Legally required disclosure
+                         (ESIGN Act / eIDAS): the signer must affirmatively agree
+                         to transact electronically before they can sign. Until
+                         "I agree" is checked and Continue is clicked, the document
+                         and all signing controls stay blocked behind this overlay. -->
+                    <template if:false={consentGiven}>
+                        <div class="consent-overlay">
+                            <div class="consent-card">
+                                <div class="consent-header">
+                                    <template if:true={hasBrandLogo}>
+                                        <img src={brandLogoUrl} alt={brandNameDisplay} class="consent-logo"/>
+                                    </template>
+                                    <h2 class="consent-title">Electronic Record and Signature Disclosure</h2>
+                                </div>
+
+                                <div class="consent-body">
+                                    <p class="consent-intro">
+                                        Please read and agree to the following before you sign <strong>{displayAgreementName}</strong> electronically.
+                                    </p>
+
+                                    <div class="consent-scroll">
+                                        <p>By continuing, you confirm that:</p>
+                                        <ul>
+                                            <li>You agree to use electronic records and electronic signatures
+                                                for this document, instead of paper documents and handwritten
+                                                (wet-ink) signatures.</li>
+                                            <li>Your electronic signature on this document is legally binding
+                                                and has the same legal effect as a handwritten signature.</li>
+                                            <li>You are able to access, view, and retain this document in
+                                                electronic form (for example, by downloading or printing it).</li>
+                                            <li>You may request a paper copy of this document, and you may
+                                                withdraw your consent to sign electronically, by contacting
+                                                the sender before completing your signature.</li>
+                                            <li>Your name, IP address, and the date and time of signing will be
+                                                recorded as part of the signing audit trail.</li>
+                                        </ul>
+                                    </div>
+
+                                    <label class="consent-checkbox-row">
+                                        <input type="checkbox" checked={consentChecked} onchange={handleConsentToggle}/>
+                                        <span>I agree to use electronic records and electronic signatures, and I have
+                                            read the disclosure above.</span>
+                                    </label>
+                                </div>
+
+                                <div class="consent-footer">
+                                    <button class="consent-decline" onclick={handleDecline}>Decline</button>
+                                    <button class="consent-continue" onclick={handleConsentContinue} disabled={consentContinueDisabled}>
+                                        Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Top Bar -->
+                    <div class="top-bar" style={topBarStyle}>
+                        <div class="top-bar-left">
+                            <template if:true={hasBrandLogo}>
+                                <img src={brandLogoUrl} alt={brandNameDisplay} style="max-height:32px;margin-right:8px;"/>
+                            </template>
+                            <span class="brand-name" style={brandNameStyle}>{brandNameDisplay}</span>
+                        </div>
+                        <div class="top-bar-center">
+                            <span class="doc-title">{displayAgreementName}</span>
+                        </div>
+                        <div class="top-bar-right">
+                            <span class="progress-pill">{completionStatus}</span>
+                            <button class="btn-finish-top" onclick={handleComplete} disabled={isCompleteDisabled}>Finish</button>
+                        </div>
+                    </div>
+
+                    <!-- Document Area -->
+                    <div class="document-area">
+                        <div class="document-scroll">
+                            <div class="document-inner">
+                            <p class="envelope-line">eSignforce Envelope ID: {envelopeId}</p>
+                            <div class="document-wrapper" style={pdfWrapperStyle}>
+
+                                <!-- In-page pdf.js host (Lightning, and LWR fallback): canvases are
+                                     appended here — children appended INSIDE the iframe element are
+                                     fallback content the browser never renders. -->
+                                <div class="pdf-inpage-host" lwc:dom="manual" style="width:100%;"></div>
+
+                                <template if:true={iframeUrl}>
+                                    <iframe src={iframeUrl} class="pdf-canvas-host" width="100%" height={iframeHeight}
+                                        scrolling="no" frameborder="0" onload={handleFrameLoad} title="Document"
+                                        style="border:none;display:block;width:100%;"></iframe>
+                                </template>
+
+                                <!-- Field overlays -->
+                                <template for:each={signerFields} for:item="field">
+                                    <div key={field.Id}
+                                        class={field.fieldClass}
+                                        style={field.fieldStyle}
+                                        data-id={field.Id}
+                                        data-type={field.Field_Type__c}
+                                        onclick={handleFieldClick}>
+                                        <template if:true={field.Is_Completed__c}>
+                                            <template if:true={field.isDrawSignature}>
+                                                <svg class="sig-preview-svg" viewBox="0 0 600 150" preserveAspectRatio="xMidYMid meet">
+                                                    <template for:each={field.drawPaths} for:item="p">
+                                                        <path key={p.id} d={p.d} stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+                                                    </template>
+                                                </svg>
+                                            </template>
+                                            <template if:true={field.isTypedSignature}>
+                                                <span class="sig-typed-preview" style={field.typedFontStyle}>{field.typedName}</span>
+                                            </template>
+                                            <template if:true={field.isUploadSignature}>
+                                                <img src={field.uploadImageSrc} alt="Signature" class="sig-upload-preview"/>
+                                            </template>
+                                            <template if:true={field.isTextValue}>
+                                                <span class="field-value-text">{field.Field_Value__c}</span>
+                                            </template>
+                                        </template>
+                                        <template if:false={field.Is_Completed__c}>
+                                            <span class="field-label-text">{field.displayLabel}</span>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <!-- Read-only: signatures already placed by previous signers -->
+                                <template for:each={otherFields} for:item="ofield">
+                                    <div key={ofield.Id} class={ofield.fieldClass} style={ofield.fieldStyle}>
+                                        <template if:true={ofield.isDrawSignature}>
+                                            <svg class="sig-preview-svg" viewBox="0 0 600 150" preserveAspectRatio="xMidYMid meet">
+                                                <template for:each={ofield.drawPaths} for:item="p">
+                                                    <path key={p.id} d={p.d} stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+                                                </template>
+                                            </svg>
+                                        </template>
+                                        <template if:true={ofield.isTypedSignature}>
+                                            <span class="sig-typed-preview" style={ofield.typedFontStyle}>{ofield.typedName}</span>
+                                        </template>
+                                        <template if:true={ofield.isUploadSignature}>
+                                            <img src={ofield.uploadImageSrc} alt="Signature" class="sig-upload-preview"/>
+                                        </template>
+                                        <template if:true={ofield.isTextValue}>
+                                            <span class="field-value-text">{ofield.Field_Value__c}</span>
+                                        </template>
+                                    </div>
+                                </template>
+
+                            </div>
+                            </div>
+                        </div>
+
+                        <!-- Side rail (DocuSign-style): zoom + download.
+                             Shown only once the PDF has rendered. -->
+                        <template if:true={showSideRail}>
+                        <div class="side-rail">
+                            <button class="rail-btn" onclick={handleDownloadDoc} title="Download">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span>Download</span>
+                            </button>
+                            <div class="rail-divider"></div>
+                            <button class="rail-btn" onclick={handleZoomIn} title="Zoom in">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                            </button>
+                            <span class="rail-zoom">{zoomLabel}</span>
+                            <button class="rail-btn" onclick={handleZoomOut} title="Zoom out">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                            </button>
+                        </div>
+                        </template>
+                    </div>
+
+                    <!-- Bottom Action Bar -->
+                    <div class="bottom-bar">
+                        <div class="bottom-bar-left">
+                            <button class="btn-decline" onclick={handleDecline}>Decline</button>
+                        </div>
+                        <div class="bottom-bar-center">
+                            <span class="progress-text">{completionStatus}</span>
+                            <template if:true={hasNextField}>
+                                <button class="btn-next-field" onclick={handleGoNext}>{nextFieldLabel} &rarr;</button>
+                            </template>
+                        </div>
+                        <div class="bottom-bar-right">
+                            <button class="btn-finish" onclick={handleComplete} disabled={isCompleteDisabled}>Finish</button>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Sheet -->
+                    <template if:true={showBottomSheet}>
+                        <div class="sheet-overlay" onclick={closeBottomSheet}></div>
+                        <div class="sheet">
+                            <div class="sheet-handle-bar">
+                                <div class="sheet-handle"></div>
+                            </div>
+                            <div class="sheet-content">
+                                <div class="sheet-header">
+                                    <template if:true={isSignatureField}>
+                                        <div>
+                                            <p class="sheet-title">Adopt Your Signature</p>
+                                            <p class="sheet-subtitle">Confirm your name, initials, and signature.</p>
+                                        </div>
+                                    </template>
+                                    <template if:false={isSignatureField}>
+                                        <p class="sheet-title">{activeField.Field_Label__c}</p>
+                                    </template>
+                                    <button class="sheet-close" onclick={closeBottomSheet} title="Close" aria-label="Close">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sheet-close-icon">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="sheet-body">
+
+                                    <!-- Signature / Initial - DocuSign-style "Adopt Your Signature" -->
+                                    <template if:true={isSignatureField}>
+                                        <!-- Name + Initials row -->
+                                        <div class="adopt-identity">
+                                            <div class="adopt-field">
+                                                <label class="adopt-label">Full Name <span class="adopt-req">*</span></label>
+                                                <lightning-input type="text" variant="label-hidden"
+                                                    placeholder="Your full name" value={typedName}
+                                                    onchange={handleTypedName}></lightning-input>
+                                            </div>
+                                            <div class="adopt-field adopt-field-initials">
+                                                <label class="adopt-label">Initials <span class="adopt-req">*</span></label>
+                                                <lightning-input type="text" variant="label-hidden"
+                                                    placeholder="AB" value={typedInitials}
+                                                    onchange={handleTypedInitials}></lightning-input>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tabs -->
+                                        <div class="sig-tabs">
+                                            <button onclick={selectType} class={typeTabClass}>Select Style</button>
+                                            <button onclick={selectDraw} class={drawTabClass}>Draw</button>
+                                            <button onclick={selectUpload} class={uploadTabClass}>Upload</button>
+                                        </div>
+
+                                        <!-- SELECT STYLE: big preview + style dropdown -->
+                                        <template if:true={showType}>
+                                            <template if:true={hasTypedName}>
+                                                <div class="adopt-preview-head">
+                                                    <span class="adopt-preview-label">Preview</span>
+                                                    <div class="adopt-style-select">
+                                                        <label class="adopt-style-select-label">Style:</label>
+                                                        <select class="adopt-style-dropdown" onchange={handleStyleChange}>
+                                                            <template for:each={fontOptions} for:item="opt">
+                                                                <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
+                                                            </template>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="adopt-preview-box">
+                                                    <div class="adopt-preview-sig">
+                                                        <p class="adopt-preview-name" style={selectedFontStyle}>{typedName}</p>
+                                                    </div>
+                                                    <div class="adopt-preview-divider"></div>
+                                                    <div class="adopt-preview-ini">
+                                                        <p class="adopt-preview-initials" style={selectedFontStyle}>{typedInitials}</p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <template if:false={hasTypedName}>
+                                                <div class="adopt-empty">
+                                                    <p class="adopt-empty-text">Enter your full name above to preview your signature.</p>
+                                                </div>
+                                            </template>
+                                        </template>
+
+                                        <!-- DRAW -->
+                                        <template if:true={showDraw}>
+                                            <div class="sig-draw-area"
+                                                onpointerdown={startDraw}
+                                                onpointermove={draw}
+                                                onpointerup={stopDraw}
+                                                onpointercancel={stopDraw}>
+                                                <svg style="width:100%;height:100%;position:absolute;top:0;left:0;"
+                                                    viewBox="0 0 600 150" preserveAspectRatio="none">
+                                                    <template for:each={paths} for:item="path">
+                                                        <path key={path.id} d={path.d}
+                                                            stroke="#1a1a1a" stroke-width="2.5"
+                                                            stroke-linecap="round" stroke-linejoin="round"
+                                                            fill="none"></path>
+                                                    </template>
+                                                </svg>
+                                                <template if:true={showDrawPlaceholder}>
+                                                    <p class="draw-placeholder">Sign here</p>
+                                                </template>
+                                            </div>
+                                            <div class="sig-actions">
+                                                <button class="btn-clear" onclick={clearDraw}>Clear</button>
+                                            </div>
+                                        </template>
+
+                                        <!-- UPLOAD -->
+                                        <template if:true={showUpload}>
+                                            <input type="file" accept="image/*" onchange={handleFileUpload} style="display:none;" data-id="sig-upload"/>
+                                            <template if:false={uploadedImage}>
+                                                <div class="upload-area">
+                                                    <button class="btn-upload" onclick={triggerUpload}>Choose Image</button>
+                                                    <p class="upload-hint">PNG, JPG up to 2MB</p>
+                                                </div>
+                                            </template>
+                                            <template if:true={uploadedImage}>
+                                                <div class="upload-preview">
+                                                    <img src={safeUploadedImage} alt="Signature"/>
+                                                    <button class="btn-remove" onclick={clearUpload}>Remove</button>
+                                                </div>
+                                            </template>
+                                        </template>
+
+                                        <!-- Legal consent line -->
+                                        <p class="adopt-consent">
+                                            By selecting Adopt &amp; Sign, I agree this is the electronic
+                                            representation of my signature and initials for all purposes
+                                            when I (or my agent) use them on documents, including legally
+                                            binding contracts.
+                                        </p>
+
+                                        <!-- Sign-all-at-once -->
+                                        <template if:true={showApplyToAll}>
+                                            <label class="apply-all-row">
+                                                <input type="checkbox" class="apply-all-cb"
+                                                    checked={applyToAll} onchange={handleApplyToAllChange}/>
+                                                <span>{applyToAllLabel}</span>
+                                            </label>
+                                        </template>
+                                    </template>
+
+
+                                    <!-- Text fields -->
+                                    <template if:true={isTextField}>
+                                        <lightning-input type="text" label={activeField.Field_Label__c}
+                                            placeholder={activeFieldPlaceholder} value={fieldInputValue}
+                                            onchange={handleTextInput}></lightning-input>
+                                    </template>
+
+                                    <!-- Checkbox -->
+                                    <template if:true={isCheckboxField}>
+                                        <lightning-input type="checkbox" label="I confirm"
+                                            checked={checkboxValue} onchange={handleCheckboxInput}></lightning-input>
+                                        <p class="checkbox-hint">By checking this box you confirm your agreement to the statement above.</p>
+                                        <template if:true={isActiveFieldRequired}>
+                                            <p class="checkbox-hint checkbox-hint-required">This confirmation is required to complete signing.</p>
+                                        </template>
+                                    </template>
+
+                                    <!-- Date -->
+                                    <template if:true={isDateField}>
+                                        <div class="date-display">&#128197; {todayDate}</div>
+                                        <p class="date-hint">Date will be auto-filled with today's date.</p>
+                                    </template>
+
+                                </div>
+                                <div class="sheet-footer">
+                                    <button class="btn-cancel-sheet" onclick={closeBottomSheet}>Cancel</button>
+                                    <template if:true={isSignatureField}>
+                                        <button class="btn-apply" onclick={applyField}>Adopt &amp; Sign</button>
+                                    </template>
+                                    <template if:false={isSignatureField}>
+                                        <button class="btn-apply" onclick={applyField}>Apply</button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    </template>
+                    <!-- /if:false={showOtpGate} -->
+
+                </template>
+                </template>
+            </template>
+        </template>
+
+        <!-- Themed confirm/prompt, in place of the browser's native dialog -->
+        <c-signforce-confirm></c-signforce-confirm>
+
+    </div>
+</template>

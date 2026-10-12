@@ -1,0 +1,35 @@
+<template>
+    <template if:true={isOpen}>
+        <div class="sfc-overlay" role="presentation" onclick={handleCancel} onkeydown={handleKeydown}>
+            <div class="sfc-card" role="dialog" aria-modal="true" aria-labelledby="sfc-title" onclick={stopPropagation}>
+                <div class="sfc-accent"></div>
+
+                <div class="sfc-body">
+                    <h2 id="sfc-title" class="sfc-title">{title}</h2>
+                    <template if:true={showMessage}>
+                        <p class="sfc-message">{message}</p>
+                    </template>
+
+                    <template if:true={hasInput}>
+                        <input
+                            type="text"
+                            class="sfc-input"
+                            value={inputValue}
+                            placeholder={placeholder}
+                            oninput={handleInput}
+                            onkeydown={handleKeydown}
+                        />
+                        <template if:true={errorText}>
+                            <p class="sfc-error">{errorText}</p>
+                        </template>
+                    </template>
+                </div>
+
+                <div class="sfc-footer">
+                    <button class="sfc-btn sfc-btn_ghost" onclick={handleCancel} type="button">{cancelLabel}</button>
+                    <button class={confirmClass} onclick={handleConfirm} type="button">{confirmLabel}</button>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

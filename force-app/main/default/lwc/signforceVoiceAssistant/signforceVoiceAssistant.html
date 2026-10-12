@@ -1,0 +1,180 @@
+<template>
+    <template if:true={agentforceAvailable}>
+        <c-signforce-access-gate>
+            <div class="sf-voice-container">
+
+                <!-- HEADER -->
+                <header class="sf-voice-header">
+                    <div class="sf-voice-brand">
+                        <div class="sf-voice-brand-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 11H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h4"></path>
+                                <path d="M15 11h4a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-4"></path>
+                                <circle cx="12" cy="5" r="2"></circle>
+                                <path d="M12 7v4"></path>
+                                <line x1="8" y1="16" x2="8" y2="16"></line>
+                                <line x1="16" y1="16" x2="16" y2="16"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="sf-voice-eyebrow">ESIGNFORCE</p>
+                            <h2 class="sf-voice-title">Voice Assistant</h2>
+                        </div>
+                    </div>
+                    <div class="sf-voice-status">
+                        <span class={statusDotClass}></span>
+                        <span>{statusLabel}</span>
+                    </div>
+                </header>
+
+                <!-- MESSAGES -->
+                <section class="sf-voice-messages" data-id="messages">
+                    <template if:false={hasMessages}>
+                        <div class="sf-voice-empty">
+                            <div class="sf-voice-empty-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 11H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h4"></path>
+                                    <path d="M15 11h4a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-4"></path>
+                                    <circle cx="12" cy="5" r="2"></circle>
+                                    <path d="M12 7v4"></path>
+                                </svg>
+                            </div>
+                            <p class="sf-voice-empty-title">Hi! I'm your eSignforce Assistant</p>
+                            <p class="sf-voice-empty-hint">I can help you manage agreements, signers, and templates. Try one of these:</p>
+                            <div class="sf-voice-chips">
+                                <template for:each={suggestions} for:item="s">
+                                    <button key={s.id} class="sf-voice-chip" data-text={s.text} onclick={handleSuggestionClick}>
+                                        {s.text}
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template for:each={messages} for:item="msg">
+                        <div key={msg.id} class={msg.cssClass}>
+
+                            <!-- AI avatar (only for AI messages) -->
+                            <template if:true={msg.isAi}>
+                                <div class="sf-msg-avatar">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 11H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h4"></path>
+                                        <path d="M15 11h4a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-4"></path>
+                                        <circle cx="12" cy="5" r="2"></circle>
+                                        <path d="M12 7v4"></path>
+                                    </svg>
+                                </div>
+                            </template>
+
+                            <div class="sf-msg-bubble">
+                                <!-- AI messages: rich rendering with bullets and bold -->
+                                <template if:true={msg.isAi}>
+                                    <div class="sf-msg-rich">
+                                        <template for:each={msg.parts} for:item="part">
+                                            <template if:true={part.isParagraph}>
+                                                <p key={part.id} class="sf-msg-para">
+                                                    <template for:each={part.spans} for:item="span">
+                                                        <template if:true={span.isBold}>
+                                                            <strong key={span.id}>{span.text}</strong>
+                                                        </template>
+                                                        <template if:true={span.isNormal}>
+                                                            <span key={span.id}>{span.text}</span>
+                                                        </template>
+                                                    </template>
+                                                </p>
+                                            </template>
+                                            <template if:true={part.isBullet}>
+                                                <div key={part.id} class="sf-msg-bullet">
+                                                    <span class="sf-bullet-dot">•</span>
+                                                    <span class="sf-bullet-text">
+                                                        <template for:each={part.spans} for:item="span">
+                                                            <template if:true={span.isBold}>
+                                                                <strong key={span.id}>{span.text}</strong>
+                                                            </template>
+                                                            <template if:true={span.isNormal}>
+                                                                <span key={span.id}>{span.text}</span>
+                                                            </template>
+                                                        </template>
+                                                    </span>
+                                                </div>
+                                            </template>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <!-- User and system messages: plain text -->
+                                <template if:false={msg.isAi}>
+                                    <p class="sf-msg-text">{msg.text}</p>
+                                </template>
+
+                                <p class="sf-msg-time">{msg.timeLabel}</p>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- THINKING indicator (only while waiting for response) -->
+                    <template if:true={isThinking}>
+                        <div class="sf-msg-row ai">
+                            <div class="sf-msg-avatar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 11H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h4"></path>
+                                    <path d="M15 11h4a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-4"></path>
+                                    <circle cx="12" cy="5" r="2"></circle>
+                                    <path d="M12 7v4"></path>
+                                </svg>
+                            </div>
+                            <div class="sf-msg-bubble sf-msg-thinking">
+                                <span class="sf-thinking-dot"></span>
+                                <span class="sf-thinking-dot"></span>
+                                <span class="sf-thinking-dot"></span>
+                            </div>
+                        </div>
+                    </template>
+                </section>
+
+                <!-- FOOTER -->
+                <footer class="sf-voice-footer">
+                    <button class={micButtonClass} onclick={handleMicToggle} title="Tap to speak" disabled={isThinking}>
+                        <template if:false={isListening}>
+                            <svg class="sf-mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" y1="19" x2="12" y2="22"></line>
+                                <line x1="8" y1="22" x2="16" y2="22"></line>
+                            </svg>
+                        </template>
+                        <template if:true={isListening}>
+                            <svg class="sf-mic-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                                <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                            </svg>
+                        </template>
+                    </button>
+
+                    <input type="text" class="sf-voice-input" placeholder="Message eSignforce Assistant..." value={inputText}
+                        onkeyup={handleInputKey} onchange={handleInputChange} disabled={isThinking} />
+
+                    <button class="sf-voice-send" onclick={handleSend} disabled={cantSend} title="Send">
+                        <svg class="sf-send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </footer>
+
+                <!-- OPTIONS -->
+                <div class="sf-voice-options">
+                    <select class="sf-language" value={language} onchange={handleLanguageChange}>
+                        <template for:each={languageOptions} for:item="opt">
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        </template>
+                    </select>
+                    <label class="sf-voice-toggle">
+                        <input type="checkbox" checked={voiceOutputEnabled} onchange={handleVoiceToggle} />
+                        <span>Speak responses</span>
+                    </label>
+                </div>
+
+            </div>
+        </c-signforce-access-gate>
+    </template>
+</template>

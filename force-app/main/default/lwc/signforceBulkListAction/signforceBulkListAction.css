@@ -1,0 +1,352 @@
+/* Renders inside a flow screen (modal) or the legacy Visualforce host, so no
+   page chrome can be assumed — every token is set here. */
+:host {
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;
+    --brand-700: #6d28d9;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --emerald-50: #ecfdf5;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+    --amber-50: #fffbeb;
+    --amber-200: #fde68a;
+    --amber-700: #b45309;
+    --red-50: #fef2f2;
+    --red-200: #fecaca;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+
+    display: block;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--slate-900);
+}
+
+/* 620px, not 560: the step cards carry two columns of content now, and the
+   flow screen gives us the width for free. */
+.bla-shell { max-width: 620px; margin: 0 auto; padding: 0.4rem 0.2rem 0.2rem; }
+
+/* ── header ── */
+.bla-head { display: flex; align-items: flex-start; gap: 0.85rem; margin-bottom: 1.35rem; }
+.bla-head-text { min-width: 0; }
+
+.bla-icon {
+    width: 42px; height: 42px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+    color: #fff; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.28);
+}
+.bla-icon svg { width: 20px; height: 20px; }
+
+.bla-eyebrow {
+    margin: 0; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em;
+    color: var(--slate-400); text-transform: uppercase;
+}
+.bla-title { margin: 0.1rem 0 0; font-size: 1.3rem; font-weight: 700; letter-spacing: -0.015em; }
+.bla-sub { margin: 0.25rem 0 0; font-size: 0.83rem; color: var(--slate-500); line-height: 1.5; }
+
+/* ── steps ── */
+.bla-step {
+    border: 1px solid var(--slate-200); border-radius: 14px;
+    background: #fff; padding: 1.05rem 1.15rem; margin-bottom: 0.85rem;
+}
+
+.bla-step-head { display: flex; align-items: flex-start; gap: 0.7rem; margin-bottom: 0.9rem; }
+
+.bla-num {
+    flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+    background: var(--brand-100); color: var(--brand-700);
+}
+/* The tick replaces the digit once the step is satisfied, so progress through
+   the screen is readable at a glance without reading any of the copy. */
+.bla-num-done { background: var(--emerald-500); color: transparent; position: relative; }
+.bla-num-done::after {
+    content: ''; position: absolute; width: 5px; height: 9px;
+    border: solid #fff; border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+.bla-num-idle { background: var(--slate-100); color: var(--slate-400); }
+
+.bla-step-title { margin: 0; font-size: 0.95rem; font-weight: 680; letter-spacing: -0.01em; }
+.bla-step-sub { margin: 0.15rem 0 0; font-size: 0.78rem; color: var(--slate-500); line-height: 1.5; }
+
+.bla-badge {
+    margin-left: auto; flex-shrink: 0;
+    font-size: 0.75rem; font-weight: 700; font-variant-numeric: tabular-nums;
+    color: var(--brand-700); background: var(--brand-50);
+    border: 1px solid var(--brand-200); border-radius: 99px; padding: 3px 12px;
+}
+
+/* ── selected record names ── */
+.bla-names { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.bla-name {
+    font-size: 0.76rem; font-weight: 550; padding: 4px 11px; border-radius: 99px;
+    background: var(--slate-50); border: 1px solid var(--slate-200); color: var(--slate-600);
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.bla-more {
+    appearance: none; background: none; border: 1px dashed var(--slate-300);
+    cursor: pointer; font: inherit; font-size: 0.76rem; font-weight: 620;
+    padding: 4px 11px; border-radius: 99px; color: var(--brand-600);
+}
+.bla-more:hover { border-color: var(--brand-500); background: var(--brand-50); }
+
+/* ── template cards ── */
+.bla-cards { display: flex; flex-direction: column; gap: 7px; }
+
+.bla-card {
+    appearance: none; cursor: pointer; font: inherit; text-align: left; width: 100%;
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.7rem 0.85rem; border-radius: 11px;
+    border: 1px solid var(--slate-200); background: #fff;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.bla-card:hover:not(:disabled) { border-color: var(--slate-300); background: var(--slate-50); }
+.bla-card:disabled { cursor: default; opacity: 0.65; }
+.bla-card:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 2px; }
+
+.bla-card-on { border-color: var(--brand-500); background: var(--brand-50); }
+.bla-card-on:hover:not(:disabled) { background: var(--brand-100); }
+
+.bla-radio {
+    flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--slate-300); background: #fff;
+}
+.bla-card-on .bla-radio { border-color: var(--brand-600); box-shadow: inset 0 0 0 3px #fff; background: var(--brand-600); }
+
+.bla-card-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bla-card-name {
+    font-size: 0.86rem; font-weight: 620; color: var(--slate-900);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bla-card-meta { font-size: 0.73rem; color: var(--slate-500); }
+
+/* ── review ── */
+.bla-review {
+    padding: 0.85rem 1rem; border-radius: 11px;
+    background: var(--slate-50); border: 1px solid var(--slate-200);
+}
+.bla-review-line { margin: 0; font-size: 0.86rem; font-weight: 620; line-height: 1.5; }
+.bla-review-list {
+    margin: 0.55rem 0 0; padding-left: 1.05rem;
+    font-size: 0.79rem; line-height: 1.65; color: var(--slate-500);
+}
+.bla-review-list li { margin-bottom: 0.1rem; }
+
+.bla-hint { margin: 0.8rem 0 0; font-size: 0.79rem; line-height: 1.55; color: var(--slate-500); }
+
+/* ── notes ── */
+.bla-note {
+    padding: 0.9rem 1rem; border-radius: 11px; font-size: 0.84rem; line-height: 1.55;
+}
+.bla-note p { margin: 0 0 0.35rem; }
+.bla-note p:last-child { margin-bottom: 0; }
+.bla-note-warn { background: var(--amber-50); border: 1px solid var(--amber-200); color: var(--amber-700); }
+/* ── failure banner ── */
+.bla-alert {
+    margin-bottom: 0.95rem; padding: 0.9rem 1rem;
+    background: var(--red-50); border: 1px solid var(--red-200); border-radius: 12px;
+}
+.bla-alert-head { display: flex; align-items: flex-start; gap: 0.65rem; }
+
+.bla-alert-mark {
+    flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--red-500); color: #fff; font-size: 0.72rem; font-weight: 800;
+}
+.bla-alert-title { margin: 0; font-size: 0.87rem; font-weight: 680; color: var(--red-700); }
+.bla-alert-text { margin: 0.2rem 0 0; font-size: 0.81rem; line-height: 1.55; color: var(--slate-600); }
+
+.bla-alert-toggle {
+    appearance: none; background: none; border: none; cursor: pointer;
+    font: inherit; font-size: 0.75rem; font-weight: 620; padding: 0;
+    margin: 0.6rem 0 0 1.65rem; color: var(--red-600);
+}
+.bla-alert-toggle:hover { text-decoration: underline; }
+
+/* Raw Apex text with its stack trace: monospace, scrollable, and boxed in so a
+   long trace cannot push the rest of the screen off. */
+.bla-alert-detail {
+    margin: 0.5rem 0 0 1.65rem; padding: 0.6rem 0.7rem;
+    max-height: 160px; overflow: auto;
+    background: #fff; border: 1px solid var(--red-200); border-radius: 8px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    font-size: 0.7rem; line-height: 1.5; color: var(--slate-600);
+    white-space: pre-wrap; word-break: break-word;
+}
+
+/* ── progress ── */
+.bla-progress { padding-top: 0.1rem; }
+
+.bla-progress-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1rem; margin-bottom: 0.6rem;
+}
+.bla-progress-title { font-size: 0.86rem; font-weight: 630; }
+.bla-progress-pct {
+    font-size: 0.86rem; font-weight: 700; color: var(--brand-600);
+    font-variant-numeric: tabular-nums;
+}
+
+.bla-bar { height: 6px; border-radius: 99px; background: var(--brand-100); overflow: hidden; }
+.bla-bar span {
+    display: block; height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--brand-500), var(--brand-600));
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bla-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.75rem; }
+.bla-chip {
+    font-size: 0.71rem; font-weight: 650; padding: 3px 10px; border-radius: 99px;
+    font-variant-numeric: tabular-nums;
+}
+.bla-chip-ok { background: var(--emerald-50); color: var(--emerald-600); }
+.bla-chip-bad { background: var(--red-50); color: var(--red-600); }
+.bla-chip-wait { background: var(--slate-100); color: var(--slate-500); }
+
+/* ── per-record outcome ── */
+.bla-results-note { margin: 0.85rem 0 0.4rem; font-size: 0.75rem; color: var(--slate-500); }
+
+.bla-results {
+    list-style: none; margin: 0.75rem 0 0; padding: 0;
+    max-height: 260px; overflow-y: auto;
+    border: 1px solid var(--slate-200); border-radius: 10px;
+}
+.bla-result {
+    display: grid;
+    grid-template-columns: 8px minmax(0, 1fr) auto;
+    align-items: center; gap: 0.55rem;
+    padding: 0.5rem 0.75rem; font-size: 0.8rem;
+    border-bottom: 1px solid var(--slate-100);
+}
+.bla-result:last-child { border-bottom: 0; }
+
+.bla-dot { width: 8px; height: 8px; border-radius: 50%; }
+.bla-dot-ok { background: var(--emerald-500); }
+.bla-dot-bad { background: var(--red-500); }
+.bla-dot-wait { background: var(--slate-300); }
+
+.bla-result-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bla-result-state { font-size: 0.73rem; font-weight: 620; color: var(--slate-500); }
+.bla-result-bad .bla-result-state { color: var(--red-600); }
+
+/* The reason spans the full row width: a merge error message is a sentence,
+   not a label, and squeezing it into the third column truncates it to noise. */
+.bla-result-err {
+    grid-column: 2 / -1;
+    font-size: 0.73rem; line-height: 1.45; color: var(--red-700);
+}
+
+.bla-rawtoggle {
+    grid-column: 2 / -1; justify-self: start;
+    appearance: none; background: none; border: none; cursor: pointer;
+    font: inherit; font-size: 0.7rem; font-weight: 620; padding: 2px 0;
+    color: var(--slate-500);
+}
+.bla-rawtoggle:hover { color: var(--slate-800); text-decoration: underline; }
+
+.bla-rawtext {
+    grid-column: 2 / -1;
+    margin: 0.15rem 0 0.2rem; padding: 0.5rem 0.6rem;
+    max-height: 130px; overflow: auto;
+    background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 6px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    font-size: 0.68rem; line-height: 1.5; color: var(--slate-600);
+    white-space: pre-wrap; word-break: break-word;
+}
+
+.bla-done {
+    margin: 0.9rem 0 0; padding: 0.7rem 0.85rem; border-radius: 10px;
+    font-size: 0.82rem; line-height: 1.55; font-weight: 570;
+}
+.bla-done-ok { background: var(--emerald-50); color: var(--emerald-700); }
+.bla-done-warn { background: var(--amber-50); color: var(--amber-700); }
+
+/* ── actions ── */
+/* The blocked reason sits beside the button, not under it — read together they
+   are one statement, and separated they read as unrelated. */
+.bla-actions {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 0.8rem; margin-top: 1rem; flex-wrap: wrap;
+}
+.bla-blocked { font-size: 0.79rem; color: var(--slate-500); }
+
+.bla-btn {
+    appearance: none; border: 1px solid transparent; cursor: pointer;
+    font: inherit; font-size: 0.87rem; font-weight: 600;
+    padding: 0.7rem 1.4rem; border-radius: 10px;
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+.bla-btn:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 2px; }
+
+/* These are anchors wearing the button styling — a link needs no JavaScript API
+   to be granted, which is the whole reason they are links. */
+.bla-link {
+    display: inline-flex; align-items: center; justify-content: center;
+    text-decoration: none; line-height: 1;
+}
+.bla-link:hover { text-decoration: none; }
+
+.bla-btn-primary {
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-700));
+    color: #fff; box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
+}
+.bla-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px); box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+.bla-btn-primary:disabled {
+    background: var(--slate-200); color: var(--slate-400);
+    cursor: not-allowed; box-shadow: none;
+}
+
+/* Secondary. Deliberately quiet so it never competes with the primary action —
+   the old screen had a blue platform Finish button sitting next to the purple
+   Generate button, and readers went for the wrong one. */
+.bla-btn-ghost {
+    background: #fff; border-color: var(--slate-200); color: var(--slate-600);
+}
+.bla-btn-ghost:hover { background: var(--slate-50); border-color: var(--slate-300); }
+
+/* ── loading ── */
+.bla-loading {
+    display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+    padding: 2rem 0;
+}
+.bla-loading-text { margin: 0; font-size: 0.8rem; color: var(--slate-500); }
+.bla-spinner {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0deg, var(--brand-600) 300deg, var(--brand-600) 360deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    animation: bla-spin 0.85s linear infinite;
+}
+@keyframes bla-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .bla-spinner { animation-duration: 2.5s; }
+    .bla-bar span { transition: none; }
+    .bla-btn-primary:hover:not(:disabled) { transform: none; }
+}
+
+@media (max-width: 560px) {
+    .bla-actions { justify-content: stretch; }
+    .bla-btn { width: 100%; }
+    .bla-blocked { width: 100%; text-align: center; }
+}

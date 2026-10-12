@@ -1,0 +1,1176 @@
+/* ══════════════════════════════════════════════════════════════
+   SIGNFORCE — Template Field Editor CSS
+   Adapted from documentEditor.css (Violet/Indigo & Slate theme).
+   Trimmed to the classes this bundle actually uses (no topbar,
+   step-bar, locked-banner, bottom-nav or floating CTA). Embedded
+   inside the templateLibrary "Fields" tab, so :host is sized to
+   fill its parent rather than the full viewport.
+   ══════════════════════════════════════════════════════════════ */
+
+:host {
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;
+    --brand-700: #6d28d9;
+    --brand-900: #4c1d95;
+
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-700: #b45309;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    display: block;
+    height: var(--editor-height, 700px);
+    min-height: 550px;
+    overflow: hidden;
+}
+
+.sf-editor-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--slate-100);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+}
+
+/* ─── Main Body ─── */
+.sf-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ─── Left Panel ─── */
+.sf-left {
+    width: 200px;
+    flex-shrink: 0;
+    background: #fff;
+    border-right: 1px solid var(--slate-200);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* ─── Right Panel ─── */
+.sf-right {
+    width: 230px;
+    flex-shrink: 0;
+    background: #fff;
+    border-left: 1px solid var(--slate-200);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* ─── Panel Block ─── */
+.sf-panel-block {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.sf-panel-heading {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 6px 0;
+}
+
+.sf-panel-sub {
+    font-size: 11px;
+    color: var(--slate-500);
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+/* ─── Field Palette (DocuSign-style cards) ─── */
+.sf-palette {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sf-palette-item {
+    --sf-accent: #4a6fa5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px 9px 9px;
+    border: 1px solid #e3e6ea;
+    border-radius: 8px;
+    cursor: grab;
+    background: #ffffff;
+    user-select: none;
+    /* Let a touch that starts on a palette item drive our pointer-drag instead of
+       scrolling the palette — mobile/tablet drag depends on this. */
+    touch-action: none;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    color: #2b3340;
+    position: relative;
+}
+
+.sf-palette-item:hover {
+    border-color: var(--sf-accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--sf-accent) inset;
+    transform: translateY(-1px);
+}
+
+.sf-palette-item:active {
+    cursor: grabbing;
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Field type icons ───
+ * One stroke-drawn set, shared by the palette and the placed-field overlays.
+ * Emoji were doing this job before: they render differently on every OS, arrive
+ * pre-coloured, and sat next to plain-text glyphs ("IN", "T") — which is what
+ * made the canvas look like a toy.
+ *
+ * Each SVG is a mask, not an image, so the shape takes its colour from
+ * background-color and can follow the signer's hue. Set once per type below via
+ * the existing --<typeKey> modifier classes; the boxes stay markup-free.
+ */
+.sf-palette-item--signature, .sf-field-overlay--signature {
+    --sf-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 18c3-.5 4.5-8.5 7-8.5S12.5 16 15 16s3-3.5 6-3.5'/%3E%3Cpath d='M3 21.5h18'/%3E%3C/svg%3E");
+}
+.sf-palette-item--initial, .sf-field-overlay--initial {
+    --sf-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 19 12 5l7 14'/%3E%3Cpath d='M8.5 14h7'/%3E%3C/svg%3E");
+}
+.sf-palette-item--date, .sf-field-overlay--date {
+    --sf-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4.5' width='18' height='17' rx='2.5'/%3E%3Cpath d='M16 2.5v4M8 2.5v4M3 10h18'/%3E%3C/svg%3E");
+}
+.sf-palette-item--name, .sf-field-overlay--name {
+    --sf-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+}
+.sf-palette-item--email, .sf-field-overlay--email {
+    --sf-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='4.5' width='20' height='15' rx='2.5'/%3E%3Cpath d='m2.5 6.5 9.5 6 9.5-6'/%3E%3C/svg%3E");
+}
+.sf-palette-item--company, .sf-field-overlay--company {
+    --sf-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 21V4.5A1.5 1.5 0 0 1 5.5 3h9A1.5 1.5 0 0 1 16 4.5V21'/%3E%3Cpath d='M16 10h2.5A1.5 1.5 0 0 1 20 11.5V21'/%3E%3Cpath d='M2.5 21h19'/%3E%3Cpath d='M8 7h1.5M11 7h1.5M8 11h1.5M11 11h1.5'/%3E%3C/svg%3E");
+}
+.sf-palette-item--title, .sf-field-overlay--title {
+    --sf-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2.5' y='7' width='19' height='13.5' rx='2'/%3E%3Cpath d='M16 20.5V5.5A2 2 0 0 0 14 3.5h-4a2 2 0 0 0-2 2v15'/%3E%3C/svg%3E");
+}
+.sf-palette-item--text, .sf-field-overlay--text {
+    --sf-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 7.5V5.5h15v2'/%3E%3Cpath d='M12 5.5v13'/%3E%3Cpath d='M9 18.5h6'/%3E%3C/svg%3E");
+}
+.sf-palette-item--checkbox, .sf-field-overlay--checkbox {
+    --sf-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='3.5' width='17' height='17' rx='3'/%3E%3Cpath d='m8.5 12 2.5 2.5 4.5-5'/%3E%3C/svg%3E");
+}
+
+.sf-palette-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--sf-accent) 14%, #ffffff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0;   /* no glyph is rendered — the mask below draws the icon */
+}
+
+.sf-palette-icon::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-color: var(--sf-accent);
+    -webkit-mask: var(--sf-icon) center / contain no-repeat;
+    mask: var(--sf-icon) center / contain no-repeat;
+}
+
+.sf-palette-label {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    color: #1f2a37;
+}
+
+.sf-palette-drag {
+    font-size: 14px;
+    color: #b9c0c9;
+    opacity: 0;
+    transition: opacity .15s ease;
+    line-height: 1;
+}
+
+.sf-palette-item:hover .sf-palette-drag {
+    opacity: 1;
+}
+
+/* Per-type accent colors */
+.sf-palette-item--signature { --sf-accent: #f5a623; }
+.sf-palette-item--initial { --sf-accent: #e07b00; }
+.sf-palette-item--date { --sf-accent: #2e844a; }
+.sf-palette-item--name { --sf-accent: #1a73e8; }
+.sf-palette-item--email { --sf-accent: #6f42c1; }
+.sf-palette-item--company { --sf-accent: #0b7285; }
+.sf-palette-item--title { --sf-accent: #b45309; }
+.sf-palette-item--text { --sf-accent: #4a6fa5; }
+.sf-palette-item--checkbox { --sf-accent: #2e844a; }
+
+/* ─── Page Thumbnails ─── */
+.sf-page-thumbs {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sf-page-thumb {
+    border: 1.5px solid var(--slate-200);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s var(--ease-out);
+    overflow: hidden;
+}
+
+.sf-page-thumb:hover {
+    border-color: var(--brand-500);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
+}
+
+.sf-thumb-inner {
+    background: var(--slate-50);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.sf-thumb-num {
+    font-size: 11px;
+    color: var(--slate-500);
+    font-weight: 500;
+}
+
+/* ─── Center Canvas ─── */
+.sf-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--slate-700);
+    min-width: 0;
+    position: relative;   /* anchor for the preview loading/error overlay */
+}
+
+/* ─── Preview loading / error overlay ─── */
+.sf-preview-status {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: var(--slate-700);
+    animation: sf-fade-in 0.2s ease-out;
+}
+
+.sf-preview-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.16);
+    border-top-color: var(--brand-500);
+    border-radius: 50%;
+    animation: sf-spin 0.75s linear infinite;
+}
+
+.sf-preview-status-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sf-preview-status-text {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--slate-300);
+}
+
+.sf-preview-retry {
+    margin-top: 2px;
+    padding: 7px 16px;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--brand-600);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.sf-preview-retry:hover {
+    background: var(--brand-700);
+}
+
+@keyframes sf-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes sf-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sf-preview-spinner { animation-duration: 1.4s; }
+    .sf-preview-status { animation: none; }
+}
+
+.sf-canvas-toolbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--slate-200);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    height: 48px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.sf-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sf-zoom-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--slate-100);
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-sm);
+    padding: 3px 6px;
+}
+
+.sf-icon-btn {
+    width: 26px;
+    height: 26px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--slate-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s var(--ease-out);
+    font-weight: 600;
+    line-height: 1;
+}
+
+.sf-icon-btn:hover {
+    background: #fff;
+    color: var(--brand-600);
+}
+
+.sf-zoom-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-800);
+    min-width: 38px;
+    text-align: center;
+}
+
+.sf-toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--slate-200);
+}
+
+.sf-page-count {
+    font-size: 12px;
+    color: var(--slate-500);
+    display: flex;
+    align-items: center;
+}
+
+/* Canvas Scroll */
+.sf-canvas-scroll {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    background: var(--slate-700);
+}
+
+.sf-left::-webkit-scrollbar,
+.sf-right::-webkit-scrollbar,
+.sf-canvas-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sf-left::-webkit-scrollbar-track,
+.sf-right::-webkit-scrollbar-track,
+.sf-canvas-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sf-left::-webkit-scrollbar-thumb,
+.sf-right::-webkit-scrollbar-thumb,
+.sf-canvas-scroll::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.sf-left::-webkit-scrollbar-thumb:hover,
+.sf-right::-webkit-scrollbar-thumb:hover,
+.sf-canvas-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.38);
+    background-clip: padding-box;
+}
+
+.sf-left,
+.sf-right,
+.sf-canvas-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.22) transparent;
+}
+
+/* Drop Zone */
+.sf-drop-zone {
+    position: relative;
+    width: 100%;
+}
+
+.sf-drop-zone-active {
+    outline: 3px dashed #f5a623;
+    outline-offset: -3px;
+    background: rgba(245, 166, 35, 0.03);
+}
+
+/* PDF iframe */
+.sf-pdf-frame {
+    width: 100%;
+    border: none;
+    display: block;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* No Document */
+.sf-no-doc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+    gap: 8px;
+}
+
+.sf-no-doc-icon {
+    width: 72px;
+    height: 72px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.sf-no-doc-title {
+    font-size: 14px;
+    color: #ccc;
+    margin: 0;
+    font-weight: 600;
+}
+
+.sf-no-doc-sub {
+    font-size: 12px;
+    color: #999;
+    margin: 0;
+}
+
+/* ─── Placed Field Overlays (DocuSign-style) ─── */
+.sf-field-overlay {
+    --sf-signer-color: #94a3b8;
+    position: absolute;
+    box-sizing: border-box;
+    border: 1.5px solid var(--sf-signer-color);
+    border-radius: 7px;
+    background: color-mix(in srgb, var(--sf-signer-color) 9%, #ffffff);
+    cursor: grab;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    touch-action: none;
+    z-index: 9999;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    transition: box-shadow .15s ease, transform .05s ease, background .15s ease;
+    overflow: visible;
+}
+
+.sf-field-overlay:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18),
+        0 0 0 2px color-mix(in srgb, var(--sf-signer-color) 25%, transparent);
+}
+
+.sf-field-overlay:active {
+    cursor: grabbing;
+}
+
+.sf-field-overlay-selected {
+    border-width: 2px;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sf-signer-color) 25%, transparent),
+        0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.sf-field-tag {
+    position: absolute;
+    top: -22px;
+    left: -1px;
+    height: 18px;
+    max-width: calc(100% + 2px);
+    padding: 0 8px 0 6px;
+    background: var(--sf-signer-color);
+    color: #ffffff;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    pointer-events: none;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+}
+
+.sf-field-tag-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ffffff;
+    flex-shrink: 0;
+}
+
+.sf-field-tag-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sf-field-inner {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 2px 8px;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.sf-field-icon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    font-size: 0;   /* no glyph — the mask draws the icon in the signer's colour */
+    background-color: var(--sf-signer-color);
+    -webkit-mask: var(--sf-icon) center / contain no-repeat;
+    mask: var(--sf-icon) center / contain no-repeat;
+}
+
+.sf-field-type {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sf-signer-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.1px;
+}
+
+.sf-field-resize {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--sf-signer-color);
+    border-bottom: 2px solid var(--sf-signer-color);
+    opacity: 0.55;
+    pointer-events: none;
+    border-radius: 0 0 2px 0;
+}
+
+.sf-field-del {
+    position: absolute;
+    top: -28px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #c23934;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-weight: 700;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(194, 57, 52, 0.45);
+}
+
+.sf-field-del:hover {
+    background: #a82a26;
+}
+
+.sf-field-overlay:hover .sf-field-del,
+.sf-field-overlay-selected .sf-field-del {
+    display: flex;
+}
+
+/* Per-type visual tweaks */
+.sf-field-overlay--signature .sf-field-inner,
+.sf-field-overlay--initial .sf-field-inner {
+    background-image: linear-gradient(to top,
+            color-mix(in srgb, var(--sf-signer-color) 35%, transparent) 0,
+            color-mix(in srgb, var(--sf-signer-color) 35%, transparent) 1px,
+            transparent 1px);
+    background-repeat: no-repeat;
+    background-position: 8px calc(100% - 6px);
+    background-size: calc(100% - 16px) 1px;
+}
+
+.sf-field-overlay--checkbox {
+    border-radius: 3px;
+    background: #ffffff;
+}
+
+.sf-field-overlay--checkbox .sf-field-inner {
+    padding: 0;
+    font-size: 12px;
+}
+
+.sf-field-overlay--checkbox .sf-field-type {
+    display: none;
+}
+
+.sf-field-overlay--checkbox .sf-field-tag {
+    display: none;
+}
+
+/* ─── Right Panel - Props Form ─── */
+.sf-props-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sf-prop-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.sf-prop-row lightning-combobox,
+.sf-prop-row lightning-input {
+    display: block;
+    width: 100%;
+}
+
+.sf-prop-row .sf-required-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+}
+
+.sf-prop-row lightning-input.sf-required-toggle-input {
+    display: inline-flex;
+    width: fit-content;
+}
+
+.sf-prop-row .sf-required-toggle-caption {
+    font-size: 12px;
+    color: var(--slate-600);
+    cursor: default;
+    user-select: none;
+}
+
+.sf-checkbox-note {
+    background: var(--brand-50);
+    border: 1px solid var(--brand-100);
+    border-left: 3px solid var(--brand-500);
+    border-radius: 6px;
+    padding: 8px 10px;
+}
+
+.sf-checkbox-note-text {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--slate-600);
+}
+
+/* ─── Total Fields ─── */
+.sf-total-fields {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.sf-total-num {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--slate-900);
+    line-height: 1;
+}
+
+.sf-total-sub {
+    font-size: 11px;
+    color: var(--slate-500);
+}
+
+/* ─── Warning Block ─── */
+.sf-warning-block {
+    margin: 12px 16px;
+    background: var(--amber-50);
+    border: 1px solid var(--amber-100);
+    border-left: 4px solid var(--amber-500);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.sf-warning-icon {
+    color: var(--amber-500);
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.sf-warning-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 3px 0;
+}
+
+.sf-warning-body {
+    font-size: 11px;
+    color: var(--slate-600);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* ─── Buttons ─── */
+.sf-btn {
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    padding: 9px 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s var(--ease-out);
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.sf-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.sf-btn-danger {
+    background: var(--red-50);
+    color: var(--red-600);
+    border: 1.5px solid var(--red-200);
+}
+
+.sf-btn-danger:hover {
+    background: var(--red-100);
+    border-color: var(--red-500);
+}
+
+.sf-btn-full {
+    width: 100%;
+    justify-content: center;
+}
+
+/* ─── Collapsible Panels ─── */
+.sf-left {
+    transition: width 0.25s ease, padding 0.25s ease, border-color 0.25s ease;
+}
+
+.sf-right {
+    transition: width 0.25s ease, padding 0.25s ease, border-color 0.25s ease;
+}
+
+.sf-left.sf-collapsed {
+    width: 0px !important;
+    height: 0px !important;
+    padding: 0px !important;
+    margin: 0px !important;
+    overflow: hidden !important;
+    border: none !important;
+}
+
+.sf-right.sf-collapsed {
+    width: 0px !important;
+    height: 0px !important;
+    padding: 0px !important;
+    margin: 0px !important;
+    overflow: hidden !important;
+    border: none !important;
+}
+
+/* Panel Header styling inside sidebars */
+.sf-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--slate-200);
+    background: var(--slate-50);
+    flex-shrink: 0;
+}
+
+.sf-panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--brand-600);
+    text-transform: uppercase;
+}
+
+.sf-panel-close-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--slate-400);
+    padding: 2px 6px;
+    transition: all 0.2s;
+    line-height: 1;
+    border-radius: 4px;
+}
+
+.sf-panel-close-btn:hover {
+    color: var(--brand-600);
+    background: var(--brand-50);
+}
+
+/* Toolbar Right & Toggle Buttons */
+.sf-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sf-toolbar-toggle-btn {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brand-600);
+    background: var(--brand-50);
+    border: 1px solid var(--brand-200);
+    border-radius: var(--radius-sm);
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: inherit;
+    line-height: 1;
+}
+
+.sf-toolbar-toggle-btn:hover {
+    background: var(--brand-100);
+    border-color: var(--brand-500);
+    color: var(--brand-700);
+    box-shadow: var(--shadow-xs);
+}
+
+/* ─── Media Queries (Responsive Styling) ─── */
+@media screen and (max-width: 1400px) {
+    /* Slightly narrower sidebars on standard screens to maximize canvas space */
+    .sf-left:not(.sf-collapsed) {
+        width: 170px;
+    }
+    .sf-right:not(.sf-collapsed) {
+        width: 190px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    :host {
+        height: auto !important;
+        min-height: none !important;
+        overflow: visible !important;
+    }
+
+    .sf-editor-root {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    /* Stack layout on mobile/tablet viewports */
+    .sf-body {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    .sf-left:not(.sf-collapsed) {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--slate-200);
+    }
+
+    .sf-right:not(.sf-collapsed) {
+        width: 100%;
+        height: auto;
+        border-left: none;
+        border-top: 1px solid var(--slate-200);
+    }
+
+    .sf-center {
+        height: 550px; /* viewport height on mobile */
+    }
+
+    .sf-canvas-toolbar {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 8px;
+        gap: 8px;
+    }
+}
+
+/* Toolbar toggle icons — masks, so they follow the button's text colour. These
+   were emoji ("folder", "gear"), which render differently per OS and can't be
+   themed. */
+.sf-toolbar-toggle-btn { display: inline-flex; align-items: center; gap: 7px; }
+.sf-toolbar-toggle-btn::before {
+    content: '';
+    width: 14px; height: 14px; flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: var(--sf-toggle-glyph) center / contain no-repeat;
+    mask: var(--sf-toggle-glyph) center / contain no-repeat;
+}
+.sf-toggle--fields { --sf-toggle-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7.5A2 2 0 0 1 5 5.5h3.9a2 2 0 0 1 1.6.8l1 1.4a2 2 0 0 0 1.6.8H19a2 2 0 0 1 2 2v6.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3C/svg%3E"); }
+.sf-toggle--props  { --sf-toggle-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 7a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H7a1.7 1.7 0 0 0 1-1.5V1a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V7a1.7 1.7 0 0 0 1.5 1H23a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'/%3E%3C/svg%3E"); }
+
+/* Unassigned-fields warning. Amber rather than red: the template is still valid
+   and saveable — these placements just have nobody to fill them yet. */
+.sf-unassigned-warn {
+    margin: 12px 14px 0;
+    padding: 12px 14px;
+    border: 1px solid #fcd9a4;
+    border-left: 3px solid #f59e0b;
+    border-radius: 8px;
+    background: #fffaf0;
+}
+
+.sf-unassigned-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sf-unassigned-icon {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 15px;
+    color: #b45309;
+}
+
+.sf-unassigned-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #92400e;
+}
+
+.sf-unassigned-body {
+    margin: 6px 0 0;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: #92400e;
+}
+
+.sf-unassigned-list {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    max-height: 108px;
+    overflow-y: auto;
+}
+
+.sf-unassigned-item {
+    font-size: 0.7rem;
+    color: #78350f;
+    padding: 3px 0 3px 12px;
+    position: relative;
+}
+
+.sf-unassigned-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #f59e0b;
+}
+
+/* ── "Who fills in this field?" prompt ─────────────────────────────────
+   Shown right after a drop when the template has more than one signer.
+   Kept small and anchored centre-screen: it interrupts a drag gesture, so
+   it has to be answerable without hunting for the button. */
+.sf-assign-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 9000;
+}
+
+.sf-assign-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9001;
+    width: min(380px, 92vw);
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.35);
+    padding: 22px;
+}
+
+.sf-assign-title {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 650;
+    color: #181818;
+}
+
+.sf-assign-sub {
+    margin: 0 0 16px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #5a5f6b;
+}
+
+.sf-assign-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sf-assign-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 13px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #181818;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+}
+
+.sf-assign-option:hover {
+    border-color: #7c3aed;
+    background: #f8f6fe;
+}
+
+.sf-assign-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    flex: none;
+}
+
+.sf-assign-name { flex: 1; }
+
+.sf-assign-skip {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 9px;
+    background: transparent;
+    border: 0;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: #5a5f6b;
+    cursor: pointer;
+}
+
+.sf-assign-skip:hover { color: #181818; text-decoration: underline; }

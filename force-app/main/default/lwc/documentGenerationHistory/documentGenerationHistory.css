@@ -1,0 +1,1046 @@
+/* Containing block for the generate loader, which covers this card while a
+   document is being rebuilt. Without it the loader's absolute veil escapes to
+   whatever is positioned further up and lands in the wrong place. */
+.sf-genwrap { position: relative; }
+
+/* ════════════════════════════════════════════════════════════════
+   SignForce — Generated Documents Redesigned SaaS Style Component
+   Features: Aura Indigo & Slate palette, micro-interactions, custom toggle
+   ════════════════════════════════════════════════════════════════ */
+:host {
+    /* Color Palette Design Tokens */
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;
+    /* Primary Indigo/Violet Brand Accent */
+    --brand-700: #6d28d9;
+    --brand-900: #4c1d95;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-200: #a7f3d0;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+    /* Border Radius Design Tokens */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-full: 9999px;
+    /* Elevation Design Tokens */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+.sf-shell {
+    background: #ffffff;
+    padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--slate-800);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--slate-200);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.sf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 0 20px 0;
+    border-bottom: 1px solid var(--slate-100);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.sf-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sf-brand-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.sf-brand-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.sf-brand-eyebrow {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--brand-600);
+    text-transform: uppercase;
+}
+
+.sf-brand-title {
+    margin: 2px 0 0 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--slate-900);
+}
+
+.sf-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* ── CUSTOM TOGGLE SWITCH (SaaS style) ──────────────────── */
+.sf-toggle-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.sf-toggle-label {
+    font-size: 13px;
+    color: var(--slate-600);
+    font-weight: 600;
+}
+
+.sf-switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 22px;
+}
+
+.sf-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.sf-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--slate-300);
+    border-radius: var(--radius-full);
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sf-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.sf-switch input:checked+.sf-slider {
+    background-color: var(--brand-600);
+}
+
+.sf-switch input:focus+.sf-slider {
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+.sf-switch input:checked+.sf-slider:before {
+    transform: translateX(16px);
+}
+
+/* Refresh Button */
+.sf-icon-btn-header {
+    width: 36px;
+    height: 36px;
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    color: var(--slate-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-xs);
+}
+
+.sf-icon-btn-header:hover {
+    background: var(--slate-50);
+    color: var(--slate-900);
+    border-color: var(--slate-300);
+}
+
+.sf-icon-btn-header:active {
+    transform: scale(0.96);
+}
+
+.sf-icon-btn-header:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+}
+
+.sf-icon-btn-header svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.25s ease;
+}
+
+.sf-icon-btn-header:hover svg {
+    transform: rotate(30deg);
+}
+
+/* ── STATES ─────────────────────────────────────────────── */
+.sf-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    background: var(--slate-50);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--slate-200);
+}
+
+.sf-state-icon-wrap {
+    width: 64px;
+    height: 64px;
+    background: var(--slate-100);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    color: var(--slate-400);
+}
+
+.sf-state-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.sf-state-title {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--slate-900);
+}
+
+.sf-state-body {
+    margin: 0;
+    font-size: 14px;
+    color: var(--slate-500);
+    line-height: 1.6;
+    max-width: 320px;
+}
+
+.sf-state-text {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--slate-600);
+    font-weight: 500;
+}
+
+/* ── Spinner ────────────────────────────────────────────── */
+.sf-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--slate-200);
+    border-top-color: var(--brand-600);
+    border-radius: var(--radius-full);
+    animation: sf-spin 0.6s linear infinite;
+}
+
+.sf-spinner-xs {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+}
+
+@keyframes sf-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── ROWS ───────────────────────────────────────────────── */
+.sf-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ── Pagination ─────────────────────────────────────────── */
+.sf-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--slate-200);
+}
+
+.sf-pager-range {
+    font-size: 0.78rem;
+    color: var(--slate-500);
+    /* Digits change every page turn; tabular figures stop the label twitching. */
+    font-variant-numeric: tabular-nums;
+}
+
+.sf-pager-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.sf-pager-page {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--slate-600);
+    font-variant-numeric: tabular-nums;
+    min-width: 8.5ch;
+    text-align: center;
+}
+
+.sf-pager-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 11px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--slate-600);
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.sf-pager-btn svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+.sf-pager-btn:hover:not(:disabled) {
+    color: var(--brand-600);
+    border-color: var(--brand-200);
+    background: var(--brand-50);
+}
+
+.sf-pager-btn:focus-visible {
+    outline: 2px solid var(--brand-600);
+    outline-offset: 2px;
+}
+
+/* Disabled rather than hidden: the control keeps its place, so the row does
+   not jump sideways when you reach the first or last page. */
+.sf-pager-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+    .sf-pager { justify-content: center; }
+    .sf-pager-nav { margin-left: 0; }
+}
+
+.sf-row-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sf-row-card:hover {
+    border-color: var(--slate-300);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.sf-row-card-failure {
+    border-left: 4px solid var(--red-500);
+}
+
+.sf-row-card-failure:hover {
+    border-left-color: var(--red-600);
+}
+
+.sf-row-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.sf-row-icon-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    background: var(--brand-50);
+    color: var(--brand-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.sf-row-card-failure .sf-row-icon-wrap {
+    background: var(--red-50);
+    color: var(--red-500);
+}
+
+.sf-row-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.sf-row-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.sf-row-filename {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-900);
+    word-break: break-word;
+    letter-spacing: -0.01em;
+}
+
+.sf-row-meta {
+    margin: 0;
+    font-size: 13px;
+    color: var(--slate-500);
+    line-height: 1.5;
+}
+
+.sf-row-meta strong {
+    color: var(--slate-700);
+    font-weight: 600;
+}
+
+.sf-row-sep {
+    color: var(--slate-300);
+    margin: 0 6px;
+}
+
+/* Dynamic linked tag styling */
+.sf-row-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 8px 0 0 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--emerald-700);
+    background: var(--emerald-50);
+    border: 1px solid var(--emerald-200);
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+}
+
+.sf-row-tag-icon {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2.5;
+}
+
+/* ── STATUS BADGES ──────────────────────────────────────── */
+.sf-status-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+.sf-status-success {
+    background: var(--emerald-50);
+    color: var(--emerald-700);
+    border-color: var(--emerald-200);
+}
+
+.sf-status-failure {
+    background: var(--red-50);
+    color: var(--red-700);
+    border-color: var(--red-200);
+}
+
+.sf-status-progress {
+    background: var(--amber-50);
+    color: var(--amber-700);
+    border-color: var(--amber-100);
+}
+
+/* ── ERROR BLOCK ────────────────────────────────────────── */
+.sf-row-error {
+    background: var(--slate-50);
+    border: 1px solid var(--red-100);
+    border-left: 3px solid var(--red-500);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+}
+
+.sf-row-error pre {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    color: var(--red-700);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+/* ── ROW ACTIONS ────────────────────────────────────────── */
+.sf-row-actions {
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--slate-100);
+    padding-top: 14px;
+    flex-wrap: wrap;
+}
+
+.sf-row-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s ease-in-out;
+    font-family: inherit;
+    line-height: 1.2;
+}
+
+.sf-row-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sf-row-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.sf-row-btn:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+}
+
+.sf-row-btn-primary {
+    background: var(--brand-600);
+    color: #ffffff;
+    border-color: var(--brand-600);
+    box-shadow: var(--shadow-xs);
+}
+
+.sf-row-btn-primary:hover:not(:disabled) {
+    background: var(--brand-700);
+    border-color: var(--brand-700);
+}
+
+.sf-row-btn-ghost {
+    background: #ffffff;
+    color: var(--slate-700);
+    border: 1px solid var(--slate-200);
+    box-shadow: var(--shadow-xs);
+}
+
+.sf-row-btn-ghost:hover:not(:disabled) {
+    border-color: var(--slate-300);
+    background: var(--slate-50);
+    color: var(--slate-900);
+}
+
+.sf-row-btn-danger {
+    background: #ffffff;
+    color: var(--red-600);
+    border: 1px solid var(--red-200);
+    box-shadow: var(--shadow-xs);
+}
+
+.sf-row-btn-danger:hover:not(:disabled) {
+    background: var(--red-50);
+    border-color: var(--red-500);
+    color: var(--red-700);
+}
+
+.sf-row-btn-icon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+/* ── MODALS (Glassmorphic Redesign) ─────────────────────── */
+.sf-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    /* Slate 900 tint */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    padding: 20px;
+    animation: sf-fade-in 0.18s ease-out;
+}
+
+@keyframes sf-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.sf-modal-dialog {
+    background: #ffffff;
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 460px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    animation: sf-fade-up 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid var(--slate-100);
+}
+
+.sf-modal-wide {
+    max-width: 580px;
+}
+
+@keyframes sf-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sf-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.sf-modal-icon-warn,
+.sf-modal-icon-info {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.sf-modal-icon-warn {
+    background: var(--amber-500);
+    box-shadow: 0 4px 10px rgba(245, 166, 35, 0.2);
+}
+
+.sf-modal-icon-info {
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+    box-shadow: 0 4px 10px rgba(124, 58, 237, 0.2);
+}
+
+.sf-modal-icon-warn svg,
+.sf-modal-icon-info svg {
+    width: 18px;
+    height: 18px;
+}
+
+.sf-modal-eyebrow {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--brand-600);
+    text-transform: uppercase;
+}
+
+.sf-modal-title {
+    margin: 2px 0 0 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--slate-900);
+}
+
+.sf-modal-body {
+    padding: 20px 24px;
+}
+
+.sf-modal-body p {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: var(--slate-600);
+    line-height: 1.6;
+}
+
+.sf-modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+.sf-modal-hint {
+    color: var(--slate-400) !important;
+    font-size: 12px !important;
+}
+
+.sf-form-row {
+    margin-bottom: 16px;
+}
+
+/* LWC input customization mapping */
+.sf-input {
+    --slds-c-input-color-background: var(--slate-50);
+    --slds-c-input-color-border: var(--slate-200);
+    --slds-c-input-radius-border: var(--radius-sm);
+    --slds-c-textarea-color-background: var(--slate-50);
+    --slds-c-textarea-color-border: var(--slate-200);
+    --slds-c-textarea-radius-border: var(--radius-sm);
+}
+
+.sf-attachment-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--brand-50);
+    border: 1px solid var(--brand-200);
+    border-radius: var(--radius-full);
+    margin-top: 8px;
+}
+
+.sf-chip-icon {
+    width: 12px;
+    height: 12px;
+    color: var(--brand-600);
+    stroke-width: 2.5;
+}
+
+.sf-chip-label {
+    font-size: 12px;
+    color: var(--brand-700);
+    font-weight: 600;
+    word-break: break-all;
+}
+
+.sf-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--slate-100);
+    background: var(--slate-50);
+}
+
+/* ── BUTTONS (modal) ────────────────────────────────────── */
+.sf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    font-family: inherit;
+    line-height: 1.2;
+    border: 1px solid transparent;
+}
+
+.sf-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.sf-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.sf-btn:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+}
+
+.sf-btn-primary {
+    background: var(--brand-600);
+    color: #ffffff;
+    border-color: var(--brand-600);
+    box-shadow: var(--shadow-sm);
+}
+
+.sf-btn-primary:hover:not(:disabled) {
+    background: var(--brand-700);
+    border-color: var(--brand-700);
+    box-shadow: var(--shadow-md);
+}
+
+.sf-btn-ghost {
+    background: #ffffff;
+    color: var(--slate-700);
+    border: 1px solid var(--slate-200);
+    box-shadow: var(--shadow-xs);
+}
+
+.sf-btn-ghost:hover:not(:disabled) {
+    border-color: var(--slate-300);
+    background: var(--slate-100);
+    color: var(--slate-900);
+}
+
+.sf-btn-danger {
+    background: var(--red-500);
+    color: #ffffff;
+    border-color: var(--red-500);
+    box-shadow: var(--shadow-sm);
+}
+
+.sf-btn-danger:hover:not(:disabled) {
+    background: var(--red-600);
+    border-color: var(--red-600);
+}
+
+/* ── FILE PREVIEW MODAL ─────────────────────────────────── */
+.sf-modal-preview {
+    max-width: 980px;
+    width: 94vw;
+    height: 86vh;
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+.sf-modal-header-preview {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--slate-200);
+    align-items: center;
+    flex-shrink: 0;
+    display: flex;
+    gap: 16px;
+}
+
+.sf-modal-title-block {
+    flex: 1;
+    min-width: 0;
+}
+
+.sf-modal-title-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    display: block;
+}
+
+.sf-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--slate-200);
+    background: #ffffff;
+    color: var(--slate-500);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease-in-out;
+    padding: 0;
+}
+
+.sf-modal-close:hover {
+    background: var(--slate-50);
+    color: var(--slate-900);
+    border-color: var(--slate-300);
+}
+
+.sf-modal-close:active {
+    transform: scale(0.95);
+}
+
+.sf-modal-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+.sf-modal-body-preview {
+    flex: 1;
+    padding: 0;
+    background: var(--slate-800);
+    /* Dark grey backing for document preview contrast */
+    overflow: hidden;
+    position: relative;
+}
+
+.sf-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #ffffff;
+}
+
+.sf-preview-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: #ffffff;
+    background: rgba(15, 23, 42, 0.9);
+    z-index: 1;
+}
+
+.sf-preview-loading .sf-spinner {
+    width: 36px;
+    height: 36px;
+    border-width: 3px;
+    border-top-color: #ffffff;
+}
+
+.sf-btn-link {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sf-btn-link .sf-btn-icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* Responsive Overrides */
+@media (max-width: 600px) {
+    .sf-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .sf-header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sf-row-actions {
+        flex-direction: column;
+    }
+
+    .sf-row-btn {
+        justify-content: center;
+    }
+
+    .sf-modal-preview {
+        width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+}
+/* Friendly failure copy: prose first, stack trace behind a toggle. */
+.sf-row-error-title {
+    margin: 0 0 3px;
+    font-size: 12.5px;
+    font-weight: 650;
+    color: #b91c1c;
+}
+.sf-row-error-text {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: #7f1d1d;
+    white-space: normal;
+}
+.sf-row-error-details { margin-top: 7px; }
+.sf-row-error-details summary {
+    cursor: pointer;
+    font-size: 11.5px;
+    color: #991b1b;
+}
+.sf-row-error-details pre {
+    margin: 6px 0 0;
+    max-height: 200px;
+    overflow: auto;
+    font-size: 11px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

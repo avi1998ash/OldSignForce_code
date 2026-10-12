@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="token" type="String" label="Token"/>
+            <property name="signerEmail" type="String" label="Signer Email"/>
+            <property name="signerId" type="String" label="Signer Id"/>
+            <property name="label" type="String" label="Label"/>
+            <property name="agreementName" type="String" label="Agreement Name"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

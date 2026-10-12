@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>SignForce Bulk Generate</masterLabel>
+    <description>Runs a document template over a set of selected records. Used as the screen of the SignForce Bulk Generate Documents flow, launched from a list view button.</description>
+    <targets>
+        <target>lightning__FlowScreen</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="flowRecordIds" type="String[]"
+                      label="Record Ids"
+                      description="The records to generate documents for. Wire this to the flow's ids collection."/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

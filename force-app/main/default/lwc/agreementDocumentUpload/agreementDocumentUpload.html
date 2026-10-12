@@ -1,0 +1,109 @@
+<!--
+  @description       : SignForce Uploaded Documents list LWC template
+  @author            : Antigravity Redesign
+  @last modified on  : 05-21-2026
+-->
+<template>
+    <c-signforce-access-gate>
+        <lightning-card title="Documents" icon-name="standard:document" class="sf-docs-card">
+
+            <div slot="actions">
+                <template if:true={documents.length}>
+                    <span class="doc-count-badge">{documents.length}</span>
+                </template>
+            </div>
+
+            <div class="slds-p-around_medium sf-shell-content">
+
+                <template if:true={isLoading}>
+                    <div class="loading-row">
+                        <div class="sf-spinner sf-spinner-md"></div>
+                    </div>
+                </template>
+
+                <!-- Document cards -->
+                <template if:true={documents.length}>
+                    <div class="docs-header">
+                        <span class="docs-title">Uploaded Documents</span>
+                    </div>
+                    <div class="docs-grid">
+                        <template for:each={documents} for:item="doc">
+                            <div key={doc.Id} class="doc-card">
+                                <div class={doc.iconBgClass}>
+                                    <lightning-icon icon-name={doc.icon} size="medium" variant="inverse"></lightning-icon>
+                                </div>
+                                <div class="doc-info">
+                                    <p class="doc-name" title={doc.Name}>{doc.Name}</p>
+                                    <div class="doc-meta">
+                                        <span class={doc.typeBadgeClass}>{doc.typeLabel}</span>
+                                    </div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button class="action-btn action-preview" data-url={doc.accessUrl} data-name={doc.Name} data-id={doc.Id} data-cloud={doc.cloudFlag} onclick={handlePreview} title="Preview">
+                                        <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
+                                    </button>
+                                    <button class="action-btn action-download" data-url={doc.accessUrl} data-name={doc.Name} data-id={doc.Id} data-cloud={doc.cloudFlag} onclick={handleDownload} title="Download">
+                                        <lightning-icon icon-name="utility:download" size="x-small"></lightning-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <template if:false={documents.length}>
+                    <template if:false={isLoading}>
+                        <div class="empty-state">
+                            <div class="empty-state-icon-wrap empty-state-icon-brand">
+                                <lightning-icon icon-name="utility:add_source" size="small" class="empty-icon"></lightning-icon>
+                            </div>
+                            <p class="empty-title">No documents yet</p>
+                            <p class="empty-sub">Documents are attached while creating an agreement.</p>
+                            <lightning-button class="empty-cta" variant="brand" label="Go to Create Agreement"
+                                icon-name="utility:forward" icon-position="right"
+                                onclick={handleGoToCreateAgreement}></lightning-button>
+                        </div>
+                    </template>
+                </template>
+
+            </div>
+
+            <!-- Preview Modal -->
+            <template if:true={showPreviewModal}>
+                <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open preview-modal sf-modal-backdrop" onclick={closePreview}>
+                    <div class="slds-modal__container sf-modal-dialog sf-modal-preview" onclick={stopPropagation}>
+                        <header class="slds-modal__header sf-modal-header-preview">
+                            <div class="sf-modal-icon-info">
+                                <lightning-icon icon-name="standard:document" size="small"></lightning-icon>
+                            </div>
+                            <div class="sf-modal-title-block">
+                                <p class="sf-modal-eyebrow">DOCUMENT PREVIEW</p>
+                                <h2 class="slds-modal__title slds-hyphenate sf-modal-title-truncate" title={previewDocName}>{previewDocName}</h2>
+                            </div>
+                            <button class="slds-button slds-button_icon slds-modal__close sf-modal-close" title="Close" onclick={closePreview}>
+                                <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                            </button>
+                        </header>
+                        <div class="slds-modal__content sf-modal-body-preview">
+                            <iframe src={previewUrl} class="sf-preview-frame" title="Document Preview" onload={handleFrameLoad}></iframe>
+                        </div>
+                        <footer class="slds-modal__footer modal-footer sf-modal-footer">
+                            <button class="footer-btn footer-btn-primary" onclick={handleDownloadFromPreview}>
+                                <lightning-icon icon-name="utility:download" size="x-small" class="footer-btn-icon"></lightning-icon>
+                                <span>Download</span>
+                            </button>
+                            <button class="footer-btn footer-btn-ghost" onclick={closePreview}>
+                                <span>Close</span>
+                            </button>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open sf-modal-overlay"></div>
+            </template>
+
+        </lightning-card>
+
+        <!-- Themed confirm, in place of the browser's native dialog -->
+        <c-signforce-confirm></c-signforce-confirm>
+    </c-signforce-access-gate>
+</template>

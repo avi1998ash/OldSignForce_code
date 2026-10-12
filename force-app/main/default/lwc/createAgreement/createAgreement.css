@@ -1,0 +1,1625 @@
+/* =============== Design tokens =============== */
+:host {
+    /* Color Palette Design Tokens */
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;  /* Primary Indigo/Violet Brand Accent */
+    --brand-700: #6d28d9;
+    --brand-900: #4c1d95;
+
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-200: #a7f3d0;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+
+    /* Map legacy variables to preserve existing selectors */
+    --navy-900: var(--slate-900);
+    --navy-800: var(--slate-800);
+    --navy-700: var(--slate-700);
+    --navy-100: var(--slate-100);
+
+    --warm-white: #ffffff;
+    --warm-50: var(--slate-50);
+    --warm-100: var(--slate-100);
+    --warm-200: var(--slate-200);
+    --warm-400: var(--slate-400);
+    --warm-600: var(--slate-500);
+    --warm-800: var(--slate-800);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 25px -5px rgba(99, 102, 241, 0.05), 0 8px 10px -6px rgba(168, 85, 247, 0.03);
+    --shadow-glow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.55);
+    --glass-blur: blur(12px) saturate(180%);
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* =============== Shell =============== */
+.wizard-shell {
+    position: relative;
+    min-height: 100vh;
+    background: var(--slate-50);
+    padding: 32px 24px 80px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--slate-800);
+}
+
+.ambient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 480px;
+    background:
+        radial-gradient(ellipse 800px 400px at 20% 0%, rgba(99, 102, 241, 0.06), transparent 60%),
+        radial-gradient(ellipse 600px 400px at 90% 10%, rgba(168, 85, 247, 0.04), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.wizard-container {
+    max-width: 880px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    transition: max-width 0.3s var(--ease-out);
+}
+
+/* When Step 4 is active, expand the entire container */
+.wizard-container.editor-active {
+    max-width: 100%;
+    padding: 0;
+}
+
+.wizard-container.editor-active .wizard-header {
+    margin-bottom: 16px;
+}
+
+.wizard-container.editor-active .progress-rail {
+    margin-bottom: 16px;
+}
+
+.wizard-container.editor-active .ambient-bg {
+    display: none;
+}
+
+.wizard-container.editor-active .step-counter {
+    display: none;
+}
+
+.wizard-container.editor-active .content-card {
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+}
+
+.wizard-container.editor-active .editor-step {
+    padding: 12px 24px 8px !important;
+}
+
+.wizard-container.editor-active .step-header {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.wizard-container.editor-active .step-eyebrow {
+    display: none;
+}
+
+.wizard-container.editor-active .step-description {
+    font-size: 12px;
+    margin: 0;
+    max-width: none;
+}
+
+.wizard-container.editor-active .editor-fullwidth {
+    height: calc(100vh - 180px);
+    min-height: 360px;
+    border-top: none;
+    /* Hard guard: whatever the editor computes internally, it can never paint
+       outside the box the wizard gave it (this is what leaked through the
+       sticky footer before). */
+    overflow: hidden;
+}
+
+.wizard-container.editor-active .editor-fullwidth c-document-editor {
+    --editor-height: calc(100vh - 180px);
+    /* The wizard owns the height here - drop the standalone 650px floor so the
+       editor matches its box exactly instead of overflowing it. */
+    --editor-min-height: 0;
+}
+
+.wizard-container.editor-active .step-title {
+    font-size: 18px;
+    margin: 0;
+}
+
+.wizard-container.editor-active .wizard-footer {
+    padding: 8px 24px;
+    /* BUG-035 FIX: mirror the FAB clearance for the sticky editor footer. */
+    padding-right: 104px;
+    margin-top: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+}
+
+/* =============== Header =============== */
+.wizard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    animation: fadeSlideDown 0.6s var(--ease-out);
+}
+
+@keyframes fadeSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.brand-mark {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.brand-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.brand-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.brand-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #6366f1;
+    margin: 0 0 2px 0;
+}
+
+.brand-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--slate-900);
+    margin: 0;
+}
+
+.step-counter {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.step-current {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--slate-900);
+    font-variant-numeric: tabular-nums;
+}
+
+.step-divider {
+    color: var(--slate-400);
+    font-weight: 400;
+}
+
+.step-total {
+    font-size: 14px;
+    color: var(--slate-500);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* =============== Progress Rail =============== */
+.progress-rail {
+    position: relative;
+    margin-bottom: 40px;
+    padding: 0 8px;
+    animation: fadeSlideDown 0.6s var(--ease-out) 0.1s both;
+}
+
+.progress-line {
+    position: absolute;
+    top: 18px;
+    left: 28px;
+    right: 28px;
+    height: 2px;
+    background: var(--slate-200);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+    border-radius: 2px;
+    transition: width 0.6s var(--ease-out);
+}
+
+.progress-steps {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+}
+
+.step-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.step-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid var(--slate-200);
+    color: var(--slate-400);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.35s var(--ease-spring);
+    box-shadow: var(--shadow-sm);
+}
+
+.step-dot svg {
+    width: 16px;
+    height: 16px;
+}
+
+.step-dot-active {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    border-color: #6366f1;
+    color: white;
+    transform: scale(1.08);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.step-dot-complete {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.3s;
+    white-space: nowrap;
+}
+
+.step-label-active {
+    color: #6366f1;
+    font-weight: 800;
+}
+
+.step-label-complete {
+    color: #10b981;
+    font-weight: 800;
+}
+
+/* =============== Content Card =============== */
+.content-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--glass-border);
+    overflow: visible;
+    animation: fadeScale 0.5s var(--ease-out) 0.2s both;
+    transition: box-shadow 0.3s var(--ease-out);
+}
+
+.content-card:hover {
+    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.06), 0 8px 16px rgba(168, 85, 247, 0.03);
+}
+
+@keyframes fadeScale {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.step-content {
+    padding: 48px 56px;
+    animation: fadeIn 0.4s var(--ease-out);
+}
+
+.step-content.editor-step {
+    padding: 32px 32px 24px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-header {
+    margin-bottom: 36px;
+}
+
+.step-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #a855f7;
+    margin: 0 0 8px 0;
+}
+
+.step-title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 0 10px 0;
+    /* BUG-052 FIX: with -webkit-background-clip:text the gradient only paints
+       inside the line-box, so a tight line-height (1.1) clipped descenders
+       (the tail of 'g'/'y'/'p'). 1.3 gives descenders room to render. */
+    line-height: 1.3;
+    padding-bottom: 0.08em;
+}
+
+.step-description {
+    font-size: 15px;
+    color: var(--slate-500);
+    margin: 0;
+    line-height: 1.5;
+    max-width: 560px;
+}
+
+/* =============== Forms =============== */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Style Salesforce lightning-input labels */
+.form-grid lightning-input,
+.form-grid lightning-combobox,
+.form-grid lightning-textarea {
+    --slds-c-input-color-background: var(--warm-white);
+    --slds-c-input-color-border: rgba(226, 232, 240, 0.8);
+    --slds-c-input-radius-border: var(--radius-sm);
+    --slds-c-input-spacing-block: 10px;
+    --slds-c-input-color-border-focus: #6366f1;
+    --slds-c-input-shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* BUG-020/046 FIX: the read-only "Signing Order" used to render its value flush
+   against the left border. The earlier SLDS-styling-hook approach did NOT work
+   (a base lightning-input's inner <input> padding is not settable from a parent
+   stylesheet, and these hooks aren't consumed by it). It is now a NATIVE SLDS
+   input (see HTML), whose padding we DO control: .slds-input already supplies
+   standard horizontal padding so the number is inset like every other field. */
+.signer-order .slds-input {
+    padding: 0 1rem;
+    border-radius: var(--radius-sm);
+}
+
+/* =============== Upload Zone =============== */
+.upload-dropzone {
+    border: 2px dashed rgba(99, 102, 241, 0.35);
+    border-radius: var(--radius-lg);
+    padding: 56px 32px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s var(--ease-out);
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.upload-dropzone:hover {
+    border-color: #818cf8;
+    background: rgba(99, 102, 241, 0.03);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.upload-dropzone-active {
+    border-color: #a855f7 !important;
+    background: rgba(168, 85, 247, 0.05) !important;
+    transform: scale(1.005);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+}
+
+.upload-icon-wrapper {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    transition: transform 0.3s var(--ease-spring);
+}
+
+.upload-dropzone:hover .upload-icon-wrapper {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+
+.upload-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.upload-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 6px 0;
+    letter-spacing: -0.01em;
+}
+
+.upload-subtitle {
+    font-size: 14px;
+    color: var(--slate-500);
+    margin: 0 0 24px 0;
+}
+
+.upload-button-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.upload-formats {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.format-chip {
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.5px;
+    color: #4f46e5;
+    background: rgba(99, 102, 241, 0.06);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.uploaded-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+    animation: fadeScale 0.4s var(--ease-spring);
+}
+
+.uploaded-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: white;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.uploaded-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.uploaded-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.uploaded-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.uploaded-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: #059669;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.1);
+    }
+}
+
+.uploaded-remove {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--slate-400);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.uploaded-remove:hover {
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.uploaded-remove svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* =============== Signers =============== */
+.signers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.signer-card {
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: var(--radius-md);
+    overflow: visible;
+    background: rgba(255, 255, 255, 0.5);
+    transition: all 0.25s var(--ease-out);
+    animation: fadeScale 0.4s var(--ease-spring);
+}
+
+.signer-card:hover {
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.08);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.signer-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+}
+
+.signer-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
+}
+
+.signer-label {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0;
+    flex: 1;
+}
+
+.signer-remove {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--slate-400);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.signer-remove:hover {
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.signer-remove svg {
+    width: 14px;
+    height: 14px;
+}
+
+.signer-form {
+    padding: 20px;
+}
+
+.signer-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.signer-row:last-child {
+    margin-bottom: 0;
+}
+
+.signer-row lightning-input,
+.signer-row lightning-combobox {
+    --slds-c-input-color-background: var(--warm-white);
+    --slds-c-input-color-border: rgba(226, 232, 240, 0.8);
+    --slds-c-input-radius-border: var(--radius-sm);
+    --slds-c-input-spacing-block: 10px;
+    --slds-c-input-text-color: #0f172a;
+    --slds-c-input-color-border-focus: #6366f1;
+    --slds-c-input-shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    display: block;
+    width: 100%;
+}
+
+.add-signer-btn {
+    width: 100%;
+    padding: 14px;
+    border: 1.5px dashed rgba(99, 102, 241, 0.35);
+    background: transparent;
+    border-radius: var(--radius-md);
+    color: #4f46e5;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s var(--ease-out);
+}
+
+.add-signer-btn:hover {
+    border-color: #818cf8;
+    background: rgba(99, 102, 241, 0.05);
+    color: #6366f1;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
+}
+
+.add-signer-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* =============== Editor Step =============== */
+.editor-frame {
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--warm-white);
+}
+
+/* =============== Review =============== */
+.warning-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    background: rgba(254, 243, 199, 0.4);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-left: 4px solid #f59e0b;
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    animation: fadeScale 0.4s var(--ease-spring);
+}
+
+.warning-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: #f59e0b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+}
+
+.warning-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.warning-title {
+    font-size: 14.5px;
+    font-weight: 750;
+    color: #b45309;
+    margin: 0 0 4px 0;
+}
+
+.warning-text {
+    font-size: 13px;
+    color: var(--slate-600);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.review-card {
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: var(--shadow-sm);
+}
+
+.review-card-header {
+    padding: 14px 20px;
+    background: rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.review-section-title {
+    font-size: 12px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.signer-count-badge {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 10px;
+    border-radius: 20px;
+}
+
+.review-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+}
+
+.review-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.review-key {
+    font-size: 11px;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.review-value {
+    font-size: 14.5px;
+    color: var(--slate-900);
+    font-weight: 700;
+    margin: 0;
+}
+
+.review-signers {
+    padding: 8px;
+}
+
+.review-signer-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+}
+
+.review-signer-row:hover {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.review-signer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
+}
+
+.review-signer-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.review-signer-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 2px 0;
+}
+
+.review-signer-email {
+    font-size: 12px;
+    color: var(--slate-500);
+    margin: 0;
+}
+
+.role-chip {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    background: rgba(99, 102, 241, 0.06);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    color: #4f46e5;
+    border-radius: 20px;
+}
+
+.review-loading {
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+}
+
+/* =============== Footer =============== */
+.wizard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 24px;
+    /* Symmetric padding so Back (left) and Continue (right) mirror each
+       other against the content-card edges. The chatbot FAB is fixed to
+       the bottom-right viewport corner; on the 880px centred container it
+       clears the buttons on desktop, and the narrow-screen media queries
+       below stack the footer + reserve bottom clearance where it can overlap. */
+    padding: 0 8px 8px;
+}
+
+.footer-right {
+    display: flex;
+    gap: 10px;
+}
+
+/* On narrow desktop widths (~769-1024px) the 880px container nearly fills
+   the viewport, so the bottom-right chatbot FAB can sit over the right-aligned
+   Continue button on tall/scrolled steps. Keep the buttons in a mirrored row
+   (aligned) and just reserve vertical clearance below them. */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .wizard-footer {
+        padding-bottom: 80px;
+    }
+}
+
+.btn-primary,
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+    font-family: inherit;
+    letter-spacing: -0.01em;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4), 0 0 40px rgba(168, 85, 247, 0.2);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-primary.btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary.btn-success:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 35px rgba(5, 150, 105, 0.2);
+}
+
+.btn-primary svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--slate-700);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(99, 102, 241, 0.4);
+    color: #6366f1;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.1);
+}
+
+.btn-secondary svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* =============== Responsive =============== */
+@media (max-width: 768px) {
+    .wizard-shell {
+        padding: 20px 16px 60px;
+    }
+
+    .step-content {
+        padding: 32px 24px;
+    }
+
+    .step-title {
+        font-size: 26px;
+    }
+
+    .form-grid,
+    .signer-row,
+    .review-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wizard-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .step-label {
+        display: none;
+    }
+}
+
+/* ═══════ Editor Full Width Breakout ═══════ */
+.editor-step {
+    padding: 32px 40px 16px !important;
+}
+
+.editor-fullwidth {
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
+    min-height: calc(100vh - 280px);
+}
+
+.editor-fullwidth c-document-editor {
+    display: block;
+    width: 100%;
+    --editor-height: calc(100vh - 280px);
+}
+
+/* Hide the lightning-card wrapper from Create Agreement page */
+:host {
+    display: block;
+}
+
+/* ═══════ Responsive Fixes ═══════ */
+@media (max-width: 1200px) {
+    .wizard-container {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    .content-card {
+        border-radius: var(--radius-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .wizard-shell {
+        padding: 16px 8px 60px;
+    }
+
+    .wizard-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 28px;
+    }
+
+    .brand-title {
+        font-size: 20px;
+    }
+
+    .step-title {
+        font-size: 24px;
+    }
+
+    .step-content {
+        padding: 28px 20px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .signer-row {
+        grid-template-columns: 1fr;
+    }
+
+    .review-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .progress-steps {
+        gap: 0;
+    }
+
+    .step-label {
+        font-size: 9px;
+    }
+
+    .footer-right {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 11px 20px;
+        font-size: 13px;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .wizard-header {
+        margin-bottom: 20px;
+    }
+
+    .brand-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .brand-title {
+        font-size: 18px;
+    }
+
+    .step-eyebrow {
+        font-size: 10px;
+    }
+
+    .step-title {
+        font-size: 20px;
+    }
+
+    .step-description {
+        font-size: 13px;
+    }
+
+    .step-content {
+        padding: 24px 16px;
+    }
+
+    .upload-dropzone {
+        padding: 32px 16px;
+    }
+
+    .upload-title {
+        font-size: 16px;
+    }
+
+    .signer-form {
+        padding: 16px;
+    }
+
+    .review-grid {
+        padding: 16px;
+    }
+
+    .wizard-footer {
+        /* BUG-035 FIX: on narrow screens the FAB sits bottom-right over the
+           footer. Stack the footer and reserve bottom clearance so the
+           buttons sit clear of the ~64px FAB; reset the desktop right pad. */
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 0 4px 88px;
+    }
+
+    .progress-rail {
+        padding: 0;
+    }
+
+    .step-label {
+        display: none;
+    }
+}
+
+/* Hide document editor's own header bar and send button when inside wizard */
+.editor-fullwidth c-document-editor .editor-top-bar,
+.editor-fullwidth c-document-editor .top-bar {
+    display: none !important;
+}
+
+/* When inside wizard (no topbar), adjust height */
+.sf-editor-root:not(:has(.sf-topbar)) .sf-body {
+    height: calc(100vh - 200px);
+    min-height: 600px;
+}
+
+/* ═══════ Responsive ═══════ */
+@media (max-width: 1024px) {
+    .sf-left {
+        width: 180px;
+        min-width: 180px;
+    }
+
+    .sf-right {
+        width: 200px;
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sf-body {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .sf-left {
+        width: 100%;
+        min-width: auto;
+        height: auto;
+        overflow-y: visible;
+        border-right: none;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .sf-center {
+        min-height: 500px;
+    }
+
+    .sf-right {
+        width: 100%;
+        min-width: auto;
+        height: auto;
+        overflow-y: visible;
+        border-left: none;
+        border-top: 1px solid rgba(226, 232, 240, 0.8);
+    }
+}
+
+/* Hide ambient bg and reduce padding in editor mode */
+.wizard-shell.editor-mode {
+    padding: 0;
+    background: white;
+    /* The base shell floors at 100vh for the marketing-style steps. In editor
+       mode that only forces the page to scroll past the sticky footer. */
+    min-height: 0;
+}
+
+.wizard-shell.editor-mode .ambient-bg {
+    display: none;
+}
+
+.wizard-shell.editor-mode .wizard-header {
+    padding: 12px 24px;
+    margin-bottom: 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    background: white;
+}
+
+.wizard-shell.editor-mode .brand-icon {
+    width: 36px;
+    height: 36px;
+}
+
+.wizard-shell.editor-mode .brand-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.wizard-shell.editor-mode .brand-title {
+    font-size: 16px;
+}
+
+.wizard-shell.editor-mode .brand-label {
+    font-size: 10px;
+    margin: 0;
+}
+
+/* Fill the full allocated height through every layer of the editor */
+.wizard-container.editor-active .editor-fullwidth c-document-editor,
+.wizard-container.editor-active .editor-fullwidth c-document-editor .sf-editor-root,
+.wizard-container.editor-active .editor-fullwidth c-document-editor .sf-body {
+    height: 100% !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.wizard-container.editor-active .editor-fullwidth c-document-editor .sf-body {
+    flex-direction: row;
+}
+
+/* Critical: allow flex children to shrink below their content width/height */
+.wizard-container.editor-active .editor-fullwidth c-document-editor .sf-left,
+.wizard-container.editor-active .editor-fullwidth c-document-editor .sf-right,
+.wizard-container.editor-active .editor-fullwidth c-document-editor .sf-center {
+    min-width: 0;
+    min-height: 0;
+}
+
+/* Narrower side panels inside the wizard to give the canvas more room */
+@media (min-width: 1024px) {
+    .wizard-container.editor-active .editor-fullwidth c-document-editor .sf-left {
+        width: 200px;
+        min-width: 200px;
+    }
+
+    .wizard-container.editor-active .editor-fullwidth c-document-editor .sf-right {
+        width: 232px;
+        min-width: 232px;
+    }
+}
+
+/* On medium viewports, shrink side panels further */
+@media (max-width: 1200px) and (min-width: 769px) {
+    .wizard-container.editor-active .editor-fullwidth c-document-editor .sf-left {
+        width: 180px;
+        min-width: 180px;
+    }
+
+    .wizard-container.editor-active .editor-fullwidth c-document-editor .sf-right {
+        width: 200px;
+        min-width: 200px;
+    }
+}
+
+/* Mobile: stack vertically, let editor scroll naturally */
+@media (max-width: 768px) {
+    .wizard-container.editor-active .editor-fullwidth {
+        height: auto;
+        min-height: calc(100vh - 160px);
+    }
+
+    .wizard-container.editor-active .editor-fullwidth c-document-editor .sf-body {
+        flex-direction: column;
+        height: auto !important;
+    }
+
+    .wizard-container.editor-active .editor-fullwidth c-document-editor .sf-left,
+    .wizard-container.editor-active .editor-fullwidth c-document-editor .sf-right {
+        width: 100%;
+        min-width: 100%;
+        max-height: 200px;
+        border-right: none;
+        border-left: none;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+}
+
+/* Keep the wizard sticky footer above the editor's floating CTA on mobile */
+@media (max-width: 768px) {
+    .wizard-container.editor-active .editor-fullwidth c-document-editor .sf-floating-cta {
+        display: none;
+    }
+}
+
+/* ── Signer search & suggestions ── */
+.signer-search-wrap {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.signer-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
+}
+
+.signer-suggestion-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+    transition: background 0.12s ease;
+}
+
+.signer-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.signer-suggestion-item:hover {
+    background: #f5f7fb;
+}
+
+.suggestion-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.suggestion-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1f2e;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.suggestion-email {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 2px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.suggestion-source {
+    flex-shrink: 0;
+    margin-left: 12px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: rgba(99, 102, 241, 0.08);
+    color: #3730a3;
+}
+
+.signer-suggestions {
+    margin-top: 6px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+}
+
+.signer-suggestion-item {
+    padding: 12px 16px;
+    gap: 12px;
+}
+
+.signer-suggestion-item+.signer-suggestion-item {
+    border-top: 1px solid rgba(226, 232, 240, 0.4);
+}
+
+.signer-suggestion-item {
+    border-bottom: none;
+}
+
+.signer-suggestion-item:hover {
+    background: #f8fafc;
+}
+
+.suggestion-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.suggestion-source {
+    flex-shrink: 0;
+    align-self: center;
+    margin-left: 0;
+}
+/* ── "No cloud connected" notice on the upload step ── */
+/* No max-width: .upload-dropzone below has none either, so letting the banner fill
+   the container is what keeps their left and right edges flush. */
+.sf-storage-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+}
+
+.sf-storage-warning-icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    /* Sit on the title's optical centre, not the top of its line box. */
+    margin-top: 1px;
+    color: #6366f1;
+}
+
+.sf-storage-warning-body {
+    min-width: 0;
+}
+
+.sf-storage-warning-title {
+    margin: 0 0 3px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #3730a3;
+}
+
+.sf-storage-warning-text {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: #4338ca;
+}
+
+.sf-storage-warning-text strong {
+    font-weight: 700;
+    color: #312e81;
+}

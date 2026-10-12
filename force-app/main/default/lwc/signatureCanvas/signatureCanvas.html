@@ -1,0 +1,490 @@
+<template>
+    <div class="sc-shell">
+
+        <!-- ── Loading ── -->
+        <template if:true={isLoading}>
+            <div class="sc-fullscreen">
+                <lightning-spinner alternative-text="Loading document…" size="large"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- ── Error ── -->
+        <template if:true={hasError}>
+            <div class="sc-fullscreen">
+                <div class="sc-state-card">
+                    <div class="sc-state-icon sc-state-icon-error">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                    <h2 class="sc-state-title">Unable to continue</h2>
+                    <p class="sc-state-sub">{errorMessage}</p>
+                </div>
+            </div>
+        </template>
+
+        <!-- ── Success ── -->
+        <template if:true={isSigned}>
+            <div class="sc-fullscreen">
+                <div class="sc-state-card">
+                    <div class="sc-state-icon sc-state-icon-success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <h2 class="sc-state-title">Document signed</h2>
+                    <p class="sc-state-sub">You have successfully signed <strong>{internalAgreementName}</strong>. A confirmation email has been sent to you.</p>
+                </div>
+            </div>
+        </template>
+
+        <!-- ── Main signing UI ── -->
+        <template if:false={isLoading}>
+            <template if:false={hasError}>
+                <template if:false={isSigned}>
+
+                    <!-- Top bar -->
+                    <div class="sc-topbar">
+                        <div class="sc-topbar-left">
+                            <p class="sc-topbar-eyebrow">Signature requested</p>
+                            <p class="sc-topbar-name">{internalAgreementName}</p>
+                        </div>
+                        <div class="sc-topbar-right">
+                            <span class="sc-progress-text">{completionStatus}</span>
+                            <span class={statusPillClass}>{badgeLabel}</span>
+                        </div>
+                    </div>
+
+                    <div class="sc-main">
+
+                        <!-- ─── Left: Document preview ─── -->
+                        <div class="sc-col-left">
+                            <template if:true={hasDocument}>
+                                <div class="sc-panel">
+                                    <div class="sc-panel-head">
+                                        <p class="sc-panel-title">Document</p>
+                                    </div>
+                                    <iframe class="sc-doc-frame" src={documentPreviewUrl} height="780" scrolling="yes" title="Document preview">
+                                    </iframe>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- ─── Right: Fields + signature pad ─── -->
+                        <div class="sc-col-right">
+
+                            <!-- Required fields -->
+                            <template if:true={hasFields}>
+                                <div class="sc-panel" style="margin-bottom:20px;">
+                                    <div class="sc-panel-head">
+                                        <p class="sc-panel-title">Required fields</p>
+                                        <span class="sc-progress-text" style="color:var(--warm-600);">{completionStatus}</span>
+                                    </div>
+                                    <div class="sc-panel-body">
+                                        <div class="sc-fields-list">
+                                            <template for:each={signerFields} for:item="field">
+                                                <div key={field.Id} class={field.containerClass}>
+                                                    <div class="sc-field-head">
+                                                        <span class={field.dotClass}></span>
+                                                        <p class="sc-field-label">{field.Field_Label__c}</p>
+                                                        <template if:true={field.Is_Required__c}>
+                                                            <span class="sc-field-required">Required</span>
+                                                        </template>
+                                                    </div>
+
+                                                    <!-- Signature inline -->
+                                                    <template if:true={field.isSignature}>
+                                                        <template if:false={field.Is_Completed__c}>
+                                                            <div class="sc-field-canvas" onpointerdown={startSign} onpointermove={drawSign} onpointerup={stopSign}
+                                                                onpointercancel={stopSign} data-id={field.Id}>
+                                                                <svg data-id={field.Id} viewBox="0 0 600 100" preserveAspectRatio="none">
+                                                                    <template for:each={field.paths} for:item="path">
+                                                                        <path key={path.id} d={path.d} stroke="#0a1628" stroke-width="2.5" stroke-linecap="round"
+                                                                            stroke-linejoin="round" fill="none">
+                                                                        </path>
+                                                                    </template>
+                                                                </svg>
+                                                                <template if:true={field.isEmpty}>
+                                                                    <p class="sc-field-placeholder">Draw signature here</p>
+                                                                </template>
+                                                            </div>
+                                                            <div class="sc-field-actions">
+                                                                <button class="sc-btn sc-btn-secondary sc-btn-sm" data-id={field.Id} onclick={clearSignField}>Clear</button>
+                                                                <button class="sc-btn sc-btn-primary sc-btn-sm" data-id={field.Id} onclick={applySignField}>Apply</button>
+                                                            </div>
+                                                        </template>
+                                                        <template if:true={field.Is_Completed__c}>
+                                                            <div class="sc-field-done">
+                                                                <p class="sc-field-done-label">
+                                                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"
+                                                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                                                    </svg>
+                                                                    Signature applied
+                                                                </p>
+                                                                <button class="sc-btn sc-btn-ghost sc-btn-sm" data-id={field.Id} onclick={resetField}>Change</button>
+                                                            </div>
+                                                        </template>
+                                                    </template>
+
+                                                    <!-- Text -->
+                                                    <template if:true={field.isText}>
+                                                        <lightning-input type="text" variant="label-hidden" placeholder={field.placeholder} value={field.Field_Value__c}
+                                                            data-id={field.Id} onchange={handleFieldValueChange}>
+                                                        </lightning-input>
+                                                    </template>
+
+                                                    <!-- Date Signed -->
+                                                    <template if:true={field.isDate}>
+                                                        <lightning-input type="text" variant="label-hidden" value={field.Field_Value__c} data-id={field.Id} readonly>
+                                                        </lightning-input>
+                                                    </template>
+
+                                                    <!-- Checkbox -->
+                                                    <template if:true={field.isCheckbox}>
+                                                        <lightning-input type="checkbox" label="I agree" checked={field.isChecked} data-id={field.Id}
+                                                            onchange={handleCheckboxChange}>
+                                                        </lightning-input>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Primary signature pad -->
+                            <div class="sc-panel sc-sigpad">
+                                <div class="sc-sigpad-head">
+                                    <h2 class="sc-sigpad-title">Adopt your signature</h2>
+                                    <p class="sc-sigpad-sub">Confirm your signature by drawing, typing, or uploading an image. This will be applied to the document.</p>
+                                </div>
+
+                                <!-- Saved-signature banner -->
+                                <template if:true={hasSavedSignature}>
+                                    <template if:true={showUseSaved}>
+                                        <div class="sc-saved-banner">
+                                            <div class="sc-saved-banner-text">
+                                                <p class="sc-saved-banner-title">Saved signature found</p>
+                                                <p class="sc-saved-banner-sub">Use your previous signature or create a new one.</p>
+                                            </div>
+                                            <button class="sc-saved-banner-btn" onclick={handleUseSaved}>Use saved</button>
+                                        </div>
+                                    </template>
+                                </template>
+
+                                <!-- Tabs -->
+                                <div class="sc-tabs" role="tablist">
+                                    <button class={drawTabClass} onclick={selectDraw} role="tab" aria-selected={showDraw}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            aria-hidden="true">
+                                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                        </svg>
+                                        Draw
+                                    </button>
+                                    <button class={typeTabClass} onclick={selectType} role="tab" aria-selected={showType}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            aria-hidden="true">
+                                            <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                                            <line x1="9" y1="20" x2="15" y2="20"></line>
+                                            <line x1="12" y1="4" x2="12" y2="20"></line>
+                                        </svg>
+                                        Type
+                                    </button>
+                                    <button class={uploadTabClass} onclick={selectUpload} role="tab" aria-selected={showUpload}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            aria-hidden="true">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                        </svg>
+                                        Upload
+                                    </button>
+                                </div>
+
+                                <!-- Draw -->
+                                <template if:true={showDraw}>
+                                    <div class="sc-tabpanel">
+                                        <p class="sc-tabpanel-hint">Sign on the line below.</p>
+                                        <div class={canvasWrapClass} onpointerdown={startDraw} onpointermove={draw} onpointerup={stopDraw} onpointercancel={stopDraw}>
+                                            <svg class="sc-canvas" viewBox="0 0 640 220" preserveAspectRatio="none">
+                                                <template for:each={paths} for:item="path">
+                                                    <path key={path.id} d={path.d} stroke={penColor} stroke-width={penWidth} stroke-linecap="round" stroke-linejoin="round"
+                                                        fill="none">
+                                                    </path>
+                                                </template>
+                                            </svg>
+                                            <template if:true={showDrawPlaceholder}>
+                                                <p class="sc-canvas-placeholder">Sign here</p>
+                                            </template>
+                                        </div>
+
+                                        <div class="sc-canvas-toolbar">
+                                            <div class="sc-canvas-toolbar-left">
+                                                <div class="sc-color-picker" title="Pen color">
+                                                    <button class={colorBlackClass} style="background:#0a1628;" data-color="#0a1628" onclick={selectColor}
+                                                        aria-label="Black"></button>
+                                                    <button class={colorBlueClass} style="background:#1d4ed8;" data-color="#1d4ed8" onclick={selectColor}
+                                                        aria-label="Blue"></button>
+                                                    <button class={colorRedClass} style="background:#b91c1c;" data-color="#b91c1c" onclick={selectColor} aria-label="Red"></button>
+                                                </div>
+                                                <div class="sc-thickness-picker" title="Pen thickness">
+                                                    <button class={thin1Class} data-width="1.5" onclick={selectWidth} aria-label="Thin">
+                                                        <span class="sc-thickness-dot" style="width:4px;height:4px;"></span>
+                                                    </button>
+                                                    <button class={thin2Class} data-width="2.5" onclick={selectWidth} aria-label="Medium">
+                                                        <span class="sc-thickness-dot" style="width:6px;height:6px;"></span>
+                                                    </button>
+                                                    <button class={thin3Class} data-width="4" onclick={selectWidth} aria-label="Thick">
+                                                        <span class="sc-thickness-dot" style="width:8px;height:8px;"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="sc-canvas-toolbar-right">
+                                                <button class="sc-btn sc-btn-ghost sc-btn-sm" onclick={clearDraw}>Clear</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Type -->
+                                <template if:true={showType}>
+                                    <div class="sc-tabpanel">
+                                        <p class="sc-tabpanel-hint">Type your full name. We'll generate your signature and initials in a clean, professional signature stamp.</p>
+                                        <div class="sc-type-input">
+                                            <lightning-input type="text" variant="label-hidden" placeholder="Your full name" value={typedName} onchange={handleTypedName}>
+                                            </lightning-input>
+                                        </div>
+                                        <template if:true={typedName}>
+                                            <div class="sc-font-grid">
+                                                <button class={font1Class} onclick={selectFont1}>
+                                                    <p class="sc-font-label">Style 1</p>
+                                                    <div class="sc-ds-pair">
+                                                        <div class="sc-ds-stamp">
+                                                            <div class="sc-ds-stamp-head">
+                                                                <span class="sc-ds-tag">Signature</span>
+                                                            </div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">eSignforce by:</span>
+                                                                <span class="sc-ds-name sc-font-dancing">{typedName}</span>
+                                                                <span class="sc-ds-envelope">{envelopeId}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="sc-ds-stamp sc-ds-stamp-initials">
+                                                            <div class="sc-ds-stamp-head">
+                                                                <span class="sc-ds-tag">Initials</span>
+                                                            </div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">SD</span>
+                                                                <span class="sc-ds-name sc-font-dancing">{typedInitials}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+
+                                                <button class={font2Class} onclick={selectFont2}>
+                                                    <p class="sc-font-label">Style 2</p>
+                                                    <div class="sc-ds-pair">
+                                                        <div class="sc-ds-stamp">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Signature</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">eSignforce by:</span>
+                                                                <span class="sc-ds-name sc-font-greatvibes">{typedName}</span>
+                                                                <span class="sc-ds-envelope">{envelopeId}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="sc-ds-stamp sc-ds-stamp-initials">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Initials</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">SD</span>
+                                                                <span class="sc-ds-name sc-font-greatvibes">{typedInitials}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+
+                                                <button class={font3Class} onclick={selectFont3}>
+                                                    <p class="sc-font-label">Style 3</p>
+                                                    <div class="sc-ds-pair">
+                                                        <div class="sc-ds-stamp">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Signature</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">eSignforce by:</span>
+                                                                <span class="sc-ds-name sc-font-pacifico">{typedName}</span>
+                                                                <span class="sc-ds-envelope">{envelopeId}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="sc-ds-stamp sc-ds-stamp-initials">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Initials</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">SD</span>
+                                                                <span class="sc-ds-name sc-font-pacifico">{typedInitials}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+
+                                                <button class={font4Class} onclick={selectFont4}>
+                                                    <p class="sc-font-label">Style 4</p>
+                                                    <div class="sc-ds-pair">
+                                                        <div class="sc-ds-stamp">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Signature</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">eSignforce by:</span>
+                                                                <span class="sc-ds-name sc-font-caveat">{typedName}</span>
+                                                                <span class="sc-ds-envelope">{envelopeId}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="sc-ds-stamp sc-ds-stamp-initials">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Initials</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">SD</span>
+                                                                <span class="sc-ds-name sc-font-caveat">{typedInitials}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+
+                                                <button class={font5Class} onclick={selectFont5}>
+                                                    <p class="sc-font-label">Style 5</p>
+                                                    <div class="sc-ds-pair">
+                                                        <div class="sc-ds-stamp">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Signature</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">eSignforce by:</span>
+                                                                <span class="sc-ds-name sc-font-allura">{typedName}</span>
+                                                                <span class="sc-ds-envelope">{envelopeId}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="sc-ds-stamp sc-ds-stamp-initials">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Initials</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">SD</span>
+                                                                <span class="sc-ds-name sc-font-allura">{typedInitials}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+
+                                                <button class={font6Class} onclick={selectFont6}>
+                                                    <p class="sc-font-label">Style 6</p>
+                                                    <div class="sc-ds-pair">
+                                                        <div class="sc-ds-stamp">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Signature</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">eSignforce by:</span>
+                                                                <span class="sc-ds-name sc-font-satisfy">{typedName}</span>
+                                                                <span class="sc-ds-envelope">{envelopeId}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="sc-ds-stamp sc-ds-stamp-initials">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Initials</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">SD</span>
+                                                                <span class="sc-ds-name sc-font-satisfy">{typedInitials}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+
+                                                <button class={font7Class} onclick={selectFont7}>
+                                                    <p class="sc-font-label">Style 7</p>
+                                                    <div class="sc-ds-pair">
+                                                        <div class="sc-ds-stamp">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Signature</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">eSignforce by:</span>
+                                                                <span class="sc-ds-name sc-font-kaushan">{typedName}</span>
+                                                                <span class="sc-ds-envelope">{envelopeId}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="sc-ds-stamp sc-ds-stamp-initials">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Initials</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">SD</span>
+                                                                <span class="sc-ds-name sc-font-kaushan">{typedInitials}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+
+                                                <button class={font8Class} onclick={selectFont8}>
+                                                    <p class="sc-font-label">Style 8</p>
+                                                    <div class="sc-ds-pair">
+                                                        <div class="sc-ds-stamp">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Signature</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">eSignforce by:</span>
+                                                                <span class="sc-ds-name sc-font-sacramento">{typedName}</span>
+                                                                <span class="sc-ds-envelope">{envelopeId}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="sc-ds-stamp sc-ds-stamp-initials">
+                                                            <div class="sc-ds-stamp-head"><span class="sc-ds-tag">Initials</span></div>
+                                                            <div class="sc-ds-stamp-body">
+                                                                <span class="sc-ds-brand">SD</span>
+                                                                <span class="sc-ds-name sc-font-sacramento">{typedInitials}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <!-- Upload -->
+                                <template if:true={showUpload}>
+                                    <div class="sc-tabpanel">
+                                        <p class="sc-tabpanel-hint">Upload an image of your signature (PNG, JPG, GIF).</p>
+                                        <input type="file" id="sig-upload" accept="image/jpeg,image/png,image/gif" onchange={handleFileUpload} style="display:none;" />
+                                        <template if:false={uploadedImage}>
+                                            <div class={dropzoneClass} ondrop={handleDrop} ondragover={handleDragOver} ondragleave={handleDragLeave}>
+                                                <svg class="sc-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round" aria-hidden="true">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                                </svg>
+                                                <p class="sc-upload-text">Click to upload signature</p>
+                                                <p class="sc-upload-sub">Or drop a file here</p>
+                                                <button class="sc-btn sc-btn-secondary sc-btn-sm" onclick={triggerFileUpload}>Choose file</button>
+                                            </div>
+                                        </template>
+                                        <template if:true={uploadedImage}>
+                                            <div class="sc-upload-preview">
+                                                <img src={safeUploadedImage} alt="Signature preview" />
+                                                <div>
+                                                    <button class="sc-btn sc-btn-ghost sc-btn-sm" onclick={clearUpload}>Remove</button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Sticky action bar -->
+                            <div class="sc-actionbar">
+                                <button class="sc-btn sc-btn-danger" onclick={handleDecline}>Decline to sign</button>
+                                <button class="sc-btn sc-btn-primary" onclick={handleComplete}>
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    Complete signing
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </template>
+            </template>
+        </template>
+
+        <!-- Themed confirm/prompt, in place of the browser's native dialog -->
+        <c-signforce-confirm></c-signforce-confirm>
+    </div>
+</template>

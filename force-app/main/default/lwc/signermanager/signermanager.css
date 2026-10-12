@@ -1,0 +1,929 @@
+/* ════════════════════════════════════════════════════════════════
+   SignForce — Signers List Manager Redesigned SaaS Style Component
+   Features: Shared Brand Violet/Slate theme, micro-interactions
+   ════════════════════════════════════════════════════════════════ */
+
+:host {
+    /* Color Palette Design Tokens (Consistent with sfGeneratedDocuments) */
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;
+    /* Primary Indigo/Violet Brand Accent */
+    --brand-700: #6d28d9;
+    --brand-900: #4c1d95;
+
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-200: #a7f3d0;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+
+    /* Border Radius Design Tokens */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-full: 9999px;
+
+    /* Elevation Design Tokens */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Input customizations mapping */
+    --slds-c-input-color-background: var(--slate-50);
+    --slds-c-input-color-border: var(--slate-200);
+    --slds-c-input-radius-border: var(--radius-sm);
+    --slds-c-combobox-color-background: var(--slate-50);
+    --slds-c-combobox-color-border: var(--slate-200);
+    --slds-c-combobox-radius-border: var(--radius-sm);
+}
+
+.sf-shell {
+    background: #ffffff;
+    padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--slate-800);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--slate-200);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.sf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 0 20px 0;
+    border-bottom: 1px solid var(--slate-100);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.sf-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sf-brand-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.sf-brand-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.sf-brand-eyebrow {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--brand-600);
+    text-transform: uppercase;
+}
+
+.sf-brand-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.sf-brand-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--slate-900);
+}
+
+.sf-count-badge {
+    background: var(--slate-900);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    letter-spacing: 0.02em;
+    box-shadow: var(--shadow-xs);
+}
+
+.sf-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Header action circular buttons */
+.sf-icon-btn-header {
+    width: 36px;
+    height: 36px;
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    color: var(--slate-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s var(--ease-out);
+    box-shadow: var(--shadow-xs);
+}
+
+.sf-icon-btn-header svg {
+    width: 16px;
+    height: 16px;
+}
+
+.sf-icon-btn-header:active {
+    transform: scale(0.95);
+}
+
+/* Custom themed header button states */
+.sf-btn-remind-all {
+    background: var(--amber-50);
+    color: var(--amber-600);
+    border-color: var(--amber-100);
+}
+
+.sf-btn-remind-all:hover {
+    background: var(--amber-100);
+    color: var(--amber-700);
+    border-color: var(--amber-500);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(245, 158, 11, 0.15);
+}
+
+.sf-btn-void-all {
+    background: var(--red-50);
+    color: var(--red-500);
+    border-color: var(--red-100);
+}
+
+.sf-btn-void-all:hover {
+    background: var(--red-100);
+    color: var(--red-700);
+    border-color: var(--red-500);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(239, 68, 68, 0.15);
+}
+
+.sf-btn-template-all {
+    background: var(--slate-50);
+    color: var(--slate-600);
+    border-color: var(--slate-200);
+}
+
+.sf-btn-template-all:hover {
+    background: var(--brand-50);
+    color: var(--brand-600);
+    border-color: var(--brand-200);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(124, 58, 237, 0.12);
+}
+
+/* ── BASE BUTTONS ───────────────────────────────────────── */
+.sf-row-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s var(--ease-out);
+    font-family: inherit;
+    line-height: 1.2;
+}
+
+.sf-row-btn-primary {
+    background: var(--brand-600);
+    color: #ffffff;
+    border-color: var(--brand-600);
+    box-shadow: var(--shadow-xs);
+}
+
+.sf-row-btn-primary:hover {
+    background: var(--brand-700);
+    border-color: var(--brand-700);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(124, 58, 237, 0.25);
+}
+
+.sf-row-btn-primary:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.sf-row-btn-icon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+/* ── STATES ─────────────────────────────────────────────── */
+.sf-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    background: var(--slate-50);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--slate-200);
+}
+
+.sf-state-icon-wrap {
+    width: 64px;
+    height: 64px;
+    background: var(--slate-100);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    color: var(--slate-400);
+}
+
+.sf-state-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.sf-state-title {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--slate-900);
+}
+
+.sf-state-body {
+    margin: 0;
+    font-size: 14px;
+    color: var(--slate-500);
+    line-height: 1.6;
+    max-width: 320px;
+}
+
+.sf-state-text {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--slate-600);
+    font-weight: 500;
+}
+
+.sf-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--slate-200);
+    border-top-color: var(--brand-600);
+    border-radius: var(--radius-full);
+    animation: sf-spin 0.6s linear infinite;
+}
+
+@keyframes sf-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── SIGNER LIST ────────────────────────────────────────── */
+.sf-signer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sf-signer-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    background: #ffffff;
+    transition: all 0.25s var(--ease-out);
+    box-shadow: var(--shadow-sm);
+
+    /* Two-row layout: the left block takes the full first row (name/email get
+       the whole card width), and .sf-signer-right wraps onto its own row below,
+       right-aligned. Replaces an absolute overlay whose reserved padding was
+       smaller than the button row, so icons overlapped the email and Order badge. */
+    flex-wrap: wrap;
+    position: relative;
+}
+
+
+.sf-signer-card:hover {
+    border-color: var(--slate-300);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.sf-signer-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    /* Full first row of the wrapping card — see .sf-signer-card. */
+    flex: 1 1 100%;
+    min-width: 0;
+}
+
+.sf-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.sf-signer-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sf-signer-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.sf-signer-email {
+    font-size: 12px;
+    color: var(--slate-500);
+    margin: 0 0 6px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sf-signer-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── STATUS BADGES ──────────────────────────────────────── */
+.status-badge,
+.sf-role {
+    font-size: 9px;
+    font-weight: 750;
+    padding: 3px 9px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid transparent;
+}
+
+.sf-status-pending,
+.status-pending {
+    background: var(--amber-50);
+    color: var(--amber-700);
+    border-color: var(--amber-200);
+}
+
+.sf-status-sent,
+.status-sent {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+.sf-status-signed,
+.status-signed {
+    background: var(--emerald-50);
+    color: var(--emerald-700);
+    border-color: var(--emerald-200);
+}
+
+.sf-status-declined,
+.status-declined {
+    background: var(--red-50);
+    color: var(--red-700);
+    border-color: var(--red-200);
+}
+
+.sf-status-voided,
+.status-voided {
+    background: var(--slate-50);
+    color: var(--slate-600);
+    border-color: var(--slate-200);
+}
+
+.sf-role {
+    background: var(--slate-100);
+    color: var(--slate-700);
+    border-color: var(--slate-200);
+    font-weight: 600;
+}
+
+.sf-order {
+    font-size: 11px;
+    color: var(--slate-400);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.sf-signer-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+
+    /* In flow on its own bottom row (the card wraps). The absolute overlay this
+       replaces was sized for a 150px reserve while five buttons need ~194px, so
+       the icons sat on top of the email and the Order badge. Wrapping gives the
+       name/email the full card width AND keeps the buttons clear of every line. */
+    margin-left: auto;
+    padding-top: 6px;
+}
+
+.sf-signer-meta {
+    padding-right: 0;
+}
+.sf-cc-card .sf-signer-meta {
+    padding-right: 0;
+}
+
+.sf-signed-date {
+    font-size: 11px;
+    color: var(--emerald-700);
+    font-weight: 600;
+    background: var(--emerald-50);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--emerald-100);
+}
+
+/* Signer action button rows */
+.sf-signer-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.sf-action-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-md);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    padding: 0;
+}
+
+.sf-action-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.sf-action-btn:active {
+    transform: scale(0.93);
+}
+
+.sf-action-btn:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+}
+
+/* Action buttons.
+ * These were five differently-tinted chips in one row — amber for in-person,
+ * amber for remind, violet for resend, a second blue for edit, red for delete —
+ * so a signer row read as five alerts rather than one toolbar. None of those
+ * hues meant anything: sending a reminder isn't a warning, and editing isn't
+ * "info". They're a quiet set now; the colour arrives on hover, where it
+ * confirms what you're about to do.
+ */
+.sf-action-btn {
+    background: transparent;
+    color: var(--slate-400);
+    border: 1px solid transparent;
+}
+
+.sf-action-btn:hover {
+    background: var(--brand-50);
+    border-color: var(--brand-200);
+    color: var(--brand-600);
+}
+
+/* Delete is the one action worth colouring — it's the one you can't undo. */
+.sf-icon-delete:hover {
+    background: var(--red-50);
+    border-color: var(--red-200);
+    color: var(--red-600);
+}
+
+/* ── CC-ONLY RECIPIENTS SECTION (BUG-041) ───────────────── */
+.sf-cc-list {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--slate-200);
+}
+
+.sf-cc-section-label {
+    margin: 0 0 4px 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--slate-400);
+}
+
+.sf-cc-card {
+    background: var(--slate-50);
+}
+
+/* ── MODALS (Glassmorphic Redesign) ─────────────────────── */
+.sf-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    padding: 20px;
+    animation: sf-fade-in 0.18s ease-out;
+}
+
+@keyframes sf-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.sf-modal-dialog {
+    background: #ffffff;
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 480px;
+    box-shadow: var(--shadow-xl);
+    overflow: visible;
+    /* Required for autocomplete search suggestions list */
+    animation: sf-fade-up 0.22s var(--ease-spring);
+    border: 1px solid var(--slate-100);
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes sf-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sf-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--slate-100);
+    position: relative;
+}
+
+.sf-modal-icon-info,
+.sf-modal-icon-info,
+.sf-modal-icon-warn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.sf-modal-icon-info {
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+    box-shadow: 0 4px 10px rgba(124, 58, 237, 0.25);
+}
+
+.sf-modal-icon-warn {
+    background: linear-gradient(135deg, var(--amber-500) 0%, var(--amber-600) 100%);
+    box-shadow: 0 4px 10px rgba(245, 166, 35, 0.25);
+}
+
+.sf-modal-icon-info svg,
+.sf-modal-icon-warn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.sf-modal-title-block {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.sf-modal-eyebrow {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--brand-600);
+    text-transform: uppercase;
+}
+
+.sf-modal-title {
+    margin: 2px 0 0 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--slate-900);
+}
+
+.sf-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--slate-200) !important;
+    background: #ffffff !important;
+    color: var(--slate-500) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s var(--ease-out);
+    padding: 0 !important;
+}
+
+.sf-modal-close:hover {
+    background: var(--red-50) !important;
+    color: var(--red-500) !important;
+    border-color: var(--red-200) !important;
+    transform: rotate(90deg);
+}
+
+.sf-modal-body {
+    padding: 24px;
+}
+
+.sf-form-row {
+    margin-bottom: 16px;
+}
+
+.sf-form-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 16px;
+}
+
+.sf-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--slate-100);
+    background: var(--slate-50);
+    border-bottom-left-radius: var(--radius-xl);
+    border-bottom-right-radius: var(--radius-xl);
+}
+
+/* Modals Buttons styling */
+.sf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-decoration: none;   /* the primary CTA can be an <a> styled as a button */
+    transition: all 0.15s var(--ease-out);
+    font-family: inherit;
+    line-height: 1.2;
+    border: 1px solid transparent;
+}
+
+.sf-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.sf-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.sf-btn:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+}
+
+.sf-btn-primary {
+    background: var(--brand-600);
+    color: #ffffff;
+    border-color: var(--brand-600);
+    box-shadow: var(--shadow-sm);
+}
+
+.sf-btn-primary:hover:not(:disabled) {
+    background: var(--brand-700);
+    border-color: var(--brand-700);
+    box-shadow: var(--shadow-md);
+}
+
+.sf-btn-ghost {
+    background: #ffffff;
+    color: var(--slate-700);
+    border: 1px solid var(--slate-200);
+    box-shadow: var(--shadow-xs);
+}
+
+.sf-btn-ghost:hover:not(:disabled) {
+    border-color: var(--slate-300);
+    background: var(--slate-100);
+    color: var(--slate-900);
+}
+
+/* ── SEARCH DROPDOWN SUGGESTIONS ────────────────────────── */
+.sf-search-wrap {
+    position: relative;
+}
+
+.sf-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10000;
+    margin-top: 6px;
+    padding: 6px;
+    animation: sf-fade-in 0.15s ease-out;
+}
+
+.sf-suggestion-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.15s var(--ease-out);
+}
+
+.sf-suggestion-item:hover {
+    background-color: var(--slate-50);
+}
+
+.sf-suggestion-main {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.sf-suggestion-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sf-suggestion-email {
+    font-size: 11px;
+    color: var(--slate-500);
+    margin: 2px 0 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sf-suggestion-source {
+    flex-shrink: 0;
+    margin-left: 12px;
+    font-size: 9px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    background: var(--brand-50);
+    color: var(--brand-700);
+    border: 1px solid var(--brand-100);
+}
+
+/* ── RESPONSIVE OVERRIDES ───────────────────────────────── */
+@media (max-width: 600px) {
+    .sf-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .sf-signer-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        /* Back in flow on mobile: the card stacks, so the buttons get their own
+           full-width row instead of overlaying the meta line. */
+        position: static;
+    }
+
+    .sf-signer-right {
+        position: static;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* No buttons overhead here, so the reserved space would just truncate the
+       meta row early. */
+    .sf-signer-meta,
+    .sf-cc-card .sf-signer-meta {
+        padding-right: 0;
+    }
+
+    .sf-modal-dialog {
+        max-width: 100%;
+        border-radius: var(--radius-lg);
+    }
+
+    .sf-form-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}

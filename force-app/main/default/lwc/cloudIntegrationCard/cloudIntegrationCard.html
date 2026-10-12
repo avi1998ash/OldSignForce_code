@@ -1,0 +1,224 @@
+<template>
+    <div class={cardClass}>
+        <div class="sf-int-head">
+            <img src={logoUrl} alt="" class={logoClass} width="40" height="40" />
+            <div class="sf-int-meta">
+                <p class="sf-int-name">{label} Push</p>
+                <p class="sf-int-sub">{headerSubtitle}</p>
+            </div>
+            <template if:true={enabled}>
+                <template if:false={loading}>
+                    <span class={statusClass}>
+                        <span class="sf-dot"></span>{statusLabel}
+                    </span>
+                </template>
+            </template>
+            <lightning-input
+                class="sf-int-toggle"
+                type="toggle"
+                label={label}
+                variant="label-hidden"
+                message-toggle-active=""
+                message-toggle-inactive=""
+                checked={enabled}
+                onchange={handleEnabledChange}>
+            </lightning-input>
+        </div>
+
+        <template if:true={enabled}>
+            <template if:true={loading}>
+                <div class="sf-int-loading">
+                    <lightning-spinner size="small" alternative-text="Loading integration"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={loading}>
+            <template if:true={connected}>
+                <div class="sf-int-section">
+                    <p class="sf-field-label">Destination folder</p>
+
+                    <!-- Google uses the Picker. Under the drive.file scope the app
+                         cannot list anybody's Drive, so there is no folder list to
+                         put in a dropdown: the admin hands us one folder and our
+                         access begins and ends there. -->
+                    <template if:true={usePicker}>
+                        <p class="sf-field-help">Each agreement gets its own subfolder inside the folder you choose. eSignforce can only see that folder and what it creates in it.</p>
+                        <div class="sf-field-row">
+                            <div class="sf-field-grow">
+                                <div class="sf-picked-folder">
+                                    <template if:true={target}>
+                                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                                            <path fill="currentColor" d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8z"/>
+                                        </svg>
+                                        <span>{targetLabel}</span>
+                                    </template>
+                                    <template if:false={target}>
+                                        <span class="sf-picked-folder_empty">No folder chosen yet</span>
+                                    </template>
+                                </div>
+                            </div>
+                            <button class="sf-ghost-btn" onclick={handleOpenPicker} type="button" disabled={busy}>
+                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                                    <path fill="currentColor" d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8z"/>
+                                </svg>
+                                <template if:true={target}>Change folder</template>
+                                <template if:false={target}>Choose folder</template>
+                            </button>
+                        </div>
+
+                    <!-- The Picker needs a Google API key, and it is the one Google
+                         value NOT shipped with the package - every org supplies its
+                         own. Without this field the "no API key" error had nowhere
+                         to be fixed. -->
+                    <template if:true={hasMissingSites}>
+                        <div class="sf-csp-warn">
+                            <b>The folder chooser will not open until these domains are trusted.</b>
+                            <p>Google blocks the picker frame otherwise, and it comes up blank with no error.
+                               In Setup, search <b>CSP Trusted Sites</b> and add each of these with context
+                               <b>All</b>:</p>
+                            <ul>
+                                <template for:each={missingSites} for:item="d">
+                                    <li key={d}><code>{d}</code></li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+
+                    <!-- Google API key field hidden for now (applies to both
+                         providers; only Google's Picker used it). Re-enable by
+                         restoring this block; the Apex + JS handlers stay intact.
+                    <div class="sf-apikey">
+                        <div class="sf-apikey-head">
+                            <span class="sf-field-label">Google API key <span class="sf-optional">optional</span></span>
+                            <template if:true={hasApiKey}>
+                                <span class="sf-apikey-mask">{apiKeyMasked}</span>
+                            </template>
+                            <button class="sf-linklike" type="button" onclick={handleApiKeyToggle}>{apiKeyToggleLabel}</button>
+                        </div>
+
+                        <template if:true={showApiKeyField}>
+                            <p class="sf-field-help">
+                                Only needed if you want Picker usage billed to your own Google Cloud
+                                project. Leave it empty and the folder chooser works as normal.
+                                If you do add one, use a key from the same project as your Google
+                                Client ID, with the Picker API enabled.
+                            </p>
+                            <div class="sf-field-row">
+                                <div class="sf-field-grow">
+                                    <lightning-input
+                                        type="text"
+                                        label="Google API key"
+                                        variant="label-hidden"
+                                        placeholder="AIza…"
+                                        value={apiKeyDraft}
+                                        onchange={handleApiKeyInput}
+                                        disabled={busy}>
+                                    </lightning-input>
+                                </div>
+                                <button class="sf-ghost-btn" type="button"
+                                        onclick={handleApiKeySave} disabled={apiKeySaveDisabled}>
+                                    Save key
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    -->
+                    </template>
+
+                    <template if:false={usePicker}>
+                        <p class="sf-field-help">Only top-level folders you own are listed. Each agreement gets its own subfolder here.</p>
+                        <div class="sf-field-row">
+                            <div class="sf-field-grow">
+                                <lightning-combobox
+                                    label="Destination folder"
+                                    variant="label-hidden"
+                                    placeholder="Choose a folder…"
+                                    options={folderOptions}
+                                    value={target}
+                                    onchange={handleFolderSelect}>
+                                </lightning-combobox>
+                            </div>
+                            <button class="sf-icon-btn" onclick={handleRefreshFolders} type="button" title="Refresh folder list" aria-label="Refresh folder list">
+                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                                    <path fill="currentColor" d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"/>
+                                </svg>
+                            </button>
+                            <button class="sf-ghost-btn" onclick={openCreateFolderModal} type="button">
+                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                                    <path fill="currentColor" d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/>
+                                </svg>
+                                New folder
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+    <!-- Google Picker, in an iframe over a Visualforce page. It cannot live in
+         this component: the picker loader pulls more code from apis.google.com at
+         runtime, and Lightning Web Security will not let an LWC load an external
+         script. -->
+    <template if:true={showPicker}>
+        <div class="sf-modal-backdrop" onclick={handleClosePicker}></div>
+        <div class="sf-modal sf-modal_picker" role="dialog" aria-modal="true" aria-label="Choose a Google Drive folder">
+            <div class="sf-modal-head">
+                <img src={logoUrl} alt="" class="sf-modal-head-logo" width="22" height="22" />
+                <div class="sf-modal-head-text">
+                    <h3>Choose a Google Drive folder</h3>
+                    <p>Agreement copies go here, in a subfolder per agreement.</p>
+                </div>
+                <button class="sf-icon-btn" onclick={handleClosePicker} type="button" aria-label="Close">
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                        <path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <iframe class="sf-picker-frame" src={pickerUrl} title="Google Drive folder picker"></iframe>
+        </div>
+    </template>
+
+            <template if:true={hasAlert}>
+                <div class={alertClass} role="status">{alertText}</div>
+            </template>
+
+            <template if:true={connected}>
+                <div class="sf-int-foot">
+                    <button class="sf-mini-btn" onclick={handleTest} type="button">Test connection</button>
+                    <button class="sf-mini-btn sf-mini-btn_danger" onclick={handleDisconnect} type="button">Disconnect</button>
+                </div>
+            </template>
+
+            <template if:false={connected}>
+                <div class="sf-int-foot sf-int-foot_solo">
+                    <button class="sf-btn sf-btn_primary sf-btn_block" onclick={handleConnect} type="button" disabled={busy}>
+                        {connectLabel}
+                    </button>
+                </div>
+            </template>
+            </template>
+        </template>
+    </div>
+
+    <template if:true={showCreateFolderModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="new-folder-heading" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 id="new-folder-heading" class="slds-modal__title slds-hyphenate">New {label} folder</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-input
+                        label="Folder name"
+                        value={newFolderName}
+                        onchange={handleNewFolderNameChange}>
+                    </lightning-input>
+                    <p class="sf-field-help slds-m-top_x-small">Created at the top level of your drive and selected as the destination.</p>
+                </div>
+                <footer class="slds-modal__footer sf-folder-actions">
+                    <button class="sf-btn sf-btn_ghost" onclick={closeCreateFolderModal} type="button">Cancel</button>
+                    <button class="sf-btn sf-btn_primary" onclick={handleCreateFolderSubmit} type="button" disabled={createFolderDisabled}>Create folder</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

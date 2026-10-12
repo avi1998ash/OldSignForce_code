@@ -1,0 +1,144 @@
+<template>
+  <div class="sfl">
+
+    <!-- ── seat counters ─────────────────────────────────────────── -->
+    <div class="sfl-cards">
+      <div class="sfl-card">
+        <div class="sfl-num">{allowedLabel}</div>
+        <div class="sfl-lbl">Seats purchased</div>
+      </div>
+      <div class="sfl-card">
+        <div class="sfl-num">{usedLabel}</div>
+        <div class="sfl-lbl">In use</div>
+      </div>
+      <div class="sfl-card sfl-card-accent">
+        <div class="sfl-num">{remainingLabel}</div>
+        <div class="sfl-lbl">Remaining</div>
+      </div>
+    </div>
+
+    <template if:true={showBar}>
+      <div class="sfl-bar"><div class={barClass} style={barStyle}></div></div>
+    </template>
+
+    <template if:true={hasSeatWarning}>
+      <div class="sfl-note sfl-note-warn">{seatWarning}</div>
+    </template>
+
+    <template if:true={notManaged}>
+      <div class="sfl-note sfl-note-info">{summary.note}</div>
+    </template>
+
+    <template if:true={expiryLabel}>
+      <div class="sfl-expiry">
+        <template if:true={expiringSoon}>
+          <span class="sfl-pill sfl-pill-warn">Expires {expiryLabel}</span>
+        </template>
+        <template if:false={expiringSoon}>
+          <span class="sfl-muted">Licence expires {expiryLabel}</span>
+        </template>
+      </div>
+    </template>
+
+    <!-- ── controls ──────────────────────────────────────────────── -->
+    <div class="sfl-toolbar">
+      <lightning-input
+          type="search" label="Search users" variant="label-hidden"
+          placeholder="Search by name, username or email"
+          value={search} onchange={handleSearch} class="sfl-search">
+      </lightning-input>
+
+      <lightning-combobox
+          label="Show" variant="label-hidden"
+          value={filter} options={filterOptions} onchange={handleFilter}
+          class="sfl-filter">
+      </lightning-combobox>
+
+      <lightning-button
+          label="Refresh" icon-name="utility:refresh"
+          onclick={handleRefresh} disabled={busy}>
+      </lightning-button>
+    </div>
+
+    <div class="sfl-actions">
+      <lightning-button
+          variant="brand" label={assignLabel}
+          onclick={handleAssign} disabled={busy}>
+      </lightning-button>
+      <lightning-button
+          label={revokeLabel}
+          onclick={handleRevoke} disabled={busy}>
+      </lightning-button>
+      <template if:true={hasSelection}>
+        <button class="sfl-clear" onclick={handleClear}>Clear selection</button>
+      </template>
+    </div>
+
+    <template if:true={errorMsg}>
+      <div class="sfl-note sfl-note-error">{errorMsg}</div>
+    </template>
+
+    <!-- ── roster ────────────────────────────────────────────────── -->
+    <template if:true={loading}>
+      <div class="sfl-loading"><lightning-spinner alternative-text="Loading" size="small"></lightning-spinner></div>
+    </template>
+
+    <template if:false={loading}>
+      <div class="sfl-table-wrap">
+        <table class="sfl-table">
+          <thead>
+            <tr>
+              <th class="sfl-tick">
+                <lightning-input type="checkbox" label="Select all shown"
+                    variant="label-hidden" onchange={handleSelectAllVisible}>
+                </lightning-input>
+              </th>
+              <th>User</th>
+              <th>Profile</th>
+              <th class="sfl-mid">Seat</th>
+              <th class="sfl-mid">Permission set</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template for:each={filteredUsers} for:item="u">
+              <tr key={u.userId} class={u.rowClass}>
+                <td class="sfl-tick">
+                  <lightning-input type="checkbox" label="Select user"
+                      variant="label-hidden" data-id={u.userId}
+                      checked={u.selected} onchange={handleRowToggle}>
+                  </lightning-input>
+                </td>
+                <td>
+                  <div class="sfl-name">{u.name}</div>
+                  <div class="sfl-sub">{u.username}</div>
+                </td>
+                <td class="sfl-sub">{u.profileName}</td>
+                <td class="sfl-mid">
+                  <template if:true={u.hasLicence}><span class="sfl-yes">&#10003;</span></template>
+                  <template if:false={u.hasLicence}><span class="sfl-no">&ndash;</span></template>
+                </td>
+                <td class="sfl-mid">
+                  <template if:true={u.hasPermSet}><span class="sfl-yes">&#10003;</span></template>
+                  <template if:false={u.hasPermSet}><span class="sfl-no">&ndash;</span></template>
+                </td>
+                <td><span class={u.stateClass}>{u.state}</span></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+
+        <template if:true={noResults}>
+          <div class="sfl-empty">No users match that search.</div>
+        </template>
+      </div>
+    </template>
+
+    <p class="sfl-foot">
+      A user needs <b>both</b> a seat and the <b>SignForce User</b> permission set.
+      A seat alone puts the app in their App Launcher but every screen will refuse;
+      the permission set alone leaves them without a licence to use it.
+    </p>
+
+  </div>
+</template>

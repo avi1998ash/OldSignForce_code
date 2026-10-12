@@ -1,0 +1,85 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 04-15-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <c-signforce-access-gate>
+        <div class="comment-root">
+            <div class="comment-header">
+                <div class="comment-header-left">
+                    <h2 class="comment-title">Comments</h2>
+                    <template if:true={unreadCount}>
+                        <span class="comment-unread">{unreadCount}</span>
+                    </template>
+                </div>
+                <button class="comment-btn-expand" onclick={toggleExpanded}>
+                    <template if:true={isExpanded}>Hide</template>
+                    <template if:false={isExpanded}>Show</template>
+                </button>
+            </div>
+
+            <template if:true={isExpanded}>
+                <template if:true={isLoading}>
+                    <div class="comment-loading">
+                        <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                    </div>
+                </template>
+
+                <template if:false={isLoading}>
+                    <!-- Comment thread -->
+                    <div class="comment-thread">
+                        <template if:true={comments.length}>
+                            <template for:each={comments} for:item="comment">
+                                <div key={comment.id} class={comment.rowClass}>
+                                    <div class="comment-avatar" style={comment.avatarStyle}>
+                                        {comment.initials}
+                                    </div>
+                                    <div class="comment-body">
+                                        <div class="comment-meta">
+                                            <span class="comment-author">{comment.authorName}</span>
+                                            <span class="comment-time">{comment.createdDate}</span>
+                                        </div>
+                                        <template if:true={comment.parentText}>
+                                            <div class="comment-reply-ref">
+                                                Replying to {comment.parentAuthor}: "{comment.parentText}"
+                                            </div>
+                                        </template>
+                                        <p class="comment-text">{comment.text}</p>
+                                        <button class="comment-reply-btn" data-id={comment.id} onclick={handleReplyTo}>Reply</button>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:false={comments.length}>
+                            <p class="comment-empty">No comments yet. Start a conversation.</p>
+                        </template>
+                    </div>
+
+                    <!-- Reply indicator -->
+                    <template if:true={replyingToComment}>
+                        <div class="comment-replying">
+                            <span>Replying to {replyingToName}</span>
+                            <button class="comment-cancel-reply" onclick={cancelReply}>&#215;</button>
+                        </div>
+                    </template>
+
+                    <!-- Input -->
+                    <div class="comment-input-area">
+                        <lightning-textarea
+                            value={newComment}
+                            onchange={handleCommentChange}
+                            placeholder="Type a comment..."
+                            class="comment-input">
+                        </lightning-textarea>
+                        <button class="comment-send" onclick={handleSendComment} disabled={sendDisabled}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </c-signforce-access-gate>
+</template>

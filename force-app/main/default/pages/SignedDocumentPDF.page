@@ -1,0 +1,159 @@
+<apex:page controller="SignedDocumentPDFController"
+    renderAs="pdf"
+    showHeader="false"
+    sidebar="false"
+    standardStylesheets="false"
+    applyBodyTag="false">
+<head>
+    <style>
+        @page {
+            margin: 0;
+            size: A4;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .pdf-page {
+            position: relative;
+            width: 100%;
+            page-break-after: always;
+            overflow: hidden;
+        }
+        .pdf-page:last-child {
+            page-break-after: auto;
+        }
+        .pdf-page img {
+            width: 100%;
+            display: block;
+        }
+        .field-stamp {
+            position: absolute;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .field-stamp-signature img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .field-stamp-typed {
+            color: #1a1a1a;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .field-stamp-text {
+            font-size: 11px;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .field-stamp-checkbox {
+            /* BUG-042 FIX: Add a visible box around the ✓ so it looks like a
+               proper checked checkbox (vs an isolated tick floating in space).
+               This gives consistent visual affordance across PDF renderers. */
+            display: inline-block;
+            min-width: 14px;
+            min-height: 14px;
+            line-height: 14px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #15803d;
+            border: 1.5px solid #15803d;
+            border-radius: 3px;
+            padding: 0 2px;
+            background: #f0fdf4;
+        }
+        .envelope-bar {
+            background: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+            padding: 4px 12px;
+            font-size: 8px;
+            color: #666;
+        }
+        .cert-stamp {
+            position: absolute;
+            font-size: 7px;
+            color: #888;
+            line-height: 1.3;
+            background: rgba(255,255,255,0.85);
+            padding: 2px 4px;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Envelope ID bar on first page -->
+    <div class="envelope-bar">
+        eSignforce Envelope ID: <apex:outputText value="{!envelopeId}"/>
+    </div>
+
+    <!-- Render each page with overlaid fields -->
+    <apex:repeat value="{!pages}" var="pg">
+        <div class="pdf-page">
+            <apex:image value="data:image/png;base64,{!pg.base64Image}" style="width:100%;"/>
+
+            <!-- Fields on this page -->
+            <apex:repeat value="{!pg.fields}" var="fld">
+                <div class="field-stamp" style="{!fld.positionStyle}">
+
+                    <!-- Typed signature -->
+                    <apex:outputPanel rendered="{!fld.isTypedSignature}">
+                        <span class="field-stamp-typed" style="font-family:'{!fld.fontFamily}',cursive;font-size:{!fld.fontSize}px;">
+                            <apex:outputText value="{!fld.displayValue}"/>
+                        </span>
+                    </apex:outputPanel>
+
+                    <!-- Upload signature -->
+                    <apex:outputPanel rendered="{!fld.isUploadSignature}">
+                        <div class="field-stamp-signature">
+                            <apex:image value="{!fld.displayValue}" style="max-width:100%;max-height:100%;"/>
+                        </div>
+                    </apex:outputPanel>
+
+                    <!-- Draw signature (show as text since SVG not supported in PDF) -->
+                    <apex:outputPanel rendered="{!fld.isDrawSignature}">
+                        <span class="field-stamp-typed" style="font-family:'Dancing Script',cursive;font-size:{!fld.fontSize}px;color:#1a1a1a;">
+                            <apex:outputText value="{!fld.signerName}"/>
+                        </span>
+                    </apex:outputPanel>
+
+                    <!-- Text fields -->
+                    <apex:outputPanel rendered="{!fld.isTextField}">
+                        <span class="field-stamp-text">
+                            <apex:outputText value="{!fld.displayValue}"/>
+                        </span>
+                    </apex:outputPanel>
+
+                    <!-- Checkbox -->
+                    <apex:outputPanel rendered="{!fld.isCheckbox}">
+                        <span class="field-stamp-checkbox">
+                            <!-- BUG-042 FIX: Pehle ☑/☐ box characters use kar rahe the
+                                 jo kuch PDF renderers me garbage glyph dikhate hain ya
+                                 baseline alignment galat aati hai. Switching to a clean
+                                 ✓ checkmark (U+2713) inside a thin rectangle gives
+                                 consistent rendering across PDF engines AND matches
+                                 standard "this is checked" affordance industry-wide. -->
+                            <apex:outputText value="{!IF(fld.displayValue == 'true', '✓', '')}"/>
+                        </span>
+                    </apex:outputPanel>
+                </div>
+
+                <!-- Certificate stamp for signature fields -->
+                <apex:outputPanel rendered="{!fld.showCertStamp}">
+                    <div class="cert-stamp" style="{!fld.certStampStyle}">
+                        Signed by: <apex:outputText value="{!fld.signerName}"/><br/>
+                        <apex:outputText value="{!fld.certificateId}"/><br/>
+                        <apex:outputText value="{!fld.signedDate}"/>
+                    </div>
+                </apex:outputPanel>
+            </apex:repeat>
+        </div>
+    </apex:repeat>
+</body>
+</apex:page>

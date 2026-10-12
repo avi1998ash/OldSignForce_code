@@ -1,0 +1,87 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 04-14-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <c-signforce-access-gate>
+        <div class="bulk-root">
+            <div class="bulk-header">
+                <h2 class="bulk-title">Bulk Add Signers</h2>
+                <p class="bulk-desc">Upload a CSV file or paste signer data to add multiple signers at once.</p>
+            </div>
+
+            <!-- CSV Upload -->
+            <div class="bulk-section">
+                <div class="bulk-upload-area">
+                    <div class="bulk-upload-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    </div>
+                    <p class="bulk-upload-text">Drop CSV file here or click to browse</p>
+                    <p class="bulk-upload-hint">Format: Name, Email, Role (optional), Order (optional)</p>
+                    <input type="file" accept=".csv" onchange={handleFileUpload} class="bulk-file-input"/>
+                    <button class="bulk-btn-upload" onclick={triggerUpload}>Choose CSV File</button>
+                    <template if:true={uploadedFileName}>
+                        <p class="bulk-upload-loaded">✓ {uploadedFileName} loaded — review the parsed signers below</p>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Or paste -->
+            <div class="bulk-divider">
+                <span class="bulk-divider-text">or paste data below</span>
+            </div>
+
+            <div class="bulk-section">
+                <lightning-textarea
+                    label="Paste signer data (one per line: Name, Email)"
+                    value={pastedData}
+                    onchange={handlePastedData}
+                    placeholder="Jane Doe, jane@company.com&#10;John Smith, john@company.com&#10;Sara Lee, sara@company.com, Approver"
+                    class="bulk-textarea">
+                </lightning-textarea>
+                <button class="bulk-btn-parse" onclick={handleParse} disabled={parseBtnDisabled}>
+                    Parse Signers
+                </button>
+            </div>
+
+            <!-- Parsed Preview -->
+            <template if:true={parsedSigners.length}>
+                <div class="bulk-section">
+                    <div class="bulk-preview-header">
+                        <h3 class="bulk-preview-title">Preview ({parsedSigners.length} signers)</h3>
+                        <button class="bulk-btn-clear" onclick={handleClear}>Clear</button>
+                    </div>
+                    <div class="bulk-preview-list">
+                        <template for:each={parsedSigners} for:item="signer" for:index="idx">
+                            <div key={signer.key} class="bulk-preview-row">
+                                <span class="bulk-num">{signer.num}</span>
+                                <div class="bulk-preview-info">
+                                    <p class="bulk-preview-name">{signer.name}</p>
+                                    <p class="bulk-preview-email">{signer.email}</p>
+                                </div>
+                                <span class="bulk-preview-role">{signer.role}</span>
+                                <button class="bulk-preview-remove" data-index={idx} onclick={handleRemoveSigner}>&#215;</button>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="bulk-actions">
+                        <button class="bulk-btn-add" onclick={handleBulkAdd} disabled={isAdding}>
+                            <template if:true={isAdding}>Adding...</template>
+                            <template if:false={isAdding}>Add {parsedSigners.length} Signers</template>
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Result -->
+            <template if:true={showResult}>
+                <div class="bulk-result">
+                    <p class="bulk-result-text">{resultMessage}</p>
+                </div>
+            </template>
+        </div>
+    </c-signforce-access-gate>
+</template>

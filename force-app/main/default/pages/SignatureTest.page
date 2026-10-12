@@ -1,0 +1,22 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false">
+    <apex:includeLightning />
+    <div id="lwc-container" style="padding:20px;max-width:800px;margin:0 auto;"></div>
+    <script>
+        // JSENCODE, not the raw parameter: the token arrives in the URL and is
+        // dropped straight into a JavaScript string, so without encoding a
+        // crafted token closes the quote and runs as script (Checkmarx
+        // "Reflected XSS", critical). JSENCODE escapes the quotes and
+        // backslashes and leaves a normal token byte-for-byte unchanged.
+        var token = '{!JSENCODE($CurrentPage.parameters.token)}';
+        $Lightning.use("c:signforceApp", function() {
+            $Lightning.createComponent(
+                "c:signatureCanvas",
+                { "token": token },
+                "lwc-container",
+                function(cmp) {
+                    console.log("SignatureCanvas loaded successfully");
+                }
+            );
+        });
+    </script>
+</apex:page>

@@ -1,0 +1,1164 @@
+/* SignForce v6 - force rebuild - 1779087258 */
+:host {
+    /* Brand Accent Tokens */
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;  /* Primary brand accent */
+    --brand-700: #6d28d9;
+    --brand-900: #4c1d95;
+
+    /* Neutrals - Slate */
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    /* Semantic States */
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-200: #a7f3d0;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+
+    /* Border Radii */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-full: 9999px;
+
+    /* Shadows & Transitions */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+    /* Salesforce styling hook overrides */
+    --slds-c-input-color-background: var(--slate-50);
+    --slds-c-input-color-border: var(--slate-200);
+    --slds-c-input-radius-border: var(--radius-sm);
+    --slds-c-combobox-color-background: var(--slate-50);
+    --slds-c-combobox-color-border: var(--slate-200);
+    --slds-c-combobox-radius-border: var(--radius-sm);
+    --slds-c-textarea-color-background: var(--slate-50);
+    --slds-c-textarea-color-border: var(--slate-200);
+    --slds-c-textarea-radius-border: var(--radius-sm);
+
+    /* Map legacy variables to prevent visual breakage */
+    --navy-900: var(--slate-900);
+    --navy-800: var(--slate-800);
+    --navy-700: var(--slate-700);
+    --warm-50: var(--slate-50);
+    --warm-100: var(--slate-100);
+    --warm-150: var(--slate-200);
+    --warm-200: var(--slate-200);
+    --warm-300: var(--slate-300);
+    --warm-400: var(--slate-400);
+    --warm-500: var(--slate-400);
+    --warm-600: var(--slate-500);
+    --warm-700: var(--slate-600);
+    --warm-800: var(--slate-700);
+}
+
+/* ── Shell ────────────────────────────────────────────── */
+.sc-shell {
+    font-family: var(--font-stack);
+    -webkit-font-smoothing: antialiased;
+    background: var(--warm-50);
+    min-height: 100vh;
+    color: var(--navy-900);
+}
+
+/* ── Loading / error / success states ────────────────── */
+.sc-fullscreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.sc-state-card {
+    text-align: center;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 56px 48px;
+    max-width: 460px;
+    width: 100%;
+}
+
+.sc-state-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sc-state-icon-success {
+    background: var(--emerald-50);
+    color: var(--emerald-600);
+}
+
+.sc-state-icon-error {
+    background: var(--red-50);
+    color: var(--red-500);
+}
+
+.sc-state-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+.sc-state-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    color: var(--navy-900);
+}
+
+.sc-state-sub {
+    font-size: 14px;
+    color: var(--warm-600);
+    margin: 0;
+    line-height: 22px;
+}
+
+/* ── Top bar ──────────────────────────────────────────── */
+.sc-topbar {
+    background: var(--navy-900);
+    color: white;
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 12px rgba(10, 22, 40, 0.18);
+}
+
+.sc-topbar-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.sc-topbar-eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--brand-500);
+    margin: 0;
+}
+
+.sc-topbar-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: white;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60vw;
+}
+
+.sc-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sc-progress-text {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.sc-status-pill {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 6px 12px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sc-status-pill-ready {
+    background: var(--emerald-500);
+}
+
+.sc-status-pill-ready::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+/* ── Layout ───────────────────────────────────────────── */
+.sc-main {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px 24px 80px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 20px;
+}
+
+@media (max-width: 980px) {
+    .sc-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Panels ───────────────────────────────────────────── */
+.sc-panel {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--warm-150);
+    overflow: hidden;
+}
+
+.sc-panel-head {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--warm-150);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--warm-50);
+}
+
+.sc-panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--warm-600);
+    margin: 0;
+}
+
+.sc-panel-body {
+    padding: 20px;
+}
+
+/* ── Document viewer ──────────────────────────────────── */
+.sc-doc-frame {
+    width: 100%;
+    border: none;
+    display: block;
+    background: var(--warm-100);
+}
+
+/* ── Fields list ──────────────────────────────────────── */
+.sc-fields-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sc-field {
+    background: white;
+    border: 1px solid var(--warm-150);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+
+.sc-field-complete {
+    border-color: var(--emerald-500);
+    background: var(--emerald-50);
+}
+
+.sc-field-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.sc-field-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--warm-300);
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.sc-field-dot-done {
+    background: var(--emerald-500);
+}
+
+.sc-field-label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy-900);
+    flex: 1;
+}
+
+.sc-field-required {
+    color: var(--red-500);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+/* Inline signature field canvas (per-field) */
+.sc-field-canvas {
+    border: 2px dashed var(--warm-300);
+    border-radius: var(--radius-sm);
+    height: 100px;
+    position: relative;
+    cursor: crosshair;
+    background:
+        linear-gradient(white, white) padding-box,
+        repeating-linear-gradient(to right, var(--warm-150) 0 1px, transparent 1px 8px) padding-box;
+    transition: border-color 0.15s;
+    touch-action: none;
+}
+
+.sc-field-canvas:hover {
+    border-color: var(--brand-600);
+}
+
+.sc-field-canvas svg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.sc-field-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--warm-400);
+    font-size: 13px;
+    pointer-events: none;
+    margin: 0;
+    font-style: italic;
+}
+
+.sc-field-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.sc-field-done {
+    background: white;
+    border: 1px solid var(--emerald-500);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sc-field-done-label {
+    margin: 0;
+    color: var(--emerald-600);
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ── Signature pad (premium) ──────────────────────────── */
+.sc-sigpad {
+    padding: 0;
+}
+
+.sc-sigpad-head {
+    padding: 24px 24px 0;
+}
+
+.sc-sigpad-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy-900);
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+}
+
+.sc-sigpad-sub {
+    font-size: 13px;
+    color: var(--warm-600);
+    margin: 0;
+    line-height: 20px;
+}
+
+/* Saved signature banner */
+.sc-saved-banner {
+    margin: 20px 24px 0;
+    background: var(--brand-50);
+    border: 1px solid var(--brand-200);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.sc-saved-banner-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.sc-saved-banner-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brand-600);
+}
+
+.sc-saved-banner-sub {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--warm-600);
+}
+
+.sc-saved-banner-btn {
+    background: var(--brand-600);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.sc-saved-banner-btn:hover {
+    background: var(--brand-700);
+}
+
+/* Tabs */
+.sc-tabs {
+    display: flex;
+    gap: 0;
+    margin: 24px 24px 0;
+    border-bottom: 1px solid var(--warm-150);
+}
+
+.sc-tab {
+    background: none;
+    border: none;
+    padding: 12px 4px;
+    margin-right: 24px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--warm-500);
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s var(--ease-out);
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sc-tab:hover {
+    color: var(--navy-900);
+}
+
+.sc-tab-active {
+    color: var(--brand-600);
+    border-bottom-color: var(--brand-600);
+}
+
+.sc-tab svg {
+    width: 15px;
+    height: 15px;
+}
+
+.sc-tabpanel {
+    padding: 20px 24px 24px;
+}
+
+.sc-tabpanel-hint {
+    font-size: 13px;
+    color: var(--warm-600);
+    margin: 0 0 12px;
+}
+
+/* Main canvas (premium pen feel) */
+.sc-canvas-wrap {
+    border: 2px solid var(--warm-150);
+    border-radius: var(--radius-md);
+    background: white;
+    height: 220px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.15s;
+}
+
+.sc-canvas-wrap:hover {
+    border-color: var(--warm-300);
+}
+
+.sc-canvas-wrap.sc-canvas-active {
+    border-color: var(--brand-600);
+}
+
+/* Ruled baseline mimicking pen-on-paper */
+.sc-canvas-wrap::before {
+    content: "";
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: 64px;
+    border-bottom: 1px solid var(--warm-200);
+    pointer-events: none;
+}
+
+.sc-canvas-wrap::after {
+    content: "X";
+    position: absolute;
+    left: 24px;
+    bottom: 68px;
+    font-size: 18px;
+    color: var(--warm-300);
+    font-weight: 300;
+    pointer-events: none;
+    line-height: 1;
+}
+
+.sc-canvas {
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.sc-canvas-placeholder {
+    position: absolute;
+    top: 36%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--warm-400);
+    font-size: 14px;
+    margin: 0;
+    pointer-events: none;
+    font-style: italic;
+}
+
+.sc-canvas-toolbar {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.sc-canvas-toolbar-left {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.sc-canvas-toolbar-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Color / thickness pickers */
+.sc-color-picker,
+.sc-thickness-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--warm-50);
+    border: 1px solid var(--warm-150);
+    border-radius: 8px;
+    padding: 4px 6px;
+}
+
+.sc-color-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px var(--warm-200);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    padding: 0;
+}
+
+.sc-color-swatch:hover {
+    transform: scale(1.1);
+}
+
+.sc-color-swatch-active {
+    box-shadow: 0 0 0 2px var(--brand-600);
+    transform: scale(1.1);
+}
+
+.sc-thickness-btn {
+    width: 26px;
+    height: 22px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    padding: 0;
+}
+
+.sc-thickness-btn:hover {
+    background: white;
+}
+
+.sc-thickness-btn-active {
+    background: white;
+    border-color: var(--brand-600);
+}
+
+.sc-thickness-dot {
+    display: inline-block;
+    border-radius: 50%;
+    background: var(--brand-600);
+}
+
+/* Type tab - font selection grid */
+.sc-type-input {
+    margin-bottom: 16px;
+}
+
+.sc-font-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .sc-font-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sc-font-option {
+    border: 1.5px solid var(--warm-200);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    cursor: pointer;
+    background: white;
+    transition: all 0.15s var(--ease-out);
+    text-align: left;
+    font-family: inherit;
+    width: 100%;
+    position: relative;
+}
+
+.sc-font-option:hover {
+    border-color: var(--warm-400);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.sc-font-option-active {
+    border-color: var(--brand-600);
+    background: var(--brand-50);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
+}
+
+.sc-font-option-active::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--brand-600) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center/12px no-repeat;
+}
+
+.sc-font-label {
+    font-size: 10px;
+    color: var(--warm-500);
+    margin: 0 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.sc-font-preview {
+    margin: 0;
+    color: var(--navy-900);
+    line-height: 1.1;
+    word-break: break-word;
+    min-height: 32px;
+}
+
+.sc-font-dancing {
+    font-family: 'Dancing Script', cursive;
+    font-size: 28px;
+}
+
+.sc-font-greatvibes {
+    font-family: 'Great Vibes', cursive;
+    font-size: 30px;
+}
+
+.sc-font-pacifico {
+    font-family: 'Pacifico', cursive;
+    font-size: 24px;
+}
+
+.sc-font-caveat {
+    font-family: 'Caveat', cursive;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.sc-font-allura {
+    font-family: 'Allura', cursive;
+    font-size: 32px;
+}
+
+.sc-font-satisfy {
+    font-family: 'Satisfy', cursive;
+    font-size: 26px;
+}
+
+.sc-font-kaushan {
+    font-family: 'Kaushan Script', cursive;
+    font-size: 24px;
+}
+
+.sc-font-sacramento {
+    font-family: 'Sacramento', cursive;
+    font-size: 32px;
+}
+
+/* Upload tab */
+.sc-upload-dropzone {
+    border: 2px dashed var(--warm-200);
+    border-radius: var(--radius-md);
+    padding: 32px 20px;
+    text-align: center;
+    background: var(--warm-50);
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.sc-upload-dropzone:hover,
+.sc-upload-dropzone--over {
+    border-color: var(--brand-600);
+    background: white;
+}
+.sc-upload-dropzone--over {
+    background: var(--brand-50, #f5f3ff);
+}
+
+.sc-upload-icon {
+    width: 40px;
+    height: 40px;
+    color: var(--warm-400);
+    margin: 0 auto 12px;
+}
+
+.sc-upload-text {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: var(--navy-900);
+    font-weight: 600;
+}
+
+.sc-upload-sub {
+    margin: 0 0 14px;
+    font-size: 12px;
+    color: var(--warm-500);
+}
+
+.sc-upload-preview {
+    border: 1px solid var(--warm-200);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    text-align: center;
+    background: white;
+}
+
+.sc-upload-preview img {
+    max-height: 110px;
+    max-width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Buttons */
+.sc-btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s var(--ease-out);
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sc-btn-primary {
+    background: linear-gradient(135deg, var(--emerald-500), var(--emerald-600));
+    color: white;
+    border-color: var(--emerald-500);
+    font-weight: 700;
+    padding: 11px 22px;
+    font-size: 14px;
+    box-shadow: var(--shadow-md);
+}
+
+.sc-btn-primary:hover {
+    background: linear-gradient(135deg, var(--emerald-600), var(--emerald-700));
+    border-color: var(--emerald-600);
+    color: white;
+    box-shadow: var(--shadow-lg);
+}
+
+.sc-btn-secondary {
+    background: white;
+    color: var(--slate-700);
+    border-color: var(--warm-200);
+}
+
+.sc-btn-secondary:hover {
+    border-color: var(--brand-600);
+    color: var(--brand-600);
+}
+
+.sc-btn-ghost {
+    background: transparent;
+    color: var(--warm-600);
+    border-color: transparent;
+}
+
+.sc-btn-ghost:hover {
+    color: var(--brand-600);
+}
+
+.sc-btn-danger {
+    background: transparent;
+    color: var(--red-500);
+    border-color: transparent;
+}
+
+.sc-btn-danger:hover {
+    color: #b91c1c;
+    background: var(--red-50);
+}
+
+.sc-btn-sm {
+    padding: 7px 12px;
+    font-size: 12px;
+}
+
+/* Bottom action bar (sticky) */
+.sc-actionbar {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid var(--warm-150);
+    padding: 14px 24px;
+    margin: 24px -24px -80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 -4px 16px rgba(10, 22, 40, 0.06);
+    z-index: 5;
+}
+
+@media (max-width: 980px) {
+    .sc-actionbar {
+        margin: 24px -16px -80px;
+        padding: 14px 16px;
+    }
+}
+
+/* Right column sticky for desktop */
+@media (min-width: 981px) {
+    .sc-col-right {
+        position: sticky;
+        top: 88px;
+        align-self: start;
+        max-height: calc(100vh - 110px);
+        overflow-y: auto;
+    }
+}
+
+
+
+
+/* ── SignDocked typed signature (v4 - guaranteed render) ─ */
+button.sc-font-option {
+    padding: 14px 16px !important;
+    background: white !important;
+    border: 1.5px solid #e7e5e4 !important;
+    border-radius: 10px !important;
+    overflow: visible !important;
+    width: 100% !important;
+    cursor: pointer !important;
+}
+
+button.sc-font-option:hover {
+    border-color: #a8a29e !important;
+}
+
+button.sc-font-option-active {
+    border-color: var(--brand-600) !important;
+    background: white !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18) !important;
+}
+
+.sc-font-option-active::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Hide initials block entirely */
+.sc-ds-stamp-initials {
+    display: none !important;
+}
+
+/* Hide tag pill (Signature / Initials chip) */
+.sc-ds-stamp-head {
+    display: none !important;
+}
+
+/* The stamp container - flow layout, not absolute */
+.sc-ds-pair {
+    display: block !important;
+    margin-top: 8px !important;
+    text-align: left !important;
+}
+
+.sc-ds-stamp {
+    display: block !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    position: static !important;
+    overflow: visible !important;
+}
+
+.sc-ds-stamp::before,
+.sc-ds-stamp::after,
+.sc-ds-stamp-body::before,
+.sc-ds-stamp-body::after {
+    content: none !important;
+    display: none !important;
+    border: none !important;
+}
+
+.sc-ds-stamp-body {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    min-height: 0 !important;
+    text-align: left !important;
+}
+
+/* "SignDocked by:" - INLINE flow, no absolute positioning */
+.sc-ds-brand {
+    display: block !important;
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 0 2px 0 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #0a1628 !important;
+    line-height: 1.2 !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    text-align: left !important;
+}
+
+/* Name in script - bordered TOP and BOTTOM */
+.sc-ds-name {
+    display: block !important;
+    position: static !important;
+    color: #0a1628 !important;
+    line-height: 1.1 !important;
+    padding: 6px 2px !important;
+    margin: 0 !important;
+    border-top: 1px solid #a8a29e !important;
+    border-bottom: 1px solid #a8a29e !important;
+    word-break: break-word !important;
+    text-align: left !important;
+    background: transparent !important;
+    width: auto !important;
+}
+
+/* Envelope ID below */
+.sc-ds-envelope {
+    display: block !important;
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 3px 0 0 0 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 9px !important;
+    color: #0a1628 !important;
+    letter-spacing: 0.4px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: left !important;
+}
+
+/* Font sizes for the name */
+.sc-ds-name.sc-font-dancing {
+    font-family: 'Dancing Script', cursive !important;
+    font-size: 28px !important;
+}
+
+.sc-ds-name.sc-font-greatvibes {
+    font-family: 'Great Vibes', cursive !important;
+    font-size: 32px !important;
+}
+
+.sc-ds-name.sc-font-pacifico {
+    font-family: 'Pacifico', cursive !important;
+    font-size: 22px !important;
+}
+
+.sc-ds-name.sc-font-caveat {
+    font-family: 'Caveat', cursive !important;
+    font-size: 26px !important;
+    font-weight: 600 !important;
+}
+
+.sc-ds-name.sc-font-allura {
+    font-family: 'Allura', cursive !important;
+    font-size: 30px !important;
+}
+
+.sc-ds-name.sc-font-satisfy {
+    font-family: 'Satisfy', cursive !important;
+    font-size: 24px !important;
+}
+
+.sc-ds-name.sc-font-kaushan {
+    font-family: 'Kaushan Script', cursive !important;
+    font-size: 20px !important;
+}
+
+.sc-ds-name.sc-font-sacramento {
+    font-family: 'Sacramento', cursive !important;
+    font-size: 30px !important;
+}
+
+@media (max-width: 600px) {
+
+    .sc-ds-name.sc-font-dancing,
+    .sc-ds-name.sc-font-greatvibes,
+    .sc-ds-name.sc-font-allura,
+    .sc-ds-name.sc-font-sacramento {
+        font-size: 22px !important;
+    }
+
+    .sc-ds-name.sc-font-pacifico,
+    .sc-ds-name.sc-font-kaushan {
+        font-size: 18px !important;
+    }
+
+    .sc-ds-name.sc-font-caveat,
+    .sc-ds-name.sc-font-satisfy {
+        font-size: 20px !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   BUG-024 + BUG-028 FIX: Checkbox field rendering
+   ─────────────────────────────────────────────────────────────
+   Pehle plain lightning-input type=checkbox tha with hardcoded "I agree"
+   label aur koi context nahi. Looked like a misaligned text-input row.
+   Ab wrap kiya hai accent-bordered card me with helper text — clear
+   visual cue that this is a confirmation/agreement step. */
+.sc-checkbox-field {
+    background: #fffbeb;
+    border: 1.5px solid #fde68a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.sc-checkbox-field lightning-input {
+    --slds-c-checkbox-color-background-checked: #d97706;
+    --slds-c-checkbox-color-border: #b45309;
+    --slds-c-checkbox-radius-border: 4px;
+    display: block;
+}
+
+.sc-checkbox-hint {
+    margin: 8px 0 0;
+    padding-left: 26px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #78350f;
+}

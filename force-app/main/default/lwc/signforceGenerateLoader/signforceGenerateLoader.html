@@ -1,0 +1,52 @@
+<template>
+    <template if:true={visible}>
+        <!-- role="alert" rather than a bare div: with the page behind it inert,
+             a screen reader would otherwise announce nothing at all while the
+             user waits. -->
+        <div class="gl-veil" role="alert" aria-live="assertive" aria-busy="true">
+            <div class="gl-card">
+
+                <div class="gl-art">
+                    <svg viewBox="0 0 200 190" class="gl-svg" aria-hidden="true">
+                        <!-- the page being built -->
+                        <rect class="gl-page" x="66" y="10" width="122" height="170" rx="12"/>
+
+                        <!-- the text each tag turns into -->
+                        <rect class="gl-line gl-line-hd" x="84" y="46" width="78" height="9" rx="4.5"/>
+                        <rect class="gl-line" x="84" y="86" width="88" height="7" rx="3.5"/>
+                        <rect class="gl-line" x="84" y="122" width="68" height="7" rx="3.5"/>
+
+                        <!-- lines that are simply already there, so the page does
+                             not look empty between cycles -->
+                        <rect class="gl-static" x="84" y="64" width="60" height="6" rx="3"/>
+                        <rect class="gl-static" x="84" y="102" width="72" height="6" rx="3"/>
+                        <rect class="gl-static" x="84" y="140" width="52" height="6" rx="3"/>
+                        <rect class="gl-static" x="84" y="156" width="66" height="6" rx="3"/>
+
+                        <!-- The tags flying in from the record.
+                             The labels come from JS: a literal {{Name}} in the
+                             markup is read by the template compiler as a binding
+                             and the whole bundle fails to compile. -->
+                        <g class="gl-chip">
+                            <rect x="84" y="38" width="76" height="26" rx="13"/>
+                            <text x="122" y="55">{tagOne}</text>
+                        </g>
+                        <g class="gl-chip">
+                            <rect x="84" y="78" width="88" height="26" rx="13"/>
+                            <text x="128" y="95">{tagTwo}</text>
+                        </g>
+                        <g class="gl-chip">
+                            <rect x="84" y="114" width="72" height="26" rx="13"/>
+                            <text x="120" y="131">{tagThree}</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <p class="gl-title">{title}</p>
+                <p class="gl-msg">{message}</p>
+
+                <div class="gl-track"><span></span></div>
+            </div>
+        </div>
+    </template>
+</template>

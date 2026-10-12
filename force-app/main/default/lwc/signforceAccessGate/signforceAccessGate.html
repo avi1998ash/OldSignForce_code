@@ -1,0 +1,26 @@
+<template>
+    <template if:true={checking}>
+        <div class="sf-gate-checking">
+            <lightning-spinner alternative-text="Checking access" size="small"></lightning-spinner>
+        </div>
+    </template>
+
+    <template if:true={denied}>
+        <div class="sf-gate-denied">
+            <div class="sf-gate-card">
+                <svg class="sf-gate-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M12 1 3 5v6c0 5.25 3.6 10.15 9 11 5.4-.85 9-5.75 9-11V5l-9-4zm0 6a2.5 2.5 0 0 1 2.5 2.5c0 .96-.54 1.79-1.33 2.21l.83 3.29h-4l.83-3.29A2.49 2.49 0 0 1 9.5 9.5 2.5 2.5 0 0 1 12 7z"/>
+                </svg>
+                <h2 class="sf-gate-title">Access not available</h2>
+                <p class="sf-gate-text">
+                    You don't have access to use this eSignforce feature. Please contact your
+                    Salesforce administrator to be granted access.
+                </p>
+            </div>
+        </div>
+    </template>
+
+    <template if:true={showContent}>
+        <slot></slot>
+    </template>
+</template>

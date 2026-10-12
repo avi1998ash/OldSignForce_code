@@ -1,0 +1,171 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="sf-modal-title" class="slds-modal slds-fade-in-open sf-modal">
+        <div class="slds-modal__container sf-modal-container">
+            <header class="slds-modal__header sf-modal-header">
+                <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={handleClose}>
+                    <lightning-icon icon-name="utility:close" size="small" alternative-text="Close"></lightning-icon>
+                </button>
+                <p class="sf-eyebrow">New agreement</p>
+                <h2 id="sf-modal-title" class="slds-modal__title sf-modal-title">{stepTitle}</h2>
+                <!-- Stepper -->
+                <div class="sf-stepper">
+                    <div class={step1Class}><span class="sf-step-num">1</span><span class="sf-step-label">Details</span></div>
+                    <span class="sf-step-divider"></span>
+                    <div class={step2Class}><span class="sf-step-num">2</span><span class="sf-step-label">Signers</span></div>
+                    <span class="sf-step-divider"></span>
+                    <div class={step3Class}><span class="sf-step-num">3</span><span class="sf-step-label">Email</span></div>
+                </div>
+            </header>
+
+            <div class="slds-modal__content sf-modal-content">
+
+                <!-- STEP 1: Agreement details -->
+                <template if:true={step1}>
+                    <div class="sf-form">
+                        <lightning-input
+                            label="Agreement Name"
+                            value={agreementName}
+                            onchange={handleNameChange}
+                            required
+                            placeholder="e.g. Master Services Agreement">
+                        </lightning-input>
+
+                        <div class="sf-grid-2">
+                            <lightning-combobox
+                                label="Agreement Type"
+                                value={agreementType}
+                                options={typeOptions}
+                                onchange={handleTypeChange}>
+                            </lightning-combobox>
+                            <lightning-combobox
+                                label="Signing Order"
+                                value={signingOrder}
+                                options={orderOptions}
+                                onchange={handleOrderChange}>
+                            </lightning-combobox>
+                        </div>
+
+                        <lightning-input
+                            type="datetime"
+                            label="Expiry Date"
+                            value={expiryDate}
+                            onchange={handleExpiryChange}>
+                        </lightning-input>
+
+                        <lightning-textarea
+                            label="Message to Signers"
+                            value={message}
+                            onchange={handleMessageChange}
+                            placeholder="Optional. This message appears on the agreement record.">
+                        </lightning-textarea>
+                    </div>
+                </template>
+
+                <!-- STEP 2: Signers -->
+                <template if:true={step2}>
+                    <div class="sf-section-head">
+                        <p class="sf-section-eyebrow">Recipients</p>
+                        <h3 class="sf-section-title">Who needs to sign?</h3>
+                        <p class="sf-section-sub">Agreement: <strong>{agreementName}</strong></p>
+                    </div>
+
+                    <template for:each={signers} for:item="signer" for:index="i">
+                        <div key={signer.key} class="sf-signer-card">
+                            <div class="sf-signer-head">
+                                <span class="sf-signer-badge">Signer {signer.displayOrder}</span>
+                                <button class="sf-icon-btn sf-icon-btn-danger" title="Remove" data-index={i} onclick={removeSigner}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                        <path d="M10 11v6"></path><path d="M14 11v6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="sf-grid-2">
+                                <lightning-input label="Name" value={signer.name} data-index={i} data-field="name" onchange={handleSignerChange} placeholder="Full name"></lightning-input>
+                                <lightning-input type="email" label="Email" value={signer.email} data-index={i} data-field="email" onchange={handleSignerChange} placeholder="name@company.com"></lightning-input>
+                            </div>
+                            <div class="sf-grid-2">
+                                <lightning-combobox label="Role" value={signer.role} options={roleOptions} data-index={i} data-field="role" onchange={handleSignerChange}></lightning-combobox>
+                                <lightning-input type="number" label="Order" value={signer.order} data-index={i} data-field="order" onchange={handleSignerChange} min="1"></lightning-input>
+                            </div>
+                        </div>
+                    </template>
+
+                    <button class="sf-add-signer" onclick={addSigner}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add another signer
+                    </button>
+                </template>
+
+                <!-- STEP 3: Email customization -->
+                <template if:true={step3}>
+                    <div class="sf-section-head">
+                        <p class="sf-section-eyebrow">Outgoing email</p>
+                        <h3 class="sf-section-title">Customize the invitation</h3>
+                        <p class="sf-section-sub">Leave blank to use the default subject and message.</p>
+                    </div>
+
+                    <div class="sf-form">
+                        <lightning-input
+                            label="Email Subject"
+                            value={emailSubject}
+                            onchange={handleSubjectChange}
+                            placeholder={defaultSubjectPlaceholder}
+                            max-length="255">
+                        </lightning-input>
+                        <p class="sf-field-hint">Optional. If left blank, signers receive: <em>"{defaultSubjectPlaceholder}"</em></p>
+
+                        <lightning-textarea
+                            label="Email Message"
+                            value={emailMessage}
+                            onchange={handleEmailMessageChange}
+                            placeholder="Write a personal note to your signers (optional)."
+                            max-length="2000">
+                        </lightning-textarea>
+                        <p class="sf-field-hint">Optional. If left blank, the message from Step&nbsp;1 will be used.</p>
+
+                        <!-- Preview card -->
+                        <div class="sf-preview">
+                            <p class="sf-preview-label">Preview</p>
+                            <div class="sf-preview-body">
+                                <p class="sf-preview-subj"><strong>Subject:</strong> {effectiveSubject}</p>
+                                <p class="sf-preview-body-text">{effectiveMessageDisplay}</p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={isLoading}>
+                    <div class="sf-loading">
+                        <lightning-spinner alternative-text="Saving…" size="small"></lightning-spinner>
+                    </div>
+                </template>
+            </div>
+
+            <footer class="slds-modal__footer sf-modal-footer">
+                <button class="sf-btn sf-btn-ghost" onclick={handleClose}>Cancel</button>
+                <div class="sf-footer-right">
+                    <template if:true={showBack}>
+                        <button class="sf-btn sf-btn-secondary" onclick={handleBack}>Back</button>
+                    </template>
+                    <template if:true={step1}>
+                        <button class="sf-btn sf-btn-primary" onclick={handleNext}>Continue</button>
+                    </template>
+                    <template if:true={step2}>
+                        <button class="sf-btn sf-btn-secondary" onclick={handleSaveDraft}>Save as Draft</button>
+                        <button class="sf-btn sf-btn-primary" onclick={handleNext}>Continue</button>
+                    </template>
+                    <template if:true={step3}>
+                        <button class="sf-btn sf-btn-secondary" onclick={handleSaveDraft}>Save as Draft</button>
+                        <button class="sf-btn sf-btn-primary" onclick={handleCreateAndSend}>Send for Signature</button>
+                    </template>
+                </div>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

@@ -1,0 +1,525 @@
+/* Buttons */
+.sf-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.sf-btn_primary {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+}
+
+.sf-btn_primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.sf-btn_ghost {
+    background: #fff;
+    color: var(--slate-700, #334155);
+    border: 1px solid var(--slate-300, #cbd5e1);
+}
+
+.sf-btn_ghost:hover {
+    border-color: #7c3aed;
+    color: #7c3aed;
+}
+
+/* Even gap between the two equal-width footer buttons. */
+.sf-folder-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.sf-folder-actions .sf-btn {
+    min-width: 130px;
+    text-align: center;
+}
+
+.sf-btn_block {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Card */
+.sf-int-card {
+    background: #ffffff;
+    border: 1px solid #e6e8ef;
+    border-radius: 16px;
+    /* Full width — line up with the warning banner above, not a narrower 640px. */
+    margin: 0 0 16px;
+    /* No overflow:hidden here — it clips the combobox dropdown. Children that
+       paint a background round their own outer corners instead. */
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.sf-int-card_on {
+    border-color: #dcd6f2;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px rgba(124, 58, 237, 0.09);
+}
+
+.sf-int-card_off {
+    background: #fcfcfd;
+}
+
+.sf-int-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+}
+
+/* Keep the toggle compact and hard-right, vertically centred with the logo. */
+.sf-int-toggle {
+    flex: 0 0 auto;
+}
+
+.sf-int-logo {
+    flex: 0 0 auto;
+    display: block;
+    border-radius: 8px;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.sf-int-logo_muted {
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+.sf-int-meta {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.sf-int-name {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.sf-int-sub {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 3px 0 0;
+    line-height: 1.45;
+}
+
+/* Status pill */
+.sf-status {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px 5px 9px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sf-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+
+.sf-status_on {
+    background: #e8f7f0;
+    color: #067a52;
+}
+
+.sf-status_off {
+    background: #f1f3f6;
+    color: #64748b;
+}
+
+/* Body */
+.sf-int-section {
+    padding: 18px 20px;
+    border-top: 1px solid #f1f2f6;
+}
+
+.sf-field-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    margin: 0 0 2px;
+}
+
+.sf-field-help {
+    font-size: 0.76rem;
+    color: #94a3b8;
+    line-height: 1.45;
+    margin: 0 0 10px;
+}
+
+.sf-field-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.sf-field-grow {
+    flex: 1 1 240px;
+    min-width: 0;
+}
+
+.sf-icon-btn {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sf-icon-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #7c3aed;
+}
+
+.sf-icon-btn:focus-visible,
+.sf-ghost-btn:focus-visible,
+.sf-mini-btn:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: 2px;
+}
+
+.sf-ghost-btn {
+    flex: 0 0 auto;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px;
+    background: #fff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sf-ghost-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+/* Inline alert */
+/* ─── Alerts ───
+ * One box, four severities. Each carries a stroke-drawn icon (a CSS mask, so it
+ * takes the alert's own colour) instead of an emoji glued to the front of the
+ * message string. Success/error/warning keep their conventional hues because
+ * those carry meaning; "info" is the app's indigo, so a neutral notice reads as
+ * SignForce rather than as generic grey chrome.
+ */
+.sf-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 0 20px 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    border: 1px solid transparent;
+}
+
+.sf-alert::before {
+    content: '';
+    width: 15px;
+    height: 15px;
+    margin-top: 1px;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: var(--sf-alert-icon) center / contain no-repeat;
+    mask: var(--sf-alert-icon) center / contain no-repeat;
+}
+
+.sf-alert_success {
+    --sf-alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m8.5 12 2.5 2.5 4.5-5'/%3E%3C/svg%3E");
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #067a5b;
+}
+
+.sf-alert_error {
+    --sf-alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15 9l-6 6M9 9l6 6'/%3E%3C/svg%3E");
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #b3322c;
+}
+
+.sf-alert_warning {
+    --sf-alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E");
+    background: #fffbeb;
+    border-color: #fcd34d;
+    color: #92600b;
+}
+
+.sf-alert_info {
+    --sf-alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E");
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #4338ca;
+}
+
+/* Footer */
+.sf-int-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 20px;
+    background: #fbfbfd;
+    border-top: 1px solid #f1f2f6;
+    border-radius: 0 0 15px 15px;
+}
+
+.sf-int-foot_solo {
+    justify-content: stretch;
+    background: transparent;
+    border-top: none;
+    border-radius: 0;
+    padding: 0 20px 20px;
+}
+
+.sf-mini-btn {
+    padding: 8px 14px;
+    background: #fff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sf-mini-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+.sf-mini-btn_danger {
+    color: #b42318;
+    border-color: #f0dbd8;
+    background: transparent;
+}
+
+.sf-mini-btn_danger:hover {
+    background: #fef3f2;
+    border-color: #e8b4ae;
+    color: #912018;
+}
+
+@media (max-width: 560px) {
+    .sf-int-head {
+        flex-wrap: wrap;
+        gap: 10px 12px;
+    }
+    /* Name/subtitle take the row; status pill + toggle wrap under, logo stays left. */
+    .sf-int-meta {
+        flex: 1 1 60%;
+    }
+    .sf-ghost-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+/* Spinner area while the card probes its connection + loads folders. */
+.sf-int-loading {
+    position: relative;
+    min-height: 96px;
+    border-top: 1px solid #f1f2f6;
+}
+
+/* ── Google Picker ─────────────────────────────────────────────────────
+   The picked folder is shown as a read-only chip rather than a disabled
+   input: there is nothing to type here, the only way to change it is the
+   button beside it. */
+.sf-picked-folder {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--slate-200, #e2e8f0);
+    border-radius: 8px;
+    background: var(--slate-50, #f8fafc);
+    font-size: 13px;
+    color: var(--slate-700, #334155);
+}
+.sf-picked-folder svg { color: var(--brand, #7c3aed); flex: none; }
+.sf-picked-folder_empty { color: var(--slate-400, #94a3b8); }
+
+/* ── Google Picker modal chrome ──────────────────────────────────────────
+   .sf-modal / .sf-modal-backdrop had no base rule in this file at all — the
+   dialog was rendering as a plain inline block in the page flow, with no
+   dimming, no centering, no elevation. Everything below this comment through
+   .sf-picker-frame is that missing base, plus the Picker-specific sizing. */
+.sf-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    z-index: 9000;
+    animation: sf-modal-fade .12s ease-out;
+}
+.sf-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9001;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.35);
+    animation: sf-modal-in .16s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes sf-modal-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sf-modal-in {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(.97); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.sf-modal_picker {
+    /* A touch wider/taller than the general-purpose modal size: the Picker's
+       own folder grid feels cramped and scroll-happy below this, since it is
+       laying out Google's chrome (search bar, breadcrumb, list) inside
+       whatever box it is given. */
+    width: min(780px, 94vw);
+    max-width: none;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.32), 0 0 0 1px rgba(15, 23, 42, 0.04);
+}
+.sf-modal_picker .sf-modal-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--slate-200, #e2e8f0);
+    background: linear-gradient(180deg, #fbfaff 0%, #ffffff 100%);
+}
+.sf-modal-head-logo {
+    flex: none;
+    margin-top: 1px;
+    border-radius: 5px;
+}
+.sf-modal-head-text { flex: 1; min-width: 0; }
+.sf-modal_picker .sf-modal-head h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 650;
+    color: var(--slate-900, #0f172a);
+}
+.sf-modal_picker .sf-modal-head p {
+    margin: 3px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--slate-500, #64748b);
+}
+.sf-modal_picker .sf-icon-btn { flex: none; margin-top: -2px; }
+
+/* The picker renders its own chrome and needs real height to be usable. */
+.sf-picker-frame {
+    display: block;
+    width: 100%;
+    height: min(600px, 72vh);
+    border: 0;
+}
+
+/* ---- Google Picker API key ---------------------------------------------
+   Sits under the folder chooser because that is the only place a missing key
+   ever surfaces. Collapsed to a masked summary once one is saved. */
+.sf-apikey {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #e6eaf0;
+}
+.sf-apikey-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.sf-apikey-mask {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px;
+    color: #7a8699;
+    background: #f6f8fa;
+    border: 1px solid #e6eaf0;
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+.sf-linklike {
+    background: none;
+    border: 0;
+    padding: 2px 4px;
+    font: inherit;
+    font-size: 12.5px;
+    color: #5620b8;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.sf-linklike:hover { color: #7838e8; }
+.sf-optional {
+    font-weight: 400;
+    font-size: 11px;
+    color: #7a8699;
+    background: #f6f8fa;
+    border: 1px solid #e6eaf0;
+    border-radius: 999px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    vertical-align: 1px;
+}
+
+/* ---- missing CSP trusted sites --------------------------------------- */
+.sf-csp-warn {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #fdf3e0;
+    border: 1px solid #f2dcae;
+    border-left: 3px solid #b06d13;
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: #6b4409;
+}
+.sf-csp-warn b { color: #8a5610; }
+.sf-csp-warn p { margin: 6px 0 8px; line-height: 1.55; }
+.sf-csp-warn ul { margin: 0; padding-left: 18px; }
+.sf-csp-warn li { margin: 3px 0; }
+.sf-csp-warn code {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 11.5px;
+    background: #fff;
+    border: 1px solid #f0dcb4;
+    border-radius: 4px;
+    padding: 1px 6px;
+}

@@ -1,0 +1,20 @@
+<apex:page showHeader="false" title="{!$Label.site.site_under_construction}">
+  <apex:composition template="StdExceptionTemplate">
+    <apex:define name="icon">
+      <apex:image url="{!URLFOR($Resource.SiteSamples, 'img/tools.png')}"/>
+    </apex:define>
+    <apex:define name="error">
+      <!-- escape="false" removed. It let whatever the label expands to reach the
+           browser as markup, which the scanner reports as stored XSS on a page
+           served to anonymous visitors. The value is a Salesforce label with a
+           merge placeholder, so escaping changes nothing a visitor sees; the
+           apex:param below still substitutes normally. -->
+      <apex:outputText styleClass="title" value="{!$Label.site.under_construction}">
+        <apex:param value="{!$Site.BaseUrl}"/>
+      </apex:outputText>
+      <br/>
+      <br/>
+      <apex:outputText value="{!$Label.site.stay_tuned}"/>
+    </apex:define>
+  </apex:composition>
+</apex:page>

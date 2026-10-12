@@ -1,0 +1,539 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 04-26-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <c-signforce-access-gate>
+        <div class={shellClass}>
+            <div class="ambient-bg"></div>
+            <div class={containerClass}>
+
+                <!-- Header -->
+                <div class="wizard-header">
+                    <div class="header-left">
+                        <div class="brand-mark">
+                            <div class="brand-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 20h9"></path>
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="brand-label">eSignforce</p>
+                                <h1 class="brand-title">New Agreement</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <div class="step-counter">
+                            <span class="step-current">{currentStep}</span>
+                            <span class="step-divider">/</span>
+                            <span class="step-total">5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div class="progress-rail">
+                    <div class="progress-line">
+                        <div class="progress-fill" style={progressFillStyle}></div>
+                    </div>
+                    <div class="progress-steps">
+                        <template for:each={steps} for:item="step">
+                            <div key={step.id} class={step.wrapperClass}>
+                                <div class={step.dotClass}>
+                                    <template if:true={step.isComplete}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                    </template>
+                                    <template if:false={step.isComplete}>
+                                        <span>{step.id}</span>
+                                    </template>
+                                </div>
+                                <p class={step.labelClass}>{step.label}</p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Content Card -->
+                <div class="content-card">
+
+                    <!-- Step 1: Agreement Details -->
+                    <template if:true={isStep1}>
+                        <div class="step-content">
+                            <div class="step-header">
+                                <p class="step-eyebrow">Step 01</p>
+                                <h2 class="step-title">Agreement Details</h2>
+                                <p class="step-description">Start by telling us about this agreement. You can change these details later.</p>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <lightning-input label="Agreement Name" value={agreementName} onchange={handleNameChange} placeholder="e.g. Service Agreement Q1 2026" required
+                                        variant="label-stacked">
+                                    </lightning-input>
+                                </div>
+                                <div class="form-group">
+                                    <lightning-combobox label="Agreement Type" value={agreementType} options={typeOptions} onchange={handleTypeChange} variant="label-stacked">
+                                    </lightning-combobox>
+                                </div>
+                                <div class="form-group">
+                                    <lightning-combobox label="Signing Order" value={signingOrder} options={orderOptions} onchange={handleOrderChange} variant="label-stacked">
+                                    </lightning-combobox>
+                                </div>
+                                <div class="form-group full-width">
+                                    <lightning-input type="datetime" label="Expiry Date (Optional)" value={expiryDate} onchange={handleExpiryChange} variant="label-stacked">
+                                    </lightning-input>
+                                </div>
+                                <div class="form-group full-width">
+                                    <lightning-textarea label="Message to Signers (Optional)" value={message} onchange={handleMessageChange}
+                                        placeholder="Add a personal note that signers will see..." variant="label-stacked">
+                                    </lightning-textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Step 2: Upload Document -->
+                    <template if:true={isStep2}>
+                        <div class="step-content">
+                            <div class="step-header">
+                                <p class="step-eyebrow">Step 02</p>
+                                <h2 class="step-title">Upload Document</h2>
+                                <p class="step-description">Upload the document that signers will review and sign.</p>
+                            </div>
+
+                            <!-- No cloud provider configured: documents stay in Salesforce Files. -->
+                            <template if:false={cloudConnected}>
+                                <div class="sf-storage-warning" role="status">
+                                    <svg class="sf-storage-warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                                        <circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>
+                                    </svg>
+                                    <div class="sf-storage-warning-body">
+                                        <p class="sf-storage-warning-title">Using Salesforce storage</p>
+                                        <p class="sf-storage-warning-text">
+                                            No cloud storage is connected, so this document is saved to Salesforce Files
+                                            and counts against your org's file storage. <strong>Files larger than
+                                            {salesforceStorageLimitLabel} can't be uploaded.</strong> Connect Google Drive
+                                            or OneDrive in eSignforce Admin Config to store documents there instead and
+                                            lift this limit.
+                                        </p>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:false={uploadedDoc}>
+                                <!-- BUG-003 FIX: drag-and-drop event handlers on dropzone.
+                                     Previously the dropzone was only a visual element; dropping
+                                     a file did nothing. Now it routes through the same upload
+                                     pipeline as the click-to-browse button. -->
+                                <div class={dropzoneClass} ondragenter={handleDragEnter} ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}>
+                                    <div class="upload-icon-wrapper">
+                                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                        </svg>
+                                    </div>
+                                    <h3 class="upload-title">Drop your document here</h3>
+                                    <p class="upload-subtitle">or click to browse from your computer</p>
+
+                                    <!-- Native input - file is intercepted by handleDocUpload, which routes
+                                         to Tier1 (REST → ContentVersion) or Tier2/3 (browser → Lambda → S3)
+                                         based on file size and CMT config. -->
+                                    <div class="upload-button-wrap">
+                                        <input type="file" id="doc-upload" accept=".pdf,.doc,.docx" onchange={handleDocUpload} style="display:none;" />
+                                        <button class="btn-primary" onclick={triggerDocUpload}>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                style="width:16px;height:16px;margin-right:8px;">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="17 8 12 3 7 8"></polyline>
+                                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                                            </svg>
+                                            <span>Choose File</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="upload-formats">
+                                        <span class="format-chip">PDF</span>
+                                        <span class="format-chip">DOC</span>
+                                        <span class="format-chip">DOCX</span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={uploadedDoc}>
+                                <div class="uploaded-card">
+                                    <div class="uploaded-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="uploaded-info">
+                                        <p class="uploaded-name">
+                                            {uploadedDoc.name}
+                                            <template if:true={uploadedDocStorageLabel}>
+                                                <span
+                                                    style="display:inline-block;padding:2px 8px;border-radius:10px;background:#eef2ff;color:#3730a3;font-size:11px;margin-left:8px;font-weight:600;">
+                                                    {uploadedDocStorageLabel}
+                                                </span>
+                                            </template>
+                                        </p>
+                                        <div class="uploaded-status">
+                                            <template if:true={isUploading}>
+                                                <span class="status-dot" style="background:#f59e0b;"></span>
+                                                <span>{uploadStatusText}</span>
+                                            </template>
+                                            <template if:false={isUploading}>
+                                                <span class="status-dot"></span>
+                                                <span>Uploaded successfully</span>
+                                            </template>
+                                        </div>
+
+                                        <!-- Progress bar shown only during upload -->
+                                        <template if:true={isUploading}>
+                                            <div style="margin-top:10px;background:#e5e7eb;border-radius:6px;overflow:hidden;height:6px;width:100%;">
+                                                <div style={uploadProgressStyle} class="upload-progress-bar" data-bg="#2563eb"></div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <button class="uploaded-remove" onclick={removeDoc} disabled={isUploading}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Step 3: Add Signers -->
+                    <template if:true={isStep3}>
+                        <div class="step-content">
+                            <div class="step-header">
+                                <p class="step-eyebrow">Step 03</p>
+                                <h2 class="step-title">Add Recipients</h2>
+                                <p class="step-description">Add everyone involved - signers, or recipients copied (CC) for visibility.</p>
+                            </div>
+
+                            <div class="signers-list">
+                                <!-- <template for:each={signers} for:item="signer" for:index="idx">
+                                    <div key={signer.key} class="signer-card">
+                                        <div class="signer-card-header">
+                                            <div class="signer-badge">
+                                                <span class="badge-number">{signer.order}</span>
+                                            </div>
+                                            <p class="signer-label">Signer {signer.order}</p>
+                                            <template if:true={showRemoveSigner}>
+                                                <button class="signer-remove"
+                                                    data-index={idx}
+                                                    onclick={removeSigner}
+                                                    title="Remove signer">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </button>
+                                            </template>
+                                        </div>
+                                        <div class="signer-form">
+                                            <div class="signer-row">
+                                                <lightning-input
+                                                    label="Full Name"
+                                                    value={signer.name}
+                                                    data-index={idx}
+                                                    data-field="name"
+                                                    onchange={handleSignerChange}
+                                                    placeholder="Jane Doe"
+                                                    variant="label-stacked"
+                                                    required>
+                                                </lightning-input>
+                                                <lightning-input
+                                                    type="email"
+                                                    label="Email"
+                                                    value={signer.email}
+                                                    data-index={idx}
+                                                    data-field="email"
+                                                    onchange={handleSignerChange}
+                                                    placeholder="jane@company.com"
+                                                    variant="label-stacked"
+                                                    required>
+                                                </lightning-input>
+                                            </div>
+                                            <div class="signer-row">
+                                                <lightning-combobox
+                                                    label="Role"
+                                                    value={signer.role}
+                                                    options={roleOptions}
+                                                    data-index={idx}
+                                                    data-field="role"
+                                                    onchange={handleSignerChange}
+                                                    variant="label-stacked">
+                                                </lightning-combobox>
+                                                <lightning-input
+                                                    type="number"
+                                                    label="Signing Order"
+                                                    value={signer.order}
+                                                    data-index={idx}
+                                                    data-field="order"
+                                                    onchange={handleSignerChange}
+                                                    variant="label-stacked">
+                                                </lightning-input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template> -->
+                                <template for:each={signers} for:item="signer" for:index="idx">
+                                    <div key={signer.key} class="signer-card">
+                                        <div class="signer-card-header">
+                                            <div class="signer-badge">
+                                                <span class="badge-number">{signer.order}</span>
+                                            </div>
+                                            <p class="signer-label">Signer {signer.order}</p>
+                                            <template if:true={showRemoveSigner}>
+                                                <button class="signer-remove" data-index={idx} onclick={removeSigner} title="Remove signer">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </button>
+                                            </template>
+                                        </div>
+                                        <div class="signer-form">
+
+                                            <!-- ── Existing signer search ── -->
+                                            <div class="signer-search-wrap">
+                                                <lightning-input type="search" label="Use existing signer (search by name or email)" value={signer.searchTerm} data-index={idx}
+                                                    onchange={handleSignerSearch} onfocus={handleSignerSearchFocus} onblur={handleSignerSearchBlur}
+                                                    placeholder="Type to find past signers, contacts, or leads…" variant="label-stacked">
+                                                </lightning-input>
+                                                <template if:true={signer.showSuggestions}>
+                                                    <!-- Swallow mousedown so the search box never loses focus while a
+                                                         suggestion is being clicked. Without this the blur fires first,
+                                                         lightning-input raises onchange, handleSignerSearch reassigns
+                                                         this.signers, the list re-renders, and the element the click
+                                                         started on is gone before the browser can raise the click -
+                                                         so picking a suggestion silently did nothing. -->
+                                                    <div class="signer-suggestions" onmousedown={handleSuggestionMouseDown}>
+                                                        <template for:each={signer.suggestions} for:item="sg" for:index="sidx">
+                                                            <div key={sg.email} class="signer-suggestion-item" data-index={idx} data-sidx={sidx} onclick={handleSignerSuggestionClick}>
+                                                                <div class="suggestion-main">
+                                                                    <p class="suggestion-name">{sg.name}</p>
+                                                                    <p class="suggestion-email">{sg.email}</p>
+                                                                </div>
+                                                                <span class="suggestion-source">{sg.source}</span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+
+                                            <!-- ── Signer details (auto-fills from search, or type manually) ── -->
+                                            <div class="signer-row">
+                                                <lightning-input label="Full Name" value={signer.name} data-index={idx} data-field="name" onchange={handleSignerChange}
+                                                    placeholder="Jane Doe" variant="label-stacked" required>
+                                                </lightning-input>
+                                                <lightning-input type="email" label="Email" value={signer.email} data-index={idx} data-field="email" onchange={handleSignerChange}
+                                                    placeholder="jane@company.com" variant="label-stacked" required>
+                                                </lightning-input>
+                                            </div>
+                                            <div class="signer-row">
+                                                <lightning-combobox label="Role" value={signer.role} options={roleOptions} data-index={idx} data-field="role"
+                                                    onchange={handleSignerChange} variant="label-stacked">
+                                                </lightning-combobox>
+                                                <!-- BUG-007: Signing Order is read-only (derived from row position).
+                                                     BUG-020 FIX: rendered as a native SLDS input instead of a base
+                                                     lightning-input, because a base component's inner-input padding
+                                                     cannot be set from this component's stylesheet (the number sat
+                                                     flush against the left border). .slds-input supplies the same
+                                                     padding/look as the Full Name / Email fields. -->
+                                                <div class="slds-form-element signer-order">
+                                                    <label class="slds-form-element__label">Signing Order</label>
+                                                    <div class="slds-form-element__control">
+                                                        <input type="text" class="slds-input" value={signer.order} disabled />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <button class="add-signer-btn" onclick={addSigner}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Add Another Signer</span>
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Step 4: Place Fields (Document Editor) -->
+                    <template if:true={isStep4}>
+                        <div class="step-content editor-step">
+                            <div class="step-header">
+                                <p class="step-eyebrow">Step 04</p>
+                                <h2 class="step-title">Place Signature Fields</h2>
+                                <p class="step-description">Drag signature and text fields onto the document. At least one signature field is required before you can send.</p>
+                            </div>
+                        </div>
+                        <div class="editor-fullwidth">
+                            <c-document-editor record-id={agreementId} hide-header="true"></c-document-editor>
+                        </div>
+                    </template>
+
+                    <!-- Step 5: Review & Send -->
+                    <template if:true={isStep5}>
+                        <div class="step-content">
+                            <div class="step-header">
+                                <p class="step-eyebrow">Step 05</p>
+                                <h2 class="step-title">Review &amp; Send</h2>
+                                <p class="step-description">Double check everything before sending.</p>
+                            </div>
+
+                            <template if:false={fieldsPlaced}>
+                                <div class="warning-banner">
+                                    <div class="warning-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <!-- BUG-017 FIX: clarified contradictory message.
+                                             Step 4 says "you can skip and add later" but Step 5
+                                             said sending was blocked. Now the wording matches: 
+                                             sending requires fields, but Save as Draft is fine. -->
+                                        <p class="warning-title">Signature fields not placed yet</p>
+                                        <p class="warning-text">To send this agreement, go back to Step 4 and place at least one Signature field.
+                                            You can also Save as Draft now and place fields later from the Agreement record.</p>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div class="review-card">
+                                <div class="review-card-header">
+                                    <h3 class="review-section-title">Agreement Details</h3>
+                                </div>
+                                <div class="review-grid">
+                                    <div class="review-item">
+                                        <p class="review-key">Name</p>
+                                        <p class="review-value">{agreementName}</p>
+                                    </div>
+                                    <div class="review-item">
+                                        <p class="review-key">Type</p>
+                                        <p class="review-value">{agreementType}</p>
+                                    </div>
+                                    <div class="review-item">
+                                        <p class="review-key">Signing Order</p>
+                                        <p class="review-value">{signingOrder}</p>
+                                    </div>
+                                    <div class="review-item">
+                                        <p class="review-key">Document</p>
+                                        <p class="review-value">{reviewDocName}</p>
+                                    </div>
+                                    <!-- BUG-021 FIX: show Message to Signers (Step 1 data was lost on Step 5) -->
+                                    <template if:true={hasMessage}>
+                                        <div class="review-item review-item-wide">
+                                            <p class="review-key">Message to Signers</p>
+                                            <p class="review-value review-message">{message}</p>
+                                        </div>
+                                    </template>
+                                    <template if:true={expiryDate}>
+                                        <div class="review-item">
+                                            <p class="review-key">Expiry Date</p>
+                                            <p class="review-value">{reviewExpiry}</p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="review-card">
+                                <div class="review-card-header">
+                                    <h3 class="review-section-title">Signers</h3>
+                                    <span class="signer-count-badge">{signers.length}</span>
+                                </div>
+                                <div class="review-signers">
+                                    <template for:each={signers} for:item="signer">
+                                        <div key={signer.key} class="review-signer-row">
+                                            <div class="review-signer-avatar">{signer.order}</div>
+                                            <div class="review-signer-info">
+                                                <p class="review-signer-name">{signer.name}</p>
+                                                <p class="review-signer-email">{signer.email}</p>
+                                            </div>
+                                            <div class="review-signer-meta">
+                                                <span class="role-chip">{signer.role}</span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <template if:true={isLoading}>
+                                <div class="review-loading">
+                                    <lightning-spinner alternative-text="Creating agreement..." size="medium"></lightning-spinner>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="wizard-footer">
+                    <div class="footer-left">
+                        <template if:true={showBack}>
+                            <button class="btn-secondary" onclick={handleBack}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                                    <polyline points="12 19 5 12 12 5"></polyline>
+                                </svg>
+                                <span>Back</span>
+                            </button>
+                        </template>
+                    </div>
+                    <div class="footer-right">
+                        <template if:false={isStep5}>
+                            <button class="btn-primary" onclick={handleNext}>
+                                <span>Continue</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </button>
+                        </template>
+                        <template if:true={isStep5}>
+                            <template if:true={fieldsPlaced}>
+                                <button class="btn-secondary" onclick={handleSaveDraft}>Save as Draft</button>
+                                <button class="btn-primary btn-success" onclick={handleCreateAndSend} disabled={isLoading}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                    </svg>
+                                    <span>Create &amp; Send</span>
+                                </button>
+                            </template>
+                            <template if:false={fieldsPlaced}>
+                                <button class="btn-primary" onclick={handleSaveDraft} disabled={isLoading}>
+                                    <span>Save as Draft</span>
+                                </button>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <c-signforce-chatbot-fab></c-signforce-chatbot-fab>
+    </c-signforce-access-gate>
+</template>

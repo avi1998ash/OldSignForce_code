@@ -1,0 +1,57 @@
+<apex:page standardController="Account"
+           recordSetVar="selected"
+           showHeader="false"
+           sidebar="false"
+           standardStylesheets="false"
+           lightningStylesheets="true"
+           title="Generate documents">
+
+    <!--
+      Host for the list-view mass action.
+
+      A list button hands the ticked rows to a standard SET controller, and
+      Visualforce is the only place that controller can be read — which is why
+      this page exists at all rather than the LWC being launched directly.
+
+      standardController is bound to ONE object by design; Salesforce has no
+      generic set controller. To offer this on another object, copy this page,
+      change the two occurrences of "Account" below, and point a list button on
+      that object at the copy. Nothing else changes.
+    -->
+
+    <apex:includeLightning />
+
+    <div id="sf-bulk-host" style="padding:24px 16px;"></div>
+
+    <script>
+        // Collected from the rows the user ticked. apex:repeat runs server-side,
+        // so this array is written out fully formed before the script below runs.
+        var sfSelectedIds = [];
+    </script>
+    <apex:repeat value="{!selected}" var="row">
+        <script>sfSelectedIds.push('{!JSENCODE(row.Id)}');</script>
+    </apex:repeat>
+
+    <script>
+        $Lightning.use("c:signforceApp", function () {
+            $Lightning.createComponent(
+                "c:signforceBulkListAction",
+                {
+                    // The component takes a plain string so the boundary stays
+                    // simple; it splits and validates on its own side.
+                    recordIds: sfSelectedIds.join(','),
+                    objectApiName: "Account"
+                },
+                "sf-bulk-host",
+                function (cmp, status, err) {
+                    if (status !== "SUCCESS") {
+                        document.getElementById('sf-bulk-host').innerHTML =
+                            '<p style="font-family:sans-serif;color:#b91c1c;">' +
+                            'Could not load the eSignforce action. ' +
+                            (err && err.message ? err.message : '') + '</p>';
+                    }
+                }
+            );
+        });
+    </script>
+</apex:page>

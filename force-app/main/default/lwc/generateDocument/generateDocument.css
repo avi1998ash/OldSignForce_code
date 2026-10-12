@@ -1,0 +1,1196 @@
+/* ════════════════════════════════════════════════════════════════
+   SignForce — Generate Document Quick Action
+   Matches the createAgreement wizard / document editor aesthetic:
+   warm cream bg, navy primary, amber accent, white cards
+   ════════════════════════════════════════════════════════════════ */
+
+:host {
+    /* Brand Accent Tokens */
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;
+    /* Primary brand accent */
+    --brand-700: #6d28d9;
+    --brand-900: #4c1d95;
+
+    /* Neutrals - Slate */
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    /* Semantic States */
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-200: #a7f3d0;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+
+    /* Border Radii */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-full: 9999px;
+
+    /* Shadows & Transitions */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Salesforce styling hook overrides */
+    --slds-c-input-color-background: var(--slate-50);
+    --slds-c-input-color-border: var(--slate-200);
+    --slds-c-input-radius-border: var(--radius-sm);
+    --slds-c-combobox-color-background: var(--slate-50);
+    --slds-c-combobox-color-border: var(--slate-200);
+    --slds-c-combobox-radius-border: var(--radius-sm);
+    --slds-c-textarea-color-background: var(--slate-50);
+    --slds-c-textarea-color-border: var(--slate-200);
+    --slds-c-textarea-radius-border: var(--radius-sm);
+
+    /* Map legacy variables to prevent visual breakage */
+    --navy-900: var(--slate-900);
+    --navy-800: var(--slate-800);
+    --navy-700: var(--slate-700);
+    --warm-white: #ffffff;
+    --warm-50: var(--slate-50);
+    --warm-100: var(--slate-100);
+    --warm-200: var(--slate-200);
+    --warm-400: var(--slate-400);
+    --warm-600: var(--slate-500);
+    --warm-800: var(--slate-700);
+}
+
+/* Containing block for the generate loader, which covers this panel while the
+   document is being built. Without it the loader's absolute veil escapes to
+   whatever is positioned further up and lands in the wrong place. */
+.sf-genwrap { position: relative; }
+
+/* ── Shell ───────────────────────────────────────────────── */
+.sf-shell {
+    padding: 16px 8px;
+    background: var(--warm-white);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--navy-900);
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.sf-header {
+    margin-bottom: 16px;
+    padding: 4px 8px 12px;
+    border-bottom: 1px solid var(--warm-100);
+}
+
+.sf-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sf-brand-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-700));
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.sf-brand-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.sf-brand-text {
+    min-width: 0;
+}
+
+.sf-brand-eyebrow {
+    margin: 0 0 2px 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--brand-600);
+}
+
+.sf-brand-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--navy-900);
+}
+
+/* ── States: loading / empty ─────────────────────────────── */
+.sf-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.sf-state-icon-wrap {
+    width: 56px;
+    height: 56px;
+    background: var(--warm-50);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.sf-state-icon {
+    width: 26px;
+    height: 26px;
+    color: var(--warm-400);
+}
+
+.sf-state-title {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy-900);
+}
+
+.sf-state-body {
+    margin: 0 0 4px 0;
+    font-size: 13px;
+    color: var(--warm-600);
+    line-height: 1.5;
+}
+
+.sf-state-hint {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: var(--warm-400);
+}
+
+.sf-state-text {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--warm-600);
+}
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.sf-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--warm-100);
+    border-top-color: var(--brand-600);
+    border-radius: 50%;
+    animation: sf-spin 0.7s linear infinite;
+}
+
+.sf-spinner-sm {
+    width: 18px;
+    height: 18px;
+    border-width: 2px;
+}
+
+.sf-spinner-xs {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+}
+
+@keyframes sf-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Card ────────────────────────────────────────────────── */
+.sf-card {
+    background: #fff;
+    border: 1px solid var(--warm-100);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: sf-fade-up 0.3s var(--ease-out);
+}
+
+@keyframes sf-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sf-card-section {
+    padding: 18px 20px;
+}
+
+.sf-card-section-bordered {
+    border-top: 1px solid var(--warm-100);
+}
+
+/* ── Eyebrows / labels ───────────────────────────────────── */
+.sf-eyebrow {
+    margin: 0 0 6px 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--brand-600);
+}
+
+.sf-eyebrow-small {
+    margin: 0 0 8px 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--warm-600);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-transform: uppercase;
+}
+
+.sf-section-title {
+    margin: 0 0 14px 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--navy-900);
+}
+
+/* ── Combobox styling — subtle Lightning override ────────── */
+.sf-combobox {
+    --slds-c-input-color-background: var(--warm-white);
+    --slds-c-input-color-border: var(--warm-100);
+    --slds-c-input-radius-border: var(--radius-sm);
+    --slds-c-input-spacing-block: 11px;
+}
+
+/* ── Template info card ──────────────────────────────────── */
+.sf-template-info {
+    margin-top: 14px;
+    padding: 14px;
+    background: var(--warm-white);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--warm-100);
+}
+
+.sf-template-desc {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: var(--warm-800);
+    line-height: 1.55;
+}
+
+.sf-template-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+/* ── Pills ───────────────────────────────────────────────── */
+.sf-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.sf-pill-format {
+    background: #fff;
+    border: 1px solid var(--warm-200);
+    color: var(--navy-900);
+}
+
+.sf-pill-agreement {
+    background: var(--brand-50);
+    color: var(--brand-600);
+    border: 1px solid var(--brand-200);
+}
+
+/* Preview Template pill — clickable, behaves like an action button.
+   Slightly elevated state vs static pills so users know it's interactive. */
+.sf-pill-preview {
+    background: var(--navy-900);
+    color: #fff;
+    border: 1px solid var(--navy-900);
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.1s ease-in-out, background 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.sf-pill-preview:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
+}
+
+.sf-pill-preview:active {
+    transform: translateY(0);
+}
+
+.sf-pill-icon {
+    width: 12px;
+    height: 12px;
+}
+
+/* ── Template File Preview Modal ────────────────────────────
+   Full-screen overlay with centered dialog. Backdrop click closes;
+   inner click stops propagation. Iframe fills the body. */
+.sf-tplmodal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    padding: 24px;
+    box-sizing: border-box;
+    backdrop-filter: blur(2px);
+}
+
+.sf-tplmodal-dialog {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.32);
+    width: 92vw;
+    max-width: 920px;
+    height: 85vh;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sf-tplmodal-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--warm-200, #e8e4de);
+    flex-shrink: 0;
+}
+
+.sf-tplmodal-title-block {
+    flex: 1;
+    min-width: 0;
+}
+
+.sf-tplmodal-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 2px 0 0;
+    color: var(--navy-900, #0f172a);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sf-tplmodal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--warm-200, #e8e4de);
+    background: #fff;
+    color: #4b5563;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    transition: all 0.15s ease-in-out;
+}
+
+.sf-tplmodal-close:hover {
+    background: #f9fafb;
+    color: #111827;
+}
+
+.sf-tplmodal-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+.sf-tplmodal-body {
+    flex: 1;
+    padding: 0;
+    background: #525659;
+    overflow: hidden;
+    position: relative;
+}
+
+.sf-tplmodal-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #fff;
+}
+
+.sf-tplmodal-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #f3f4f6;
+    background: rgba(82, 86, 89, 0.96);
+    z-index: 1;
+}
+
+.sf-tplmodal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--warm-200, #e8e4de);
+    flex-shrink: 0;
+    background: #fafbfc;
+}
+
+/* Mobile: full viewport */
+@media (max-width: 600px) {
+    .sf-tplmodal-backdrop {
+        padding: 0;
+    }
+
+    .sf-tplmodal-dialog {
+        width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+}
+
+/* ── Link button ─────────────────────────────────────────── */
+.sf-link {
+    background: none;
+    border: none;
+    color: var(--navy-900);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    text-transform: none;
+    letter-spacing: 0;
+    transition: background 0.12s;
+    font-family: inherit;
+}
+
+.sf-link:hover {
+    background: var(--warm-50);
+    color: var(--brand-600);
+}
+
+/* ── Preview table ───────────────────────────────────────── */
+.sf-preview-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    color: var(--warm-600);
+    font-size: 13px;
+}
+
+.sf-preview-error {
+    padding: 10px 12px;
+    background: var(--red-50);
+    border-left: 3px solid var(--red-500);
+    border-radius: var(--radius-sm);
+    color: var(--red-600);
+    font-size: 12px;
+}
+
+.sf-preview-table-wrap {
+    border: 1px solid var(--warm-100);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.sf-preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.sf-preview-table thead th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--warm-white);
+    color: var(--warm-600);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 10px;
+    border-bottom: 1px solid var(--warm-100);
+    position: sticky;
+    top: 0;
+}
+
+.sf-preview-table tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--warm-100);
+    vertical-align: top;
+}
+
+.sf-preview-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sf-mono {
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 11px;
+    background: var(--warm-50);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--navy-900);
+}
+
+.sf-value-cell {
+    color: var(--navy-900);
+    word-break: break-word;
+    max-width: 240px;
+}
+
+/* ── Tag type pills (reused) ─────────────────────────────── */
+.sf-tag-type {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.sf-tag-type-field {
+    background: #ecf5fc;
+    color: #1589ee;
+}
+
+.sf-tag-type-loop {
+    background: #f0e6f7;
+    color: #6429b7;
+}
+
+.sf-tag-type-conditional {
+    background: var(--amber-50);
+    color: var(--amber-600);
+}
+
+.sf-tag-type-image {
+    background: var(--emerald-50);
+    color: var(--emerald-600);
+}
+
+.sf-tag-type-builtin {
+    background: var(--warm-50);
+    color: var(--warm-600);
+}
+
+/* ── Action footers ──────────────────────────────────────── */
+.sf-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--warm-100);
+    background: var(--warm-white);
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.sf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.18s var(--ease-out);
+    font-family: inherit;
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+    border: 1px solid transparent;
+}
+
+.sf-btn-primary {
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-700));
+    color: #fff;
+    border-color: var(--brand-600);
+    box-shadow: var(--shadow-sm);
+}
+
+.sf-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--brand-700), var(--brand-900));
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.sf-btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.sf-btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.sf-btn-ghost {
+    background: #fff;
+    color: var(--navy-900);
+    border: 1px solid var(--warm-100);
+}
+
+.sf-btn-ghost:hover:not(:disabled) {
+    border-color: var(--warm-200);
+    background: var(--warm-white);
+}
+
+.sf-btn-ghost:disabled {
+    color: var(--warm-400);
+    cursor: not-allowed;
+}
+
+.sf-btn-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+/* ── Drafts table (existing-drafts confirmation panel) ──── */
+.sf-card-warning {
+    border-color: #fde68a;
+}
+
+.sf-warning-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--amber-50), #fef3c7);
+    border-bottom: 1px solid #fde68a;
+}
+
+.sf-warning-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--amber-500);
+    border-radius: var(--radius-sm);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sf-warning-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.sf-warning-text {
+    min-width: 0;
+}
+
+.sf-warning-title {
+    margin: 0 0 3px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--amber-600);
+}
+
+.sf-warning-body {
+    margin: 0;
+    font-size: 12px;
+    color: var(--warm-800);
+    line-height: 1.5;
+}
+
+.sf-drafts-table-wrap {
+    padding: 4px 12px;
+}
+
+.sf-drafts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.sf-drafts-table thead th {
+    text-align: left;
+    padding: 8px 10px;
+    color: var(--warm-600);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 10px;
+    border-bottom: 1px solid var(--warm-100);
+}
+
+.sf-drafts-table tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--warm-100);
+    vertical-align: middle;
+}
+
+.sf-drafts-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sf-drafts-table tbody tr {
+    transition: background 0.12s;
+}
+
+.sf-drafts-table tbody tr:hover {
+    background: var(--warm-white);
+}
+
+.sf-col-action {
+    text-align: right;
+    width: 100px;
+}
+
+.sf-draft-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sf-draft-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-700));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sf-draft-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.sf-draft-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy-900);
+    line-height: 1.3;
+}
+
+.sf-draft-tag {
+    margin: 2px 0 0 0;
+    font-size: 10px;
+    color: var(--emerald-600);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.sf-draft-meta-cell {
+    color: var(--warm-600);
+    font-size: 12px;
+}
+
+.sf-btn-row {
+    background: var(--warm-white);
+    border: 1px solid var(--warm-200);
+    color: var(--navy-900);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.sf-btn-row:hover:not(:disabled) {
+    background: var(--brand-600);
+    border-color: var(--brand-600);
+    color: #fff;
+}
+
+.sf-btn-row:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sf-drafts-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--warm-100);
+    background: var(--warm-white);
+}
+
+/* ── Success card ────────────────────────────────────────── */
+.sf-card-success {
+    border-color: #a7f3d0;
+}
+
+.sf-success-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px 6px 20px;
+}
+
+.sf-success-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--emerald-500);
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+.sf-success-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.sf-success-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.sf-success-title {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--emerald-600);
+    letter-spacing: -0.01em;
+}
+
+.sf-success-filename {
+    margin: 0;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 12px;
+    color: var(--navy-900);
+    word-break: break-all;
+    background: var(--warm-50);
+    padding: 5px 8px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+.sf-success-hint {
+    margin: 0;
+    padding: 0 20px 14px 70px;
+    font-size: 13px;
+    color: var(--warm-600);
+    line-height: 1.55;
+}
+
+/* ── Error card ──────────────────────────────────────────── */
+.sf-card-error {
+    border-color: #fca5a5;
+}
+
+.sf-error-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px;
+    background: var(--red-50);
+}
+
+.sf-error-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--red-500);
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sf-error-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.sf-error-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.sf-error-title {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--red-600);
+}
+
+.sf-error-message {
+    margin: 0;
+    font-size: 12px;
+    color: var(--warm-800);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'Monaco', 'Menlo', monospace;
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 8px;
+    border-radius: var(--radius-sm);
+}
+
+.sf-mt-sm {
+    margin-top: 8px;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .sf-shell {
+        padding: 12px 4px;
+    }
+
+    .sf-card-section {
+        padding: 14px 16px;
+    }
+
+    .sf-section-title {
+        font-size: 16px;
+    }
+
+    .sf-drafts-table thead {
+        display: none;
+    }
+
+    .sf-drafts-table tbody td {
+        display: block;
+        padding: 4px 0;
+        border: none;
+    }
+
+    .sf-drafts-table tbody tr {
+        display: block;
+        padding: 12px 4px;
+        border-bottom: 1px solid var(--warm-100);
+    }
+
+    .sf-col-action {
+        text-align: left;
+        width: auto;
+        padding-top: 8px !important;
+    }
+
+    .sf-success-banner,
+    .sf-error-banner,
+    .sf-warning-banner {
+        padding: 14px;
+    }
+
+    .sf-success-hint {
+        padding: 0 14px 14px 14px;
+    }
+}
+
+/* ── STEP 2 — Signer email mapping ───────────────────────── */
+.sf-signer-help {
+    margin: 0 0 14px 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--warm-600);
+}
+.sf-signer-map {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sf-signer-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 14px;
+    padding: 12px 14px;
+    background: var(--warm-white);
+    border: 1px solid var(--warm-100);
+    border-radius: 10px;
+    transition: border-color 0.15s ease;
+}
+.sf-signer-row:hover {
+    border-color: var(--warm-200);
+}
+
+.sf-signer-id {
+    flex: 0 0 auto;
+    min-width: 130px;
+    max-width: 190px;
+}
+
+.sf-signer-name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy-900);
+}
+
+.sf-signer-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+}
+.sf-signer-role {
+    font-size: 11px;
+    color: var(--warm-600);
+}
+.sf-signer-dot {
+    font-size: 11px;
+    color: var(--warm-400);
+}
+.sf-signer-order {
+    font-size: 11px;
+    color: var(--warm-600);
+    white-space: nowrap;
+}
+
+/* Email controls stack in one column so the row never wraps awkwardly. */
+.sf-signer-email-col {
+    flex: 1 1 240px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.sf-signer-combobox {
+    width: 100%;
+}
+.sf-signer-manual {
+    width: 100%;
+}
+
+/* Sub-heading separating UNASSIGNED-field rows from signer rows. */
+.sf-signer-subheading {
+    margin: 4px 0 0 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--warm-600);
+}
+
+/* Small tag on an UNASSIGNED-field row (mirrors .sf-signer-role placement). */
+.sf-signer-tag {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 1px 6px;
+    border-radius: var(--radius-xs);
+    background: var(--amber-50);
+    color: var(--amber-600);
+}
+/* Anchor-extraction frame. Kept INSIDE the viewport but fully transparent and
+   non-interactive: PDFPreview only reports text positions once it has rendered its
+   pages, and a frame parked far off-screen can have that work deprioritised or
+   skipped entirely. display:none would stop it rendering outright. */
+.sf-anchor-frame {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 900px;
+    height: 1200px;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Friendly failure text is prose, not a code dump — wrap it like prose.
+   The raw error moved into the <details> below it. */
+.sf-error-message_plain {
+    white-space: normal;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.sf-error-details {
+    margin-top: 10px;
+}
+.sf-error-details summary {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--slate-500, #64748b);
+}
+.sf-error-details pre {
+    margin: 8px 0 0;
+    max-height: 220px;
+    overflow: auto;
+    font-size: 11px;
+    line-height: 1.5;
+    background: var(--slate-50, #f8fafc);
+    border: 1px solid var(--slate-200, #e2e8f0);
+    border-radius: 8px;
+    padding: 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

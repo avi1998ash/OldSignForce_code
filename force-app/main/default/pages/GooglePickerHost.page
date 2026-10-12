@@ -1,0 +1,228 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false"
+          applyHtmlTag="false" applyBodyTag="false" docType="html-5.0"
+          cache="false" title="Choose a Google Drive folder">
+<html>
+<head>
+<meta charset="utf-8"/>
+<!--
+  Host page for the Google Picker.
+
+  Why a Visualforce page and not the LWC itself: the Picker is not a library you
+  can bundle. Its loader at apis.google.com pulls further code at runtime, and
+  Lightning Web Security will not let an LWC load an external script - loadScript
+  only accepts a static resource. A Visualforce page can, so the LWC embeds this
+  page in an iframe and talks to it with postMessage.
+
+  The access token arrives by postMessage, never on the URL. Query strings end up
+  in browser history, in Referer headers and in server logs, and this one carries
+  a live Drive token.
+-->
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#fff;position:relative;
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+
+  /* The Picker draws its own chrome once open, so this state only shows
+     briefly while apis.google.com and the picker module load — but on a
+     slow connection it can sit for a couple of seconds, and Google's own
+     bare "loading" text read as broken. Branded to match the rest of the
+     Integrations card instead of looking like a stalled iframe. */
+  #loading{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; text-align:center;
+    padding:24px;
+  }
+  #loading.is-hidden{ display:none; }
+  .spinner{
+    width:34px; height:34px; border-radius:50%;
+    border:3px solid #ede9fe; border-top-color:#7c3aed;
+    animation:sf-spin .8s linear infinite;
+  }
+  @keyframes sf-spin{ to{ transform:rotate(360deg); } }
+  #loading b{ color:#181818; font-size:13.5px; font-weight:650; }
+  #loading span{ color:#8a8f98; font-size:12px; line-height:1.6; max-width:280px; }
+
+  #error{
+    display:none; position:absolute; inset:0; align-items:center;
+    justify-content:center; padding:28px;
+  }
+  #error.is-shown{ display:flex; }
+  .err-card{
+    display:flex; gap:12px; max-width:360px; text-align:left;
+    background:#fef2f2; border:1px solid #fecaca; border-radius:10px;
+    padding:16px 18px;
+  }
+  .err-card svg{ flex:none; color:#dc2626; margin-top:1px; }
+  .err-card b{ display:block; color:#7f1d1d; font-size:13px; margin-bottom:4px; }
+  .err-card span{ color:#991b1b; font-size:12.5px; line-height:1.55; }
+</style>
+</head>
+<body>
+<div id="loading">
+  <div class="spinner"></div>
+  <div><b>Opening Google Drive…</b><br/>
+    <span>If nothing appears in a few seconds, check that pop-ups aren't blocked for this page.</span>
+  </div>
+</div>
+<div id="error">
+  <div class="err-card">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <div><b>Could not open the Google folder picker</b><span id="error-text"></span></div>
+  </div>
+</div>
+
+<!-- Pinned copy of Google's Picker loader (apis.google.com/js/api.js), served
+     from a package static resource so no script tag points at a third-party
+     host. The loader still fetches the Picker module from Google at runtime —
+     that is how the Picker works and cannot be bundled — and that traffic is
+     scoped by the CspTrustedSite shipped with the package
+     (Google_Picker.cspTrustedSite-meta.xml). -->
+<script src="{!$Resource.GoogleApiJs}"></script>
+<script>
+(function () {
+    'use strict';
+
+    var parentOrigin = null;   // learned from the first inbound message
+    var cfg = null;
+    var blockedHosts = [];     // hosts CSP refused, collected below
+
+    // A CSP refusal is the one picker failure that is completely silent: the
+    // frame just never paints. Recording the blocked host turns an empty white
+    // box into an error naming the exact origin to trust in Setup.
+    document.addEventListener('securitypolicyviolation', function (e) {
+        var uri = e.blockedURI || '';
+        var host = uri;
+        try { host = new URL(uri).host; } catch (ignored) { /* keep raw value */ }
+        if (host && blockedHosts.indexOf(host) === -1) blockedHosts.push(host);
+    });
+
+    function post(payload) {
+        if (parentOrigin) window.parent.postMessage(payload, parentOrigin);
+    }
+
+    function fail(text) {
+        document.getElementById('loading').classList.add('is-hidden');
+        // textContent, not innerHTML: `text` can echo back config the caller
+        // supplied (e.g. "No Google API key is configured") and must never be
+        // parsed as markup.
+        document.getElementById('error-text').textContent = ' ' + text;
+        document.getElementById('error').classList.add('is-shown');
+        post({ type: 'sf-picker-error', message: text });
+    }
+
+    function onPicked(data) {
+        var action = data[google.picker.Response.ACTION];
+        if (action === google.picker.Action.PICKED) {
+            var doc = data[google.picker.Response.DOCUMENTS][0];
+            post({
+                type: 'sf-picker',
+                id: doc[google.picker.Document.ID],
+                name: doc[google.picker.Document.NAME]
+            });
+        } else if (action === google.picker.Action.CANCEL) {
+            post({ type: 'sf-picker-cancel' });
+        }
+    }
+
+    function openPicker() {
+        // Folders only, and folders must be selectable - without
+        // setSelectFolderEnabled the picker lets you browse into a folder but
+        // never return it.
+        var view = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+            .setIncludeFolders(true)
+            .setSelectFolderEnabled(true)
+            .setMimeTypes('application/vnd.google-apps.folder');
+
+        // Google's default picker size assumes a full browser tab. Sized to
+        // this iframe's own viewport instead so it fills the modal cleanly.
+        // The floors are Google's own documented minimum (566x350): below that
+        // the picker does not simply shrink, it declines to lay out.
+        var w = Math.max(document.documentElement.clientWidth - 2, 566);
+        var h = Math.max(document.documentElement.clientHeight - 2, 350);
+
+        // setOrigin must be the TOP-MOST page's origin, not this page's own.
+        // This page is itself framed by the LWC, so window.location here is the
+        // Visualforce domain (…--esignforce.develop.vf.force.com) while the
+        // picker measures the browser's top frame (…develop.lightning.force.com)
+        // and throws "Incorrect origin value" on the mismatch - after which it
+        // renders an empty box and never calls back.
+        //
+        // parentOrigin is that top origin, learned from the inbound postMessage
+        // rather than assembled from string rules: the Lightning, VF, sandbox
+        // and Experience Cloud domains all differ per org and per sandbox, and
+        // any pattern we hardcoded would eventually be wrong somewhere.
+        var builder = new google.picker.PickerBuilder()
+            .addView(view)
+            .setOAuthToken(cfg.accessToken)
+            .setTitle('Choose the folder eSignforce should use')
+            .setCallback(onPicked)
+            .setSize(w, h)
+            .setOrigin(parentOrigin || (window.location.protocol + '//' + window.location.host));
+
+        // Optional. The Picker runs on the OAuth token alone - it did so here before
+        // this key was ever required - and a developer key is only needed when an org
+        // wants Picker calls billed to its own Google Cloud project. Passing
+        // undefined to setDeveloperKey makes the Picker refuse to build, so only
+        // call it when a real key was supplied.
+        if (cfg.developerKey) builder.setDeveloperKey(cfg.developerKey);
+
+        builder.build().setVisible(true);
+        document.getElementById('loading').classList.add('is-hidden');
+        post({ type: 'sf-picker-shown' });
+
+        // The picker draws its UI in a further iframe pointing at
+        // docs.google.com. When that frame is refused - CSP, a blocked
+        // third-party cookie, a signed-out Google session - nothing throws and
+        // no callback fires: the frame is simply blank, which reads to the
+        // admin as "the folder list is empty". Measure it shortly after and
+        // turn silence into a real message.
+        window.setTimeout(auditPickerFrame, 3500);
+    }
+
+    /**
+     * Distinguishes "picker rendered" from "picker is an empty box". Cannot see
+     * inside the cross-origin frame, so it checks the two things it can: that a
+     * frame was created at all, and that it has real dimensions on screen.
+     */
+    function auditPickerFrame() {
+        var frames = document.querySelectorAll('iframe');
+        var painted = null;
+        for (var i = 0; i < frames.length; i++) {
+            var r = frames[i].getBoundingClientRect();
+            if (r.width > 100 && r.height > 100) { painted = r; break; }
+        }
+        if (painted) return;              // picker is up; nothing to report
+
+        if (blockedHosts.length) {
+            fail('The browser blocked ' + blockedHosts.join(', ') +
+                 '. Add these as CSP Trusted Sites in Setup, then reopen the picker.');
+        } else {
+            fail('Google Drive returned an empty folder browser. This is usually a ' +
+                 'blocked third-party cookie or a signed-out Google session - open ' +
+                 'drive.google.com in this browser, sign in, then try again.');
+        }
+    }
+
+    window.addEventListener('message', function (e) {
+        if (!e.data || e.data.type !== 'sf-picker-open') return;
+        // Trust the first sender and reply only to it from then on.
+        parentOrigin = e.origin;
+        cfg = e.data;
+
+        if (!cfg.accessToken) { fail('No Google access token was supplied. Reconnect Google Drive and try again.'); return; }
+
+        try {
+            gapi.load('picker', { callback: openPicker });
+        } catch (err) {
+            fail('The Google Picker library did not load. ' + (err && err.message ? err.message : ''));
+        }
+    });
+
+    // Tell the parent the frame is ready to receive the token.
+    if (window.parent !== window) window.parent.postMessage({ type: 'sf-picker-ready' }, '*');
+}());
+</script>
+</body>
+</html>
+</apex:page>

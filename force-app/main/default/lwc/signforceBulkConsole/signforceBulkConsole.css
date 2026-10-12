@@ -1,0 +1,659 @@
+:host {
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;
+    --brand-700: #6d28d9;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-900: #0f172a;
+    --emerald-50: #ecfdf5;
+    --emerald-600: #059669;
+    --red-50: #fef2f2;
+    --red-500: #ef4444;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+
+    display: block;
+    background: var(--slate-100);
+    min-height: 100vh;
+}
+
+.bc-shell {
+    padding: 2rem 2.5rem 3rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--slate-900);
+    max-width: 1080px;
+    margin: 0 auto;
+}
+
+/* ── stats strip ── */
+.bc-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.bc-stat {
+    background: #fff; border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg); padding: 0.95rem 1.15rem;
+    display: flex; flex-direction: column; gap: 0.15rem;
+}
+
+.bc-stat-num {
+    font-size: 1.75rem; font-weight: 700; line-height: 1.1;
+    letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+    color: var(--brand-600);
+}
+.bc-stat-ok { color: var(--emerald-600); }
+
+.bc-stat-lbl {
+    font-size: 0.74rem; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--slate-400);
+}
+
+/* ── template cards ── */
+.bc-tplgrid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 10px;
+}
+
+.bc-tpl {
+    border: 1px solid var(--slate-200); border-radius: var(--radius-md);
+    padding: 0.85rem 0.95rem; cursor: pointer; background: #fff;
+    display: flex; flex-direction: column; gap: 0.55rem;
+    transition: border-color 0.15s, background 0.15s;
+}
+.bc-tpl:hover { border-color: var(--slate-300); background: var(--slate-50); }
+.bc-tpl:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 2px; }
+.bc-tpl-on { border-color: var(--brand-600); background: var(--brand-50); }
+.bc-tpl-on:hover { background: var(--brand-100); }
+
+.bc-tpl-top { display: flex; align-items: center; gap: 0.55rem; }
+
+/* Radio dot: fills only when chosen, so the selected card is obvious even
+   before the tint registers. */
+.bc-tpl-dot {
+    width: 15px; height: 15px; flex-shrink: 0; border-radius: 50%;
+    border: 2px solid var(--slate-300); background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.bc-tpl-on .bc-tpl-dot {
+    border-color: var(--brand-600);
+    box-shadow: inset 0 0 0 3px var(--brand-600);
+}
+
+.bc-tpl-name {
+    font-size: 0.87rem; font-weight: 640; line-height: 1.3;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.bc-tpl-meta {
+    display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+    padding-left: 1.55rem;
+}
+
+/* One box for all three pills — same height, same border, same radius. The
+   tag-count one used to be transparent with its own padding, so it sat off the
+   line the other two shared and read as loose text. */
+.bc-tag {
+    display: inline-flex; align-items: center; height: 20px;
+    font-size: 0.68rem; font-weight: 650; letter-spacing: 0.03em;
+    padding: 0 7px; border-radius: 5px;
+    border: 1px solid transparent;
+    background: var(--slate-100); color: var(--slate-600);
+    white-space: nowrap;
+}
+.bc-tag-obj { background: var(--brand-100); color: var(--brand-700); }
+.bc-tag-quiet {
+    background: transparent; border-color: var(--slate-200); color: var(--slate-400);
+}
+
+@media (max-width: 700px) {
+    .bc-stats { grid-template-columns: 1fr; gap: 0.6rem; }
+    .bc-stat { flex-direction: row; align-items: baseline; gap: 0.6rem; }
+}
+
+/* ── header ── */
+.bc-header { display: flex; align-items: center; justify-content: space-between; }
+.bc-brand { display: flex; align-items: center; gap: 0.85rem; }
+
+.bc-brand-icon {
+    width: 44px; height: 44px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+    color: #fff; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(124, 58, 237, 0.25);
+}
+.bc-brand-icon svg { width: 22px; height: 22px; }
+
+.bc-eyebrow {
+    margin: 0; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+    color: var(--slate-400); text-transform: uppercase;
+}
+.bc-title {
+    margin: 0.1rem 0 0; font-size: 1.6rem; font-weight: 700;
+    letter-spacing: -0.01em;
+}
+.bc-subtitle {
+    margin: 0.9rem 0 1.6rem; font-size: 0.9rem; line-height: 1.55;
+    color: var(--slate-600); max-width: 62ch;
+}
+
+/* ── mode tabs ── */
+.bc-tabs {
+    display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 1.4rem;
+    background: #fff; border: 1px solid var(--slate-200); border-radius: 12px;
+}
+
+.bc-tab {
+    box-sizing: border-box;
+    display: inline-flex; align-items: center; gap: 7px; height: 34px;
+    appearance: none; border: 0; background: transparent; color: var(--slate-500);
+    font: inherit; font-size: 0.85rem; font-weight: 600;
+    padding: 0 16px; border-radius: 9px; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.bc-tab:hover { color: var(--slate-900); }
+.bc-tab-on { background: var(--brand-600); color: #fff; }
+.bc-tab-on:hover { color: #fff; }
+.bc-tab:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 2px; }
+.bc-tab-icon { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ── panels ── */
+.bc-panel {
+    background: #fff; border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg); padding: 1.25rem 1.4rem; margin-bottom: 1rem;
+}
+
+/* center, not baseline: the header holds a button next to a pill, and baseline
+   alignment drops the button below the text it sits with.
+   The margin is measured from the BUTTON, not the label — at 0.7rem the button
+   sat flush against the search field underneath. */
+.bc-panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap; margin-bottom: 1.15rem;
+}
+.bc-panel-head .bc-step { margin-bottom: 0; }
+
+.bc-step {
+    margin: 0 0 0.7rem; font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-600);
+}
+
+/* Pill and button share one height so they read as a single control group.
+   box-sizing matters here: LWC ships no global border-box reset, so without it
+   the 1px border is ADDED to the height and the two stop matching. 34px is the
+   height of the mode tabs and of lightning-input, so the whole page lines up. */
+.bc-count {
+    box-sizing: border-box;
+    display: inline-flex; align-items: center; height: 34px;
+    font-size: 0.75rem; font-weight: 600; color: var(--slate-500);
+    font-variant-numeric: tabular-nums;
+    background: var(--slate-50); border: 1px solid var(--slate-200);
+    border-radius: 99px; padding: 0 13px;
+}
+
+.bc-panel-tools { display: flex; align-items: center; gap: 0.6rem; }
+
+/* .bc-btn-sm is defined AFTER .bc-btn further down — same specificity, so it
+   has to come later to win. */
+
+.bc-hint {
+    margin: 0.7rem 0 0; font-size: 0.78rem; line-height: 1.5; color: var(--slate-500);
+}
+.bc-hint code {
+    background: var(--brand-50); color: var(--brand-700);
+    padding: 1px 5px; border-radius: 4px; font-size: 0.95em;
+}
+
+.bc-empty {
+    margin: 1rem 0 0; font-size: 0.82rem; color: var(--slate-400); text-align: center;
+    padding: 1.2rem 0;
+}
+
+/* ── record list ── */
+.bc-selectall {
+    display: flex; gap: 1rem; margin: 0.8rem 0 0.5rem; align-items: center;
+}
+
+.bc-link {
+    appearance: none; border: 0; background: none; padding: 0; cursor: pointer;
+    font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--brand-600);
+}
+.bc-link:hover { text-decoration: underline; }
+.bc-link-muted { color: var(--slate-500); }
+.bc-link:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 2px; }
+
+/* Two-up chip grid: twice the records per screen, and the tile shape reads as
+   "pickable" in a way a bare table row does not. */
+.bc-reclist {
+    max-height: 340px; overflow-y: auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    padding: 2px;
+}
+
+@media (max-width: 640px) {
+    .bc-reclist { grid-template-columns: 1fr; }
+}
+
+.bc-rec {
+    display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--slate-200); border-radius: var(--radius-md);
+    font-size: 0.84rem; cursor: pointer; background: #fff;
+    transition: background 0.12s, border-color 0.12s;
+}
+.bc-rec:hover { background: var(--slate-50); border-color: var(--slate-300); }
+.bc-rec-on { background: var(--brand-50); border-color: var(--brand-200); }
+.bc-rec-on:hover { background: var(--brand-100); }
+.bc-rec input { accent-color: var(--brand-600); width: 15px; height: 15px; flex-shrink: 0; }
+.bc-rec-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── failure banner ── */
+.bc-alert {
+    margin-bottom: 1.4rem; padding: 0.95rem 1.05rem;
+    background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-md, 12px);
+}
+.bc-alert-head { display: flex; align-items: flex-start; gap: 0.7rem; }
+.bc-alert-body { flex: 1; min-width: 0; }
+
+.bc-alert-mark {
+    flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: #ef4444; color: #fff; font-size: 0.72rem; font-weight: 800;
+}
+.bc-alert-title { margin: 0; font-size: 0.88rem; font-weight: 680; color: #b91c1c; }
+.bc-alert-text { margin: 0.2rem 0 0; font-size: 0.82rem; line-height: 1.55; color: var(--slate-600); }
+
+.bc-alert-x {
+    appearance: none; background: none; border: none; cursor: pointer;
+    font-size: 1.25rem; line-height: 1; padding: 0 2px; color: #b91c1c; opacity: 0.6;
+}
+.bc-alert-x:hover { opacity: 1; }
+
+.bc-alert-toggle {
+    appearance: none; background: none; border: none; cursor: pointer;
+    font: inherit; font-size: 0.76rem; font-weight: 620; padding: 0;
+    margin: 0.6rem 0 0 1.7rem; color: #dc2626;
+}
+.bc-alert-toggle:hover { text-decoration: underline; }
+
+/* Raw Apex text with its stack trace: boxed and scrollable so a long trace
+   cannot push the console off the screen. */
+.bc-alert-detail {
+    margin: 0.5rem 0 0 1.7rem; padding: 0.6rem 0.7rem;
+    max-height: 170px; overflow: auto;
+    background: #fff; border: 1px solid #fecaca; border-radius: var(--radius-sm);
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    font-size: 0.7rem; line-height: 1.5; color: var(--slate-600);
+    white-space: pre-wrap; word-break: break-word;
+}
+
+/* ── expandable activity rows ── */
+.bc-acthint { margin-top: 0.25rem; }
+
+.bc-actrow { cursor: pointer; }
+.bc-actrow:hover td { background: var(--brand-50); }
+
+.bc-actcaret { width: 26px; }
+
+/* A stroked chevron. The previous version was a CSS border-triangle inside a
+   tinted disc: at 18px the triangle cannot be centred optically — the border
+   trick has no real box to centre — so it sat off to one side and the whole
+   thing read as a purple blob rather than an arrow. */
+.bc-caret {
+    display: block; width: 15px; height: 15px;
+    color: var(--slate-400);
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+.bc-actrow:hover .bc-caret { color: var(--brand-600); }
+.bc-caret-open { transform: rotate(90deg); color: var(--brand-600); }
+
+/* The word that says the row opens. Styled like a link, but the whole row is
+   the target — so it is a cue, not a separate hit area to find. */
+.bc-actopen {
+    text-align: right; white-space: nowrap;
+    font-size: 0.76rem; font-weight: 620; color: var(--brand-600);
+}
+.bc-actrow:hover .bc-actopen { text-decoration: underline; }
+
+.bc-actdetailrow td { background: var(--slate-50); }
+.bc-actdetail { padding: 0.7rem 0.9rem 0.9rem 2.1rem; }
+
+.bc-dochead {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; margin-bottom: 0.5rem;
+}
+.bc-docsum {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--slate-500);
+}
+.bc-docfilter { font-size: 0.74rem; }
+
+.bc-docs { list-style: none; margin: 0; padding: 0; }
+
+.bc-docpager {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 0.5rem; margin-top: 0.7rem;
+}
+.bc-docrange {
+    margin-right: auto; font-size: 0.72rem; color: var(--slate-500);
+    font-variant-numeric: tabular-nums;
+}
+.bc-pagebtn {
+    box-sizing: border-box; appearance: none; cursor: pointer; font: inherit;
+    font-size: 0.74rem; font-weight: 600; height: 28px; padding: 0 12px;
+    background: #fff; border: 1px solid var(--slate-200);
+    border-radius: var(--radius-sm); color: var(--slate-600);
+}
+.bc-pagebtn:hover:not(:disabled) { border-color: var(--slate-300); background: var(--slate-50); }
+.bc-pagebtn:disabled { color: var(--slate-300); cursor: not-allowed; }
+
+/* Dot | record + filename | when | Open, with the failure reason on a second
+   line spanning the width — an error message is a sentence, and squeezing it
+   into a column truncates it to noise. */
+.bc-doc {
+    display: grid;
+    grid-template-columns: 8px minmax(0, 1fr) auto auto;
+    align-items: center; gap: 0.6rem;
+    padding: 0.45rem 0; border-bottom: 1px solid var(--slate-200);
+}
+.bc-doc:last-child { border-bottom: 0; }
+
+.bc-doc-dot { width: 8px; height: 8px; border-radius: 50%; }
+.bc-doc-dot-ok { background: #10b981; }
+.bc-doc-dot-bad { background: #ef4444; }
+
+.bc-doc-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.bc-doc-rec {
+    font-size: 0.81rem; font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bc-doc-file {
+    font-size: 0.72rem; color: var(--slate-500);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bc-doc-reclink { color: var(--brand-700); text-decoration: none; }
+.bc-doc-reclink:hover { text-decoration: underline; }
+
+.bc-doc-when { font-size: 0.72rem; color: var(--slate-500); white-space: nowrap; }
+
+.bc-doc-open {
+    font-size: 0.74rem; font-weight: 620; color: var(--brand-600);
+    text-decoration: none; white-space: nowrap;
+}
+.bc-doc-open:hover { text-decoration: underline; }
+
+.bc-doc-why {
+    grid-column: 2 / -1;
+    font-size: 0.72rem; line-height: 1.45; color: #b91c1c;
+}
+
+.bc-doc-note { margin: 0.55rem 0 0; font-size: 0.72rem; color: var(--slate-500); }
+
+/* ── failed records ── */
+.bc-fail-head {
+    margin: 1rem 0 0.45rem; font-size: 0.8rem; font-weight: 650; color: #b91c1c;
+}
+.bc-fails {
+    list-style: none; margin: 0; padding: 0;
+    border: 1px solid var(--slate-200); border-radius: var(--radius-sm);
+    max-height: 230px; overflow-y: auto;
+}
+.bc-fail {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--slate-100);
+}
+.bc-fail:last-child { border-bottom: 0; }
+.bc-fail-name {
+    font-size: 0.82rem; font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bc-fail-why { font-size: 0.75rem; line-height: 1.45; color: var(--slate-500); }
+.bc-fail-note { margin: 0.45rem 0 0; font-size: 0.74rem; color: var(--slate-500); }
+
+/* ── recipients ── */
+.bc-textarea { --slds-c-textarea-sizing-min-height: 110px; }
+
+/* Name | Email | remove. The error message sits in a second grid line that
+   spans the full width, so a long message never squeezes the inputs. */
+.bc-rows { display: flex; flex-direction: column; gap: 8px; }
+
+.bc-rowhead,
+.bc-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) 34px;
+    gap: 8px; align-items: center;
+}
+
+.bc-rowhead {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--slate-500); padding: 0 2px;
+}
+
+.bc-in {
+    box-sizing: border-box; width: 100%; height: 38px;
+    font: inherit; font-size: 0.85rem; color: var(--slate-800);
+    padding: 0 11px; background: #fff;
+    border: 1px solid var(--slate-300); border-radius: var(--radius-sm);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.bc-in::placeholder { color: var(--slate-400); }
+.bc-in:focus {
+    outline: none; border-color: var(--brand-500);
+    box-shadow: 0 0 0 3px var(--brand-100);
+}
+.bc-in-bad { border-color: #dc2626; background: #fef2f2; }
+.bc-in-bad:focus { border-color: #dc2626; box-shadow: 0 0 0 3px #fee2e2; }
+
+.bc-rowdel {
+    appearance: none; cursor: pointer; font: inherit; font-size: 1.15rem;
+    line-height: 1; width: 34px; height: 34px; border-radius: var(--radius-sm);
+    background: transparent; border: 1px solid transparent; color: var(--slate-400);
+}
+.bc-rowdel:hover { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+
+.bc-rowerr {
+    grid-column: 1 / -1;
+    margin: 0; font-size: 0.75rem; color: #b91c1c; padding-left: 2px;
+}
+
+.bc-rowtools {
+    display: flex; align-items: center; gap: 1rem;
+    flex-wrap: wrap; margin-top: 0.9rem;
+}
+
+.bc-link {
+    appearance: none; background: none; border: none; cursor: pointer;
+    font: inherit; font-size: 0.82rem; font-weight: 600; padding: 0;
+    color: var(--brand-600);
+}
+.bc-link:hover { text-decoration: underline; }
+.bc-link-muted { color: var(--slate-500); font-weight: 500; }
+
+/* An anchor, but it sits in a row of buttons — strip the default underline
+   and let the shared .bc-link:hover rule put it back. */
+.bc-dl { text-decoration: none; }
+
+.bc-file { cursor: pointer; }
+/* Hidden, not display:none — a removed input cannot be opened by its label
+   and drops out of the tab order. */
+.bc-file input[type="file"] {
+    position: absolute; width: 1px; height: 1px;
+    opacity: 0; overflow: hidden; clip: rect(0 0 0 0);
+}
+.bc-file:focus-within { text-decoration: underline; outline: 2px solid var(--brand-500); outline-offset: 3px; }
+
+.bc-sep { width: 1px; height: 14px; background: var(--slate-200); }
+
+.bc-hint-tools { margin-top: 0.55rem; }
+
+.bc-paste {
+    margin-top: 1rem; padding: 1rem;
+    background: var(--slate-50); border: 1px solid var(--slate-200);
+    border-radius: var(--radius-sm);
+}
+
+.bc-warn {
+    margin: 1rem 0 0; padding: 9px 12px; font-size: 0.78rem;
+    color: #92400e; background: #fffbeb;
+    border: 1px solid #fde68a; border-radius: var(--radius-sm);
+}
+
+/* ── actions ── */
+/* The note explains a disabled button, so it has to sit beside it. */
+.bc-actions {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 0.85rem; margin-bottom: 1.2rem;
+}
+.bc-sendnote { font-size: 0.78rem; color: var(--slate-500); }
+
+.bc-btn {
+    appearance: none; border: 1px solid transparent; cursor: pointer;
+    font: inherit; font-size: 0.88rem; font-weight: 600;
+    padding: 0.75rem 1.6rem; border-radius: var(--radius-md);
+    transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.bc-btn-primary {
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-700));
+    color: #fff; box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
+}
+.bc-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px); box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+.bc-btn:disabled { background: var(--slate-300); cursor: not-allowed; box-shadow: none; }
+.bc-btn:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 2px; }
+
+/* ── small button, for the panel header ──
+   Must sit after .bc-btn and .bc-btn:disabled: both are single-class selectors
+   of equal specificity, so whichever is written last wins. Placed above them
+   earlier, every one of these declarations was silently overridden. */
+.bc-btn-sm {
+    box-sizing: border-box;
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 34px; padding: 0 1.15rem; font-size: 0.8rem; line-height: 1;
+    border-radius: var(--radius-sm);
+}
+
+/* Disabled reads as "not yet", not as a dead grey slab: keep the brand hue and
+   drop the weight rather than swapping the colour out entirely. */
+.bc-btn-sm:disabled {
+    background: var(--brand-100); color: var(--brand-600);
+    opacity: 0.75; box-shadow: none;
+}
+
+/* ── progress ── */
+.bc-progress {
+    background: #fff; border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg); padding: 1.25rem 1.4rem;
+}
+
+.bc-progress-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    margin-bottom: 0.7rem;
+}
+.bc-progress-title { font-size: 0.88rem; font-weight: 620; }
+.bc-progress-pct {
+    font-size: 0.88rem; font-weight: 700; color: var(--brand-600);
+    font-variant-numeric: tabular-nums;
+}
+
+.bc-bar {
+    height: 7px; border-radius: 99px; background: var(--brand-100); overflow: hidden;
+}
+.bc-bar span {
+    display: block; height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--brand-500), var(--brand-600));
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bc-progress-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.8rem; }
+
+.bc-chip {
+    font-size: 0.72rem; font-weight: 650; padding: 3px 10px; border-radius: 99px;
+    font-variant-numeric: tabular-nums;
+}
+.bc-chip-ok { background: var(--emerald-50); color: var(--emerald-600); }
+.bc-chip-bad { background: var(--red-50); color: var(--red-500); }
+.bc-chip-wait { background: var(--slate-100); color: var(--slate-500); }
+
+/* ── run detail ── */
+.bc-runmeta {
+    display: flex; flex-wrap: wrap; gap: 1.6rem;
+    margin: 0.9rem 0 0; padding: 0.8rem 0 0;
+    border-top: 1px solid var(--slate-200);
+}
+.bc-runmeta dt {
+    margin: 0 0 2px; font-size: 0.66rem; font-weight: 700;
+    letter-spacing: 0.09em; text-transform: uppercase; color: var(--slate-400);
+}
+.bc-runmeta dd {
+    margin: 0; font-size: 0.84rem; font-weight: 600; color: var(--slate-900);
+}
+
+/* ── recent activity ── */
+.bc-panel-activity { margin-top: 1.4rem; }
+
+.bc-actwrap { overflow-x: auto; margin-top: 0.6rem; }
+
+.bc-acttable {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+}
+.bc-acttable th {
+    text-align: left; padding: 8px 12px;
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--slate-400);
+    border-bottom: 1px solid var(--slate-200); white-space: nowrap;
+}
+.bc-acttable td {
+    padding: 10px 12px; border-bottom: 1px solid var(--slate-100);
+    vertical-align: middle;
+}
+.bc-acttable tr:last-child td { border-bottom: 0; }
+
+.bc-acttable .bc-num {
+    text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.bc-strong { font-weight: 620; }
+.bc-ok { color: var(--emerald-600); font-weight: 620; }
+.bc-bad { color: var(--red-500); font-weight: 620; }
+.bc-muted { color: var(--slate-500); }
+
+/* ── loading ── */
+.bc-loading { display: flex; justify-content: center; padding: 1.6rem 0; }
+
+.bc-spinner {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0deg, var(--brand-600) 300deg, var(--brand-600) 360deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    animation: bc-spin 0.85s linear infinite;
+}
+
+@keyframes bc-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .bc-spinner { animation-duration: 2.5s; }
+    .bc-bar span { transition: none; }
+}
+
+@media (max-width: 640px) {
+    .bc-shell { padding: 1.4rem 1rem 2.4rem; }
+    .bc-tabs { width: 100%; }
+    .bc-tab { flex: 1; justify-content: center; }
+    .bc-actions { justify-content: stretch; flex-wrap: wrap; }
+    .bc-btn { width: 100%; }
+    /* Two side-by-side inputs are unusable at this width, so name and email
+       stack and the header row (which only labels columns) goes away. */
+    .bc-rowhead { display: none; }
+    .bc-row { grid-template-columns: minmax(0, 1fr) 34px; }
+    .bc-row .bc-in:first-child { grid-column: 1 / -1; }
+}

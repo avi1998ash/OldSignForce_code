@@ -1,0 +1,561 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 05-07-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <c-signforce-access-gate>
+      <!-- Positioned so the loader can cover this panel. Generating is an HTTP
+           callout, and while it ran the panel stayed live — a second click on
+           Generate started a second document. -->
+      <div class="sf-genwrap">
+
+        <c-signforce-generate-loader
+            visible={isGenerating}
+            title={generateLoaderTitle}
+            message={generateLoaderMessage}>
+        </c-signforce-generate-loader>
+
+        <div class="sf-shell">
+
+            <!-- ── HEADER ──────────────────────────────────────────────── -->
+            <div class="sf-header">
+                <div class="sf-brand">
+                    <div class="sf-brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="9" y1="13" x2="15" y2="13"></line>
+                            <line x1="9" y1="17" x2="15" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div class="sf-brand-text">
+                        <p class="sf-brand-eyebrow">ESIGNFORCE</p>
+                        <h2 class="sf-brand-title">Generate Document</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── LOADING ─────────────────────────────────────────────── -->
+            <template if:true={isLoading}>
+                <div class="sf-state sf-state-loading">
+                    <div class="sf-spinner"></div>
+                    <p class="sf-state-text">Loading templates…</p>
+                </div>
+            </template>
+
+            <!-- ── EMPTY ───────────────────────────────────────────────── -->
+            <template if:true={showEmpty}>
+                <div class="sf-state sf-state-empty">
+                    <div class="sf-state-icon-wrap">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="sf-state-icon">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="sf-state-title">No templates available</h3>
+                    <p class="sf-state-body">No active templates are configured for {objectApiName} records.</p>
+                    <p class="sf-state-hint">An admin can create one in the Dynamic Document tab.</p>
+                </div>
+            </template>
+
+            <!-- ── PICKER (default state) ──────────────────────────────── -->
+            <template if:true={showMain}>
+                <div class="sf-card">
+                    <div class="sf-card-section">
+                        <p class="sf-eyebrow">STEP 1 - TEMPLATE</p>
+                        <h3 class="sf-section-title">Choose a template</h3>
+
+                        <lightning-combobox label="Template" variant="label-hidden" value={selectedTemplateId} options={templateOptions} onchange={handleTemplateChange}
+                            placeholder="Select a template…" class="sf-combobox">
+                        </lightning-combobox>
+
+                        <template if:true={selectedTemplate}>
+                            <div class="sf-template-info">
+                                <template if:true={selectedTemplate.Description__c}>
+                                    <p class="sf-template-desc">{selectedTemplate.Description__c}</p>
+                                </template>
+                                <div class="sf-template-meta">
+                                    <span class="sf-pill sf-pill-format">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-pill-icon">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                        </svg>
+                                        {selectedTemplate.Output_Format__c}
+                                    </span>
+                                    <template if:true={selectedTemplate.Auto_Create_Agreement__c}>
+                                        <span class="sf-pill sf-pill-agreement">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="sf-pill-icon">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                            Auto-creates Agreement ({selectedTemplate.Default_Agreement_Type__c})
+                                        </span>
+                                    </template>
+                                    <!-- Preview Template: opens the raw template file in a modal.
+                                         Lets users see what they're about to generate from. -->
+                                    <template if:true={selectedTemplate.Template_File_Id__c}>
+                                        <button class="sf-pill sf-pill-preview" onclick={handlePreviewTemplate} title="Preview template file">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                class="sf-pill-icon">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                            Preview Template
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <template if:true={selectedTemplate}>
+                        <div class="sf-card-section sf-card-section-bordered">
+                            <p class="sf-eyebrow-small">
+                                MERGE FIELDS · {fieldsToMerge.length}
+                                <template if:true={fieldsToMerge.length}>
+                                    <button class="sf-link" onclick={togglePreview}>{previewToggleLabel}</button>
+                                </template>
+                            </p>
+
+                            <template if:true={previewOpen}>
+                                <template if:true={previewLoading}>
+                                    <div class="sf-preview-loading">
+                                        <div class="sf-spinner sf-spinner-sm"></div>
+                                        <span>Resolving merge values…</span>
+                                    </div>
+                                </template>
+                                <template if:false={previewLoading}>
+                                    <template if:true={previewError}>
+                                        <div class="sf-preview-error">{previewError}</div>
+                                    </template>
+                                    <template if:false={previewError}>
+                                        <div class="sf-preview-table-wrap">
+                                            <table class="sf-preview-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tag</th>
+                                                        <th>Type</th>
+                                                        <th>Value</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <template for:each={previewRows} for:item="row">
+                                                        <tr key={row.tag}>
+                                                            <td><code class="sf-mono">{row.tag}</code></td>
+                                                            <td><span class={row.typeClass}>{row.type}</span></td>
+                                                            <td class="sf-value-cell">{row.display}</td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </template>
+                                </template>
+                            </template>
+                        </div>
+
+                        <!-- ── STEP 2 - SIGNERS (signer-email mapping) ──────────
+                             Shown when the selected auto-create template carries
+                             template-level signers OR has any UNASSIGNED fields.
+                             Each row maps a signer / unassigned field to a real
+                             email - pick one of the open record's Email-type
+                             fields, or type one manually. Templates with no signers
+                             AND no unassigned fields never render this. -->
+                        <template if:true={hasTemplateSigners}>
+                            <div class="sf-card-section sf-card-section-bordered">
+                                <p class="sf-eyebrow">STEP 2 - SIGNERS</p>
+                                <h3 class="sf-section-title">Map signer emails</h3>
+
+                                <p class="sf-signer-help">Each signer is created as a recipient when the agreement is generated. Confirm or change their email below.</p>
+                                <div class="sf-signer-map">
+                                    <!-- DEFINED template signers -->
+                                    <template for:each={signerRows} for:item="row">
+                                        <div key={row.key} class="sf-signer-row">
+                                            <div class="sf-signer-id">
+                                                <p class="sf-signer-name">{row.displayName}</p>
+                                                <div class="sf-signer-meta">
+                                                    <span class="sf-signer-role">{row.role}</span>
+                                                    <template if:true={row.orderLabel}>
+                                                        <span class="sf-signer-dot">·</span>
+                                                        <span class="sf-signer-order">{row.orderLabel}</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            <div class="sf-signer-email-col">
+                                                <template if:true={hasRecordEmails}>
+                                                    <lightning-combobox
+                                                        label="Email"
+                                                        variant="label-hidden"
+                                                        value={row.email}
+                                                        options={recordEmailOptions}
+                                                        data-key={row.key}
+                                                        onchange={handleMappingEmailChange}
+                                                        placeholder="Use a field from this record…"
+                                                        class="sf-combobox sf-signer-combobox">
+                                                    </lightning-combobox>
+                                                </template>
+                                                <template if:true={row.useManual}>
+                                                    <lightning-input
+                                                        type="email"
+                                                        label="Email address"
+                                                        variant="label-hidden"
+                                                        value={row.email}
+                                                        data-key={row.key}
+                                                        onchange={handleMappingManualChange}
+                                                        placeholder="name@example.com"
+                                                        class="sf-signer-manual">
+                                                    </lightning-input>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- UNASSIGNED fields - the template left these
+                                         without a signer, so here the user picks WHICH
+                                         defined signer each one belongs to. Several
+                                         fields can share the same signer. -->
+                                    <template if:true={hasUnassignedFields}>
+                                        <p class="sf-signer-subheading">Unassigned fields</p>
+                                        <template for:each={fieldRows} for:item="row">
+                                            <div key={row.idx} class="sf-signer-row">
+                                                <div class="sf-signer-id">
+                                                    <p class="sf-signer-name">{row.label}</p>
+                                                    <span class="sf-signer-tag">Unassigned field</span>
+                                                </div>
+                                                <div class="sf-signer-email-col">
+                                                    <template if:true={hasSignerPickerOptions}>
+                                                        <lightning-combobox
+                                                            label="Assign to signer"
+                                                            variant="label-hidden"
+                                                            value={row.email}
+                                                            options={signerPickerOptions}
+                                                            data-idx={row.idx}
+                                                            onchange={handleMappingEmailChange}
+                                                            placeholder="Assign to a signer…"
+                                                            class="sf-combobox sf-signer-combobox">
+                                                        </lightning-combobox>
+                                                    </template>
+                                                    <!-- Fallback: no signer has an email yet, so enter one directly. -->
+                                                    <template if:false={hasSignerPickerOptions}>
+                                                        <lightning-input
+                                                            type="email"
+                                                            label="Email address"
+                                                            variant="label-hidden"
+                                                            value={row.email}
+                                                            data-idx={row.idx}
+                                                            onchange={handleMappingManualChange}
+                                                            placeholder="name@example.com"
+                                                            class="sf-signer-manual">
+                                                        </lightning-input>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div class="sf-card-actions">
+                            <button class="sf-btn sf-btn-ghost" onclick={handleCancel} disabled={isGenerating}>
+                                Cancel
+                            </button>
+                            <button class="sf-btn sf-btn-primary" onclick={handleGenerate} disabled={isGenerating}>
+                                <template if:true={isGenerating}>
+                                    <div class="sf-spinner sf-spinner-xs"></div>
+                                    <span>Generating…</span>
+                                </template>
+                                <template if:false={isGenerating}>
+                                    <span>{generateButtonLabel}</span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-btn-icon">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </template>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- ── EXISTING DRAFTS CONFIRMATION ────────────────────────── -->
+            <template if:true={showExistingDraftsPanel}>
+                <div class="sf-card sf-card-warning">
+                    <div class="sf-warning-banner">
+                        <div class="sf-warning-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="sf-warning-text">
+                            <p class="sf-warning-title">Draft agreement already exists</p>
+                            <p class="sf-warning-body">
+                                <template if:true={isMultipleDrafts}>
+                                    {existingDrafts.length} draft agreements were created earlier from this template.
+                                </template>
+                                <template if:false={isMultipleDrafts}>
+                                    A draft agreement was created earlier from this template.
+                                </template>
+                                You can attach the new document to one of them, or create a fresh agreement.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="sf-drafts-table-wrap">
+                        <table class="sf-drafts-table">
+                            <thead>
+                                <tr>
+                                    <th>Agreement</th>
+                                    <th>Created</th>
+                                    <th>By</th>
+                                    <th class="sf-col-action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={existingDrafts} for:item="draft">
+                                    <tr key={draft.id}>
+                                        <td>
+                                            <div class="sf-draft-name-cell">
+                                                <div class="sf-draft-icon">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p class="sf-draft-name">{draft.name}</p>
+                                                    <template if:true={draft.hasDocument}>
+                                                        <p class="sf-draft-tag">Has existing document</p>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="sf-draft-meta-cell">{draft.relativeDate}</td>
+                                        <td class="sf-draft-meta-cell">{draft.createdBy}</td>
+                                        <td class="sf-col-action">
+                                            <button class="sf-btn-row" data-id={draft.id} onclick={handleUseExisting} disabled={isProcessingChoice}>
+                                                Use this
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="sf-drafts-actions">
+                        <button class="sf-btn sf-btn-ghost" onclick={handleCancelChoice} disabled={isProcessingChoice}>
+                            Cancel
+                        </button>
+                        <button class="sf-btn sf-btn-primary" onclick={handleCreateNewAnyway} disabled={isProcessingChoice}>
+                            <template if:true={isProcessingChoice}>
+                                <div class="sf-spinner sf-spinner-xs"></div>
+                                <span>Working…</span>
+                            </template>
+                            <template if:false={isProcessingChoice}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-btn-icon">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Create new agreement</span>
+                            </template>
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ── SUCCESS - file in source record's Files ─────────────── -->
+            <template if:true={showFileResult}>
+                <div class="sf-card sf-card-success">
+                    <div class="sf-success-banner">
+                        <div class="sf-success-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="sf-success-text">
+                            <p class="sf-success-title">Document generated</p>
+                            <p class="sf-success-filename">{result.filename}</p>
+                        </div>
+                    </div>
+                    <p class="sf-success-hint">It's been added to this record's Files.</p>
+                    <div class="sf-card-actions">
+                        <button class="sf-btn sf-btn-ghost" onclick={handleCancel}>
+                            Generate another
+                        </button>
+                        <!-- View File button: opens the just-generated file in the
+                             same preview modal used by "Preview Template". Works
+                             for both PDF (direct) and DOCX (via Lambda conversion). -->
+                        <template if:true={result.contentVersionId}>
+                            <button class="sf-btn sf-btn-primary" onclick={handleViewFile}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-btn-icon">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <span>View File</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ── SUCCESS - agreement created ─────────────────────────── -->
+            <template if:true={showAgreementResult}>
+                <div class="sf-card sf-card-success">
+                    <div class="sf-success-banner">
+                        <div class="sf-success-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="sf-success-text">
+                            <p class="sf-success-title">{agreementResultTitle}</p>
+                            <p class="sf-success-filename">{result.filename}</p>
+                        </div>
+                    </div>
+                    <p class="sf-success-hint">{agreementResultHint}</p>
+                    <div class="sf-card-actions">
+                        <button class="sf-btn sf-btn-ghost" onclick={handleCancel}>
+                            Generate another
+                        </button>
+                        <!-- View File: previews the agreement's generated document
+                             inline (same modal as the document-success card). Works
+                             for DOCX/large PDF (S3 URL) and small PDF (blob). -->
+                        <template if:true={canPreviewAgreement}>
+                            <button class="sf-btn sf-btn-ghost" onclick={handleViewAgreementFile}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-btn-icon">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <span>View File</span>
+                            </button>
+                        </template>
+                        <button class="sf-btn sf-btn-primary" onclick={openAgreement}>
+                            <span>Open agreement</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-btn-icon">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ── ERROR - generation failed ───────────────────────────── -->
+            <template if:true={showGenerationError}>
+                <div class="sf-card sf-card-error">
+                    <div class="sf-error-banner">
+                        <div class="sf-error-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        </div>
+                        <div class="sf-error-text">
+                            <p class="sf-error-title">{resultErrorTitle}</p>
+                            <p class="sf-error-message sf-error-message_plain">{result.errorMessage}</p>
+                            <!-- The raw failure stays one click away for an admin;
+                                 it is no longer the first thing a user reads. -->
+                            <template if:true={result.errorDetail}>
+                                <details class="sf-error-details">
+                                    <summary>Show technical details</summary>
+                                    <pre>{result.errorDetail}</pre>
+                                </details>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="sf-card-actions">
+                        <button class="sf-btn sf-btn-ghost" onclick={handleCancel}>
+                            Try again
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ── ERROR - agreement step failed ───────────────────────── -->
+            <template if:true={showAgreementError}>
+                <div class="sf-card sf-card-error">
+                    <div class="sf-error-banner">
+                        <div class="sf-error-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="sf-error-text">
+                            <p class="sf-error-title">Document generated, but agreement step failed</p>
+                            <p class="sf-error-message">{agreementErrorMessage}</p>
+                            <p class="sf-success-hint sf-mt-sm">
+                                The document was generated successfully but couldn't be attached to a new
+                                agreement. You can create the agreement manually and upload the file there.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="sf-card-actions">
+                        <button class="sf-btn sf-btn-ghost" onclick={handleCancel}>
+                            Try again
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ────────────────────────────────────────────────────────────
+                 Template File Preview Modal
+                 Triggered by the "Preview Template" pill in the template
+                 metadata row. Lets users see the raw template DOCX/PDF
+                 inline via /apex/PDFPreview?cvId=... (LWS-safe relative URL).
+                 Clicking the backdrop closes; clicking the modal body does not.
+            -->
+            <template if:true={showTemplatePreview}>
+                <section class="sf-tplmodal-backdrop" onclick={closeTemplatePreview}>
+                    <div class="sf-tplmodal-dialog" onclick={stopPropagation}>
+                        <header class="sf-tplmodal-header">
+                            <div class="sf-tplmodal-title-block">
+                                <p class="sf-eyebrow">TEMPLATE FILE</p>
+                                <h3 class="sf-tplmodal-title" title={templatePreviewName}>{templatePreviewName}</h3>
+                            </div>
+                            <button class="sf-tplmodal-close" onclick={closeTemplatePreview} title="Close">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </header>
+                        <div class="sf-tplmodal-body">
+                            <template if:true={templatePreviewLoading}>
+                                <div class="sf-tplmodal-loading">
+                                    <div class="sf-spinner"></div>
+                                    <p>Loading template…</p>
+                                </div>
+                            </template>
+                            <template if:true={templatePreviewUrl}>
+                                <iframe src={templatePreviewUrl} class="sf-tplmodal-frame" onload={handleTemplatePreviewLoaded} title="Template preview"></iframe>
+                            </template>
+                        </div>
+                        <footer class="sf-tplmodal-footer">
+                            <button class="sf-btn sf-btn-ghost" onclick={closeTemplatePreview}>Close</button>
+                        </footer>
+                    </div>
+                </section>
+            </template>
+
+        </div>
+
+        <!-- Off-screen frame used ONLY to read text positions out of the merged
+             PDF so anchored fields can be re-placed (zero-drift). It must be a
+             DECLARATIVE iframe: a dynamically created one appended to
+             document.body is sandboxed by Lightning Web Security, never loads,
+             and never posts back — which silently left every field drifted. -->
+        <template if:true={anchorFrameUrl}>
+            <iframe src={anchorFrameUrl} class="sf-anchor-frame" title="Anchor extraction"></iframe>
+        </template>
+      </div>
+    </c-signforce-access-gate>
+</template>

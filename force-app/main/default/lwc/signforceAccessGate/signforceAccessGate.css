@@ -1,0 +1,52 @@
+/* Be layout-transparent: the gate wraps components whose height cascade runs
+   :host{height:…} -> .root{height:100%}. A default inline/auto-height host would
+   break that (the editors' scroll region collapses). display:contents removes the
+   gate's own box so wrapped content lays out exactly as if unwrapped. */
+:host {
+    display: contents;
+}
+
+.sf-gate-checking {
+    position: relative;
+    min-height: 120px;
+}
+
+.sf-gate-denied {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    min-height: 200px;
+}
+
+.sf-gate-card {
+    max-width: 440px;
+    text-align: center;
+    background: #fff;
+    border: 1px solid #e6e8ef;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+    padding: 32px 28px;
+}
+
+.sf-gate-icon {
+    width: 42px;
+    height: 42px;
+    color: #7c3aed;
+    margin: 0 auto 12px;
+    display: block;
+}
+
+.sf-gate-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px;
+}
+
+.sf-gate-text {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #475569;
+    margin: 0;
+}

@@ -1,0 +1,550 @@
+:host {
+    /* Brand Accent Tokens — indigo, matching the app theme
+       (createAgreement / signerManager use #6366f1 → #a855f7) */
+    --brand-50: #eef2ff;
+    --brand-100: #e0e7ff;
+    --brand-200: #c7d2fe;
+    --brand-500: #6366f1;
+    --brand-600: #4f46e5;  /* Primary brand accent */
+    --brand-700: #4338ca;
+    --brand-900: #312e81;
+    --brand-alt: #a855f7;  /* gradient partner */
+
+    /* Neutrals - Slate */
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    /* Semantic States */
+    --emerald-50: #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-200: #a7f3d0;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --emerald-700: #047857;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fde68a;
+    --amber-500: #f5a623;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fca5a5;
+    --red-500: #ef4444;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+
+    /* Border Radii */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-full: 9999px;
+
+    /* Shadows & Transitions */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Map legacy variables to prevent visual breakage */
+    --navy-900: var(--slate-900);
+    --navy-800: var(--slate-800);
+    --navy-700: var(--slate-700);
+    --warm-white: #ffffff;
+    --warm-50: var(--slate-50);
+    --warm-100: var(--slate-100);
+    --warm-200: var(--slate-200);
+    --warm-400: var(--slate-400);
+    --warm-600: var(--slate-500);
+    --warm-800: var(--slate-700);
+    display: block;
+}
+
+.dash-root {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 28px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+}
+.dash-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--brand-600);
+    margin: 0 0 4px;
+}
+.dash-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0;
+    letter-spacing: -0.03em;
+}
+.dash-btn-refresh {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--slate-200);
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--slate-600);
+    transition: all 0.2s var(--ease-out);
+    box-shadow: var(--shadow-xs);
+}
+.dash-btn-refresh svg { width: 18px; height: 18px; }
+.dash-btn-refresh:hover {
+    border-color: var(--brand-600);
+    color: var(--brand-600);
+    transform: rotate(45deg);
+    box-shadow: var(--shadow-sm);
+}
+
+.dash-loading { text-align: center; padding: 80px; }
+
+/* Metric Cards */
+.dash-metrics {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.metric-card {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    padding: 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.2s var(--ease-out);
+    box-shadow: var(--shadow-xs);
+}
+/* A dashboard is scanned, not played with — six cards lifting and dropping as
+   the pointer crosses them is motion with nothing to say. */
+.metric-card:hover {
+    border-color: var(--slate-300);
+    box-shadow: var(--shadow-sm);
+}
+/* Metric icons.
+ * Six saturated gradient tiles competed with the numbers they were labelling —
+ * the tile was the loudest thing on a card whose whole point is the figure. A
+ * flat tint with the glyph in the accent lets the number lead, and the hue still
+ * groups the card. */
+.metric-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.metric-icon svg { width: 18px; height: 18px; }
+.metric-icon-total     { background: #eef2ff; color: #4f46e5; }
+.metric-icon-sent      { background: #eef2ff; color: #6366f1; }
+.metric-icon-completed { background: #ecfdf5; color: #059669; }
+.metric-icon-rate      { background: #f5f3ff; color: #7c3aed; }
+.metric-icon-time      { background: #f1f5f9; color: #64748b; }
+.metric-icon-pending   { background: #fffbeb; color: #d97706; }
+.metric-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+.metric-label {
+    font-size: 11px;
+    color: var(--slate-500);
+    margin: 4px 0 0;
+    font-weight: 500;
+}
+
+/* Charts */
+.dash-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.chart-card {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-xs);
+}
+.chart-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 20px;
+    letter-spacing: -0.01em;
+}
+
+/* Status Bars */
+.status-bars { display: flex; flex-direction: column; gap: 12px; }
+.status-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.status-bar-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--slate-700);
+    font-weight: 500;
+    min-width: 90px;
+}
+.status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.status-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--slate-100);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.status-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s var(--ease-out);
+    min-width: 4px;
+}
+.status-bar-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate-900);
+    min-width: 28px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Monthly Trend */
+.trend-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    height: 140px;
+    padding-bottom: 8px;
+    /* Baseline: without it the bars float and an empty month reads as missing
+       data rather than as zero. */
+    border-bottom: 1px solid var(--slate-200);
+}
+.trend-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    justify-content: flex-end;
+}
+.trend-bars {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    justify-content: center;
+    /* The bug: without an explicit height, the children's percentage heights
+       resolved against auto and every bar collapsed to its 4px min. */
+    height: 100%;
+    flex: 1;
+    width: 100%;
+}
+.trend-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 2px;
+}
+.trend-val {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--slate-500);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+.trend-label {
+    /* Sits under the baseline now, so give it room to read as an axis tick. */
+    padding-top: 2px;
+}
+.trend-bar {
+    width: 18px;
+    border-radius: 3px 3px 0 0;
+    transition: height 0.6s var(--ease-out);
+    /* No min-height — a zero month must draw nothing. JS already floors any
+       real value at 3% so a single agreement still shows. */
+}
+.trend-bar-sent { background: var(--brand-500); }
+.trend-bar-completed { background: var(--emerald-500); }
+.trend-label {
+    font-size: 10px;
+    color: var(--slate-500);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.trend-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    justify-content: center;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--slate-600);
+    font-weight: 500;
+}
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+.legend-dot-sent { background: var(--brand-500); opacity: 0.7; }
+.legend-dot-completed { background: var(--emerald-500); }
+
+/* Recent Agreements */
+.recent-list { display: flex; flex-direction: column; }
+.recent-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--slate-100);
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+}
+.recent-row:hover { background: var(--slate-50); margin: 0 -24px; padding: 12px 24px; border-radius: var(--radius-md); }
+.recent-row:last-child { border-bottom: none; }
+.recent-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-900);
+    margin: 0 0 2px;
+}
+.recent-date {
+    font-size: 11px;
+    color: var(--slate-400);
+    margin: 0;
+}
+/* Status chips — the same shape and dot the admin wizard and the status
+   breakdown use, so a status looks like a status everywhere in the product.
+   The dot means the state still reads without colour. */
+.recent-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 8px 2px 6px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+.recent-status::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+.recent-status-draft     { background: var(--slate-50); border-color: var(--slate-200); color: var(--slate-500); }
+.recent-status-sent      { background: var(--brand-50); border-color: #c7d2fe; color: #4338ca; }
+.recent-status-completed { background: var(--emerald-50); border-color: #a7f3d0; color: #067a5b; }
+.recent-status-declined  { background: var(--red-50); border-color: #fca5a5; color: #b3322c; }
+.recent-status-voided    { background: var(--slate-50); border-color: var(--slate-200); color: var(--slate-400); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dash-metrics { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+    .dash-root { padding: 20px 16px; }
+    .dash-metrics { grid-template-columns: repeat(2, 1fr); }
+    .dash-charts { grid-template-columns: 1fr; }
+    .dash-title { font-size: 24px; }
+}
+/* ── Agreement list header + status tabs ──────────────── */
+.agr-list-header {
+    padding: 0 0 14px;
+}
+
+.agr-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--slate-200);
+    margin: 0 -20px 16px;
+    padding: 0 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+.agr-tabs::-webkit-scrollbar { display: none; }
+
+.agr-tab {
+    background: none;
+    border: none;
+    padding: 12px 4px;
+    margin-right: 24px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate-500);
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+}
+.agr-tab:hover { color: var(--brand-700); }
+.agr-tab-active {
+    color: var(--brand-600);
+    border-bottom-color: var(--brand-600);
+}
+.agr-tab-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-600);
+    background: var(--slate-100);
+    padding: 2px 8px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    line-height: 1.4;
+}
+.agr-tab-active .agr-tab-count {
+    background: var(--brand-600);
+    color: white;
+}
+
+/* ── Empty state ──────────────────────────────────────── */
+.agr-empty {
+    padding: 56px 20px;
+    text-align: center;
+}
+.agr-empty svg {
+    width: 40px; height: 40px;
+    color: var(--slate-300);
+    margin: 0 auto 14px;
+}
+.agr-empty-title {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--slate-900);
+    text-transform: capitalize;
+}
+.agr-empty-sub {
+    margin: 0;
+    font-size: 13px;
+    color: var(--slate-500);
+}
+
+/* ── Pagination ───────────────────────────────────────── */
+.agr-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0 4px;
+    border-top: 1px solid var(--slate-100);
+    margin-top: 8px;
+}
+.page-btn {
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-700);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s var(--ease-out), border-color .15s var(--ease-out), color .15s var(--ease-out);
+}
+.page-btn:hover:not(:disabled) {
+    background: var(--brand-50);
+    border-color: var(--brand-500);
+    color: var(--brand-600);
+}
+.page-btn:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+}
+/* Muted rather than faded: opacity dims the border and text unevenly against
+   the card, and the result reads as a rendering glitch instead of a disabled
+   control. */
+.page-btn:disabled {
+    background: var(--slate-50);
+    border-color: var(--slate-200);
+    color: var(--slate-300);
+    cursor: default;
+}
+.page-info {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-500);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Additional status color variants ─────────────────── */
+.recent-status-expired {
+    background: var(--amber-50);
+    border-color: #fcd34d;
+    color: #92600b;
+}
+.recent-status-cancelled {
+    background: var(--slate-50);
+    border-color: var(--slate-200);
+    color: var(--slate-400);
+}
+.recent-status-signed {
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+    color: #6d28d9;
+}
+.recent-status-pending {
+    background: var(--amber-50);
+    border-color: #fcd34d;
+    color: #92600b;
+}

@@ -1,0 +1,666 @@
+<apex:page controller="SignedAgreementPDFController"
+         renderAs="pdf"
+         showHeader="false"
+         sidebar="false"
+         applyHtmlTag="false"
+         applyBodyTag="false"
+         standardStylesheets="false">
+<html>
+<head>
+<style>
+    /* ================= PAGE ================= */
+    @page {
+        size: A4;
+        margin-top: 1.0cm;
+        margin-bottom: 1.0cm;
+        margin-left: 1.1cm;
+        margin-right: 1.1cm;
+
+        @bottom-left {
+            content: "eSignforce \2014 Certificate of Completion";
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 8px;
+            color: #b4b4bb;
+        }
+        @bottom-right {
+            content: "Page " counter(page) " of " counter(pages);
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 8px;
+            color: #b4b4bb;
+        }
+    }
+
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 11px;
+        color: #3f3f46;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+    }
+    table { border-collapse: collapse; width: 100%; }
+    h1, h2, h3, p { margin: 0; padding: 0; }
+    td { vertical-align: top; }
+
+    /* ================= HEADER (dark card) ================= */
+    .masthead { background-color: #111114; border-radius: 10px; }
+    .masthead td { padding: 18px 20px; vertical-align: middle; }
+    .logo-box {
+        display: inline-block;
+        width: 26px; height: 26px;
+        background-color: #6366f1;
+        border-radius: 6px;
+        text-align: center;
+        line-height: 26px;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 800;
+        margin-right: 9px;
+        vertical-align: middle;
+    }
+    .brand-name {
+        font-size: 18px;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: -0.3px;
+        vertical-align: middle;
+    }
+    .brand-tag {
+        font-size: 7.5px;
+        color: #a5b4fc;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+    .mast-title {
+        text-align: right;
+        font-size: 11px;
+        font-weight: 800;
+        color: #e4e4e7;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+    }
+    .mast-env {
+        text-align: right;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 9.5px;
+        color: #c7d2fe;
+        margin-top: 5px;
+    }
+    .accent-rule { }
+
+    /* ================= HERO ================= */
+    .hero-strip { background-color: #ffffff; }
+    .hero-strip td { padding: 22px 2px 20px; vertical-align: middle; }
+    .hero-name {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0a0a0a;
+        letter-spacing: -0.6px;
+    }
+    .hero-sub {
+        font-size: 9px;
+        color: #a1a1aa;
+        margin-top: 8px;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+    .chip-done {
+        display: inline-block;
+        background-color: #ecfdf3;
+        border: 1px solid #abefc6;
+        border-radius: 6px;
+        color: #067647;
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        padding: 7px 14px;
+        text-transform: uppercase;
+    }
+    .chip-other {
+        display: inline-block;
+        background-color: #fff8eb;
+        border: 1px solid #fcdca3;
+        border-radius: 6px;
+        color: #b54708;
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        padding: 7px 14px;
+        text-transform: uppercase;
+    }
+
+    /* ================= STAT CARDS ================= */
+    .stats { margin-top: 22px; }
+    .stat-card {
+        border: 1px solid #e6e8ee;
+        border-top: 2.5px solid #6366f1;
+        border-radius: 8px;
+        background-color: #ffffff;
+        padding: 13px 16px;
+    }
+    .stat-label {
+        font-size: 8px;
+        font-weight: 800;
+        color: #a1a1aa;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+    }
+    .stat-value {
+        font-size: 17px;
+        font-weight: 800;
+        color: #0a0a0a;
+        margin-top: 6px;
+        letter-spacing: -0.3px;
+    }
+    .stat-gap { width: 14px; }
+
+    /* ================= DETAILS PANEL (boxed) ================= */
+    .panel {
+        border: 1px solid #e6e8ee;
+        border-radius: 8px;
+        background-color: #ffffff;
+        margin-top: 26px;
+    }
+    .panel-head {
+        background-color: #f6f7fb;
+        padding: 12px 16px;
+        font-size: 9px;
+        font-weight: 800;
+        color: #4338ca;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e6e8ee;
+    }
+    .panel-body td { padding: 11px 16px; border-bottom: 1px solid #f1f1f3; }
+    .p-label {
+        width: 22%;
+        font-size: 9px;
+        font-weight: 800;
+        color: #a1a1aa;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .p-value { width: 28%; font-size: 11.5px; font-weight: 700; color: #18181b; }
+    .p-mono { font-family: 'Courier New', Courier, monospace; font-size: 10px; color: #52525b; }
+
+    /* ================= SECTION HEADERS ================= */
+    .sec { margin: 34px 0 14px; page-break-after: avoid; }
+    .sec-num {
+        display: inline-block;
+        background-color: #6366f1;
+        color: #ffffff;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 800;
+        width: 22px;
+        height: 22px;
+        line-height: 22px;
+        text-align: center;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+    .sec-title {
+        display: inline-block;
+        font-size: 18px;
+        font-weight: 800;
+        color: #0a0a0a;
+        letter-spacing: -0.5px;
+        vertical-align: middle;
+    }
+    .sec-desc { font-size: 10.5px; color: #a1a1aa; margin-top: 6px; }
+    .sec-rule { border-bottom: 1px solid #e8e8ec; margin-top: 12px; }
+
+    /* ================= SIGNER CARD ================= */
+    .signer-card {
+        border: 1px solid #e6e8ee;
+        border-left: 3px solid #6366f1;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        page-break-inside: avoid;
+        background-color: #ffffff;
+    }
+    .signer-head { background-color: #f9fafe; border-bottom: 1px solid #eceef4; }
+    .signer-head td { padding: 13px 15px; vertical-align: middle; }
+    .avatar {
+        display: inline-block;
+        width: 28px; height: 28px;
+        background-color: #6366f1;
+        color: #ffffff;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 800;
+        text-align: center;
+        line-height: 28px;
+    }
+    .signer-name { font-size: 15px; font-weight: 800; color: #0a0a0a; }
+    .signer-email { font-size: 10.5px; color: #71717a; }
+    .pill-signed {
+        display: inline-block;
+        background-color: #ecfdf3;
+        border: 1px solid #abefc6;
+        border-radius: 999px;
+        color: #067647;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        padding: 4px 12px;
+        text-transform: uppercase;
+    }
+    .pill-pending {
+        display: inline-block;
+        background-color: #fff8eb;
+        border: 1px solid #fcdca3;
+        border-radius: 999px;
+        color: #b54708;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        padding: 4px 12px;
+        text-transform: uppercase;
+    }
+
+    .signer-body td { padding: 14px 16px; }
+    .meta-table td { padding: 7px 0; border-bottom: 1px solid #f4f4f5; }
+    .m-label {
+        width: 42%;
+        font-size: 9px;
+        font-weight: 700;
+        color: #a1a1aa;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .m-value { font-size: 11.5px; font-weight: 700; color: #27272a; }
+    .m-mono { font-family: 'Courier New', Courier, monospace; font-size: 10px; color: #52525b; }
+
+    /* Signature showcase (clean, no box) */
+    .sig-zone {
+        background-color: #fafbff;
+        border: 1px solid #e6e8f4;
+        border-radius: 8px;
+        padding: 14px;
+        text-align: center;
+    }
+    .sig-eyebrow {
+        font-size: 8px;
+        font-weight: 800;
+        color: #6366f1;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .sig-script {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-style: italic;
+        font-size: 30px;
+        color: #0a0a0a;
+        line-height: 1.1;
+    }
+    .sig-under { border-bottom: 1px solid #d4d4d8; width: 92%; margin: 10px auto 0; }
+    .sig-cap { font-size: 8px; color: #a1a1aa; margin-top: 6px; font-style: italic; }
+    .ts-block { margin-top: 12px; text-align: center; }
+    .ts-line { font-family: 'Courier New', Courier, monospace; font-size: 10px; color: #52525b; }
+    .ts-key { color: #a1a1aa; }
+
+    /* ================= AUDIT (boxed table) ================= */
+    .audit { border: 1px solid #e6e8ee; border-radius: 8px; margin-top: 6px; }
+    .audit th {
+        background-color: #111114;
+        color: #ffffff;
+        font-size: 8.5px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        text-align: left;
+        padding: 11px 14px;
+    }
+    .audit td {
+        padding: 11px 14px;
+        border-bottom: 1px solid #f1f1f3;
+        font-size: 10.5px;
+        vertical-align: middle;
+    }
+    .a-dot {
+        display: inline-block;
+        width: 6px; height: 6px;
+        background-color: #6366f1;
+        margin-right: 9px;
+        vertical-align: middle;
+    }
+    .a-event { font-weight: 800; color: #0a0a0a; vertical-align: middle; }
+    .a-actor { color: #52525b; }
+    .a-mono { font-family: 'Courier New', Courier, monospace; font-size: 10px; color: #52525b; }
+
+    /* ================= LEGAL FOOTER (dark card) ================= */
+    .verify-band { background-color: #111114; border-radius: 10px; margin-top: 28px; page-break-inside: avoid; }
+    .verify-band td { padding: 18px 20px; }
+    .v-eyebrow {
+        font-size: 8.5px;
+        font-weight: 800;
+        color: #a5b4fc;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+    }
+    .v-text { font-size: 9.5px; color: #d4d4d8; line-height: 1.7; }
+    .v-meta {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 9px;
+        color: #a5b4fc;
+        margin-top: 10px;
+    }
+</style>
+</head>
+<body>
+
+<!-- ================= DIAGNOSTIC (data missing) ================= -->
+<apex:outputPanel layout="block" rendered="{!NOT(hasData)}">
+    <div style="border:1px solid #fca5a5; background-color:#fef2f2; padding:12px; color:#991b1b; font-size:9px;">
+        Certificate could not be generated: {!diagnosticMessage} (Agreement: {!passedAgreementId})
+    </div>
+</apex:outputPanel>
+
+<apex:outputPanel layout="none" rendered="{!hasData}">
+
+<!-- ================= MASTHEAD ================= -->
+<table class="masthead accent-rule" cellpadding="0" cellspacing="0">
+<tr>
+    <td width="50%">
+        <span class="logo-box">S</span><span class="brand-name">eSignforce</span>
+        <div class="brand-tag">Secure eSignature Platform</div>
+    </td>
+    <td width="50%">
+        <div class="mast-title">Certificate of Completion</div>
+        <div class="mast-env">ENVELOPE: {!agreement.Envelope_ID__c}</div>
+    </td>
+</tr>
+</table>
+
+<!-- ================= HERO STRIP ================= -->
+<table class="hero-strip" cellpadding="0" cellspacing="0">
+<tr>
+    <td width="72%">
+        <div class="hero-name">{!agreement.Name}</div>
+        <div class="hero-sub">Official tamper-evident record of the electronic signing process</div>
+    </td>
+    <td width="28%" style="text-align:right;">
+        <apex:outputPanel rendered="{!agreement.Status__c == 'Completed'}" layout="none">
+            <span class="chip-done">✓&nbsp;Completed</span>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!agreement.Status__c != 'Completed'}" layout="none">
+            <span class="chip-other">{!agreement.Status__c}</span>
+        </apex:outputPanel>
+    </td>
+</tr>
+</table>
+
+<!-- ================= STAT CARDS ================= -->
+<table class="stats" cellpadding="0" cellspacing="0">
+<tr>
+    <td width="32%" class="stat-card">
+        <div class="stat-label">Total Signers</div>
+        <div class="stat-value">{!signerCount}</div>
+    </td>
+    <td class="stat-gap">&nbsp;</td>
+    <td width="32%" class="stat-card">
+        <div class="stat-label">Sent On</div>
+        <div class="stat-value">{!sentDateStr}</div>
+    </td>
+    <td class="stat-gap">&nbsp;</td>
+    <td width="32%" class="stat-card">
+        <div class="stat-label">Completed On</div>
+        <div class="stat-value">{!completedDateStr}</div>
+    </td>
+</tr>
+</table>
+
+<!-- ================= ENVELOPE DETAILS ================= -->
+<table class="panel" cellpadding="0" cellspacing="0">
+<tr><td class="panel-head" colspan="4">Envelope Details &amp; Record Tracking</td></tr>
+<tr class="panel-body">
+    <td class="p-label">Agreement ID</td>
+    <td class="p-value"><span class="p-mono">{!agreement.Envelope_ID__c}</span></td>
+    <td class="p-label">Agreement Type</td>
+    <td class="p-value">{!agreement.Agreement_Type__c}</td>
+</tr>
+<tr class="panel-body">
+    <td class="p-label">Originator</td>
+    <td class="p-value">{!sentByName}</td>
+    <td class="p-label">Originator Email</td>
+    <td class="p-value">{!agreement.Owner.Email}</td>
+</tr>
+<tr class="panel-body">
+    <td class="p-label">Holder</td>
+    <td class="p-value">{!sentByName}</td>
+    <td class="p-label">Location</td>
+    <td class="p-value">eSignforce Cloud</td>
+</tr>
+<tr class="panel-body">
+    <td class="p-label">Record Status</td>
+    <td class="p-value">Original</td>
+    <td class="p-label">Generated</td>
+    <td class="p-value">{!generatedDate}</td>
+</tr>
+<tr class="panel-body">
+    <td class="p-label">Signatures</td>
+    <td class="p-value">{!signerCount}</td>
+    <td class="p-label">Time Zone</td>
+    <td class="p-value">({!tzLabel}) {!tzId}</td>
+</tr>
+</table>
+
+<!-- ================= SECTION 1: SIGNERS ================= -->
+<div class="sec">
+    <span class="sec-num">1</span><span class="sec-title">Signer Events</span>
+    <div class="sec-desc">Each party below was authenticated and electronically signed this agreement.</div>
+    <div class="sec-rule">&nbsp;</div>
+</div>
+
+<apex:repeat value="{!signers}" var="sw">
+<table class="signer-card" cellpadding="0" cellspacing="0">
+    <tr class="signer-head">
+        <td width="6%"><span class="avatar">{!LEFT(sw.signer.Name, 1)}</span></td>
+        <td width="64%">
+            <div class="signer-name">{!sw.signer.Name}</div>
+            <div class="signer-email">{!sw.signer.Email__c}</div>
+        </td>
+        <td width="30%" style="text-align:right;">
+            <apex:outputPanel rendered="{!sw.signer.Role__c == 'CC'}" layout="none">
+                <span class="pill-pending" style="background:#eef2ff; color:#4338ca; border-color:#c7d2fe;">CC&nbsp;&middot;&nbsp;Copy</span>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!AND(sw.isSigned, NOT(sw.signer.Role__c == 'CC'))}" layout="none">
+                <span class="pill-signed">✓&nbsp;Signed</span>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!AND(NOT(sw.isSigned), NOT(sw.signer.Role__c == 'CC'))}" layout="none">
+                <span class="pill-pending">Pending</span>
+            </apex:outputPanel>
+        </td>
+    </tr>
+    <tr class="signer-body">
+        <td colspan="2" width="55%">
+            <table class="meta-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="m-label">Role</td>
+                <td class="m-value">{!sw.signer.Role__c}</td>
+            </tr>
+            <tr>
+                <td class="m-label">Signing Order</td>
+                <td class="m-value">#{!sw.signer.Signing_Order__c}</td>
+            </tr>
+            <tr>
+                <td class="m-label">Security Level</td>
+                <td class="m-value">Email, Unique Signing Link</td>
+            </tr>
+            <apex:outputPanel rendered="{!sw.hasSignature}" layout="none">
+            <tr>
+                <td class="m-label">Signature Adoption</td>
+                <td class="m-value">
+                    <apex:outputPanel rendered="{!sw.isTypeSignature}" layout="none">Pre-selected Style ({!sw.typedFont})</apex:outputPanel>
+                    <apex:outputPanel rendered="{!sw.isDrawSignature}" layout="none">Drawn on Device</apex:outputPanel>
+                    <apex:outputPanel rendered="{!sw.isUploadSignature}" layout="none">Uploaded Signature Image</apex:outputPanel>
+                </td>
+            </tr>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!NOT(ISBLANK(sw.signingIpAddress))}" layout="none">
+            <tr>
+                <td class="m-label">Using IP Address</td>
+                <td class="m-value"><span class="m-mono">{!sw.signingIpAddress}</span></td>
+            </tr>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!NOT(ISBLANK(sw.certificateId))}" layout="none">
+            <tr>
+                <td class="m-label">Certificate ID</td>
+                <td class="m-value"><span class="m-mono">{!sw.certificateId}</span></td>
+            </tr>
+            </apex:outputPanel>
+            </table>
+        </td>
+        <td width="45%">
+            <div class="sig-zone">
+                <apex:outputPanel rendered="{!sw.signer.Role__c == 'CC'}" layout="none">
+                    <div class="sig-eyebrow">Copy Recipient (CC)</div>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!NOT(sw.signer.Role__c == 'CC')}" layout="none">
+                    <div class="sig-eyebrow">eSignforce Signed By</div>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!sw.isTypeSignature}" layout="none">
+                    <div class="sig-script">{!sw.typedName}</div>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!AND(sw.isUploadSignature, CONTAINS(sw.signatureData, 'data:image'))}" layout="none">
+                    <img src="{!sw.signatureData}" height="30"/>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!AND(sw.isUploadSignature, NOT(CONTAINS(sw.signatureData, 'data:image')))}" layout="none">
+                    <div class="sig-script">{!sw.signer.Name}</div>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!sw.isDrawSignature}" layout="none">
+                    <div class="sig-script">{!sw.signer.Name}</div>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!AND(sw.isSigned, NOT(sw.hasSignature))}" layout="none">
+                    <div class="sig-script">{!sw.signer.Name}</div>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!sw.signer.Role__c == 'CC'}" layout="none">
+                    <div style="color:#94a3b8; font-size:10px; padding:8px 0;">No signature required (copy recipient)</div>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!AND(NOT(sw.isSigned), NOT(sw.hasSignature), NOT(sw.signer.Role__c == 'CC'))}" layout="none">
+                    <div style="color:#94a3b8; font-size:10px; padding:8px 0;">Awaiting signature</div>
+                </apex:outputPanel>
+                <div class="sig-under">&nbsp;</div>
+                <!-- BUG-027 FIX: a CC recipient never signs, so it must not carry
+                     the "Electronically signed" stamp. -->
+                <apex:outputPanel rendered="{!NOT(sw.signer.Role__c == 'CC')}" layout="none">
+                    <div class="sig-cap">Electronically signed via eSignforce</div>
+                </apex:outputPanel>
+            </div>
+            <div class="ts-block">
+                <apex:outputPanel rendered="{!NOT(ISNULL(agreement.Sent_Date__c))}" layout="none">
+                    <div class="ts-line"><span class="ts-key">SENT:&nbsp;</span>{!sentDateStr}</div>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!sw.signer.Role__c == 'CC'}" layout="none">
+                    <div class="ts-line"><span class="ts-key">COPY:&nbsp;</span>No signature required</div>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!NOT(sw.signer.Role__c == 'CC')}" layout="none">
+                    <div class="ts-line"><span class="ts-key">SIGNED:&nbsp;</span>{!sw.signedDateStr}</div>
+                </apex:outputPanel>
+            </div>
+        </td>
+    </tr>
+</table>
+</apex:repeat>
+
+<!-- ================= SECTION 2: AUDIT TRAIL ================= -->
+<div class="sec">
+    <span class="sec-num">2</span><span class="sec-title">Audit Trail</span>
+    <div class="sec-desc">Complete chronological record of every action taken on this agreement. All times ({!tzLabel}) {!tzId}.</div>
+    <div class="sec-rule">&nbsp;</div>
+</div>
+
+<table class="audit" cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+    <th width="32%">Event</th>
+    <th width="30%">Actor</th>
+    <th width="23%">Timestamp ({!tzLabel})</th>
+    <th width="15%">IP Address</th>
+</tr>
+</thead>
+<tbody>
+<apex:repeat value="{!auditRows}" var="evt">
+<tr>
+    <td><span class="a-dot">&nbsp;</span><span class="a-event">{!evt.action}</span></td>
+    <td class="a-actor">{!evt.signerEmail}</td>
+    <td class="a-mono">{!evt.timestampStr}</td>
+    <td class="a-mono">{!evt.ipAddress}</td>
+</tr>
+</apex:repeat>
+</tbody>
+</table>
+
+<!-- ================= SECTION 3: ELECTRONIC RECORD & SIGNATURE DISCLOSURE ================= -->
+<div class="sec" style="page-break-before: always;">
+    <span class="sec-num">3</span><span class="sec-title">Electronic Record and Signature Disclosure</span>
+    <div class="sec-desc">Consent to use electronic records and signatures.</div>
+    <div class="sec-rule">&nbsp;</div>
+</div>
+<div style="font-size:11px; color:#475569; line-height:1.65; padding:2px 2px 0;">
+    <p style="margin-bottom:8px;">
+        By electronically signing this agreement, you (the &ldquo;Signer&rdquo;) consented to conduct this
+        transaction by electronic means and agreed that your electronic signature is legally binding &mdash; with
+        the same force and effect as a handwritten signature.
+    </p>
+
+    <p style="font-weight:700; color:#0f172a; margin:10px 0 2px;">Getting paper copies</p>
+    <p style="margin-bottom:8px;">
+        You may download and print this document and this Certificate of Completion at any time during and
+        immediately after the signing session. To request a paper copy, contact the sender
+        ({!sentByName} &ndash; {!agreement.Owner.Email}). No fee is charged for paper copies.
+    </p>
+
+    <p style="font-weight:700; color:#0f172a; margin:10px 0 2px;">Withdrawing your consent</p>
+    <p style="margin-bottom:8px;">
+        You may withdraw your consent to receive and sign records electronically at any time before completing
+        signing &mdash; simply decline to sign and notify the sender. Withdrawing consent does not affect the legal
+        validity of records that were provided or signed before the withdrawal.
+    </p>
+
+    <p style="font-weight:700; color:#0f172a; margin:10px 0 2px;">System requirements</p>
+    <p style="margin-bottom:8px;">
+        To access, view, and retain electronic records you need a current web browser, a valid email account, and
+        the ability to open and save PDF files. These requirements may change over time; continued use of the
+        service indicates your hardware and software meet the current requirements.
+    </p>
+
+    <p style="font-weight:700; color:#0f172a; margin:10px 0 2px;">Acknowledgement and consent</p>
+    <p style="margin-bottom:8px;">
+        By selecting &ldquo;Finish&rdquo; and applying your signature, you confirmed that you were able to access
+        this disclosure and the agreement electronically, that you could read this Electronic Record and Signature
+        Disclosure, and that you consented to use electronic records and signatures for this transaction.
+    </p>
+
+    <p style="margin-top:12px; font-size:9.5px; color:#94a3b8;">
+        This disclosure is provided by eSignforce on behalf of {!sentByName}. The signatures, timestamps, and IP
+        addresses recorded in this certificate constitute evidence of each party's intent to be bound by the terms
+        of this agreement.
+    </p>
+</div>
+
+<!-- ================= VERIFY / LEGAL BAND (last-page footer) ================= -->
+<table class="verify-band" cellpadding="0" cellspacing="0">
+<tr>
+    <td>
+        <div class="v-eyebrow">Electronic Record &amp; Signature Disclosure</div>
+        <div class="v-text">
+            This Certificate of Completion is a tamper-evident, legally binding record of the electronic signature
+            transaction executed through the eSignforce Secure eSignature Platform. The signatures, timestamps, and
+            IP addresses recorded above constitute evidence of each party's intent to be bound by the terms of this
+            agreement.
+        </div>
+        <div class="v-meta">DOCUMENT: {!agreement.Envelope_ID__c} &nbsp;|&nbsp; GENERATED: {!generatedDate} &nbsp;|&nbsp; SOURCE: eSignforce Cloud</div>
+    </td>
+</tr>
+</table>
+
+</apex:outputPanel>
+</body>
+</html>
+</apex:page>

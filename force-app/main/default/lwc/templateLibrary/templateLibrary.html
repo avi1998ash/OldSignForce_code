@@ -1,0 +1,842 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 05-06-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <c-signforce-access-gate>
+        <div class="library-shell">
+            <!-- Page header with brand mark -->
+            <div class="library-header">
+                <div class="brand-row">
+                    <div class="brand-mark">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="brand-icon">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="brand-eyebrow">eSignforce</p>
+                        <h1 class="library-title">Dynamic Document Template</h1>
+                    </div>
+                </div>
+                <button class="btn-primary-dark" onclick={openNewDialog}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>New Template</span>
+                </button>
+            </div>
+
+            <p class="library-subtitle">Reusable templates for dynamic document generation. Upload a DOCX with merge tags, and eSignforce will fill it in for any record.</p>
+
+            <template if:true={isLoading}>
+                <div class="loading-state">
+                    <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <template if:true={hasTemplates}>
+                    <div class="template-grid">
+                        <template for:each={pagedTemplates} for:item="tpl">
+                            <div key={tpl.Id} class="template-card" data-id={tpl.Id} onclick={openEditDialog}>
+                                <div class="template-card-top">
+                                    <div class="template-icon-tile">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="template-tile-icon">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                        </svg>
+                                    </div>
+                                    <template if:true={tpl.Active__c}>
+                                        <span class="badge badge-active">ACTIVE</span>
+                                    </template>
+                                    <template if:false={tpl.Active__c}>
+                                        <span class="badge badge-inactive">INACTIVE</span>
+                                    </template>
+                                </div>
+                                <h3 class="template-name">{tpl.Name}</h3>
+                                <p class="template-object">For <strong>{tpl.Object_API_Name__c}</strong></p>
+                                <div class="template-meta-row">
+                                    <span class="meta-pill">{tpl.Output_Format__c}</span>
+                                    <span class="meta-text">{tpl.fieldCount} merge tags</span>
+                                </div>
+                                <template if:true={tpl.Description__c}>
+                                    <p class="template-description">{tpl.Description__c}</p>
+                                </template>
+                                <template if:true={tpl.Last_Parse_Error__c}>
+                                    <p class="template-error-flag">Parse error - open to view</p>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <template if:true={showPagination}>
+                        <div class="pagination-bar">
+                            <button class="pagination-btn" disabled={disablePrev} onclick={prevPage}>← Previous</button>
+                            <span class="pagination-label">Page {currentPage} of {totalPages}</span>
+                            <button class="pagination-btn" disabled={disableNext} onclick={nextPage}>Next →</button>
+                        </div>
+                    </template>
+                </template>
+
+                <template if:false={hasTemplates}>
+                    <div class="empty-state">
+                        <div class="empty-icon-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                        </div>
+                        <h3>No templates yet</h3>
+                        <p>Upload a DOCX file with merge tags to get started.</p>
+                        <button class="btn-primary-dark" onclick={openNewDialog}>Create your first template</button>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Edit / new dialog -->
+            <template if:true={dialogOpen}>
+                <section class="modal-backdrop" onclick={handleBackdropClick}>
+                    <div class="modal-card-wide" onclick={stopPropagation}>
+                        <header class="modal-header">
+                            <div class="modal-header-brand">
+                                <div class="brand-mark brand-mark-sm">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="brand-icon">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="brand-eyebrow brand-eyebrow-sm">eSignforce</p>
+                                    <h2 class="modal-title">{dialogTitle}</h2>
+                                </div>
+                            </div>
+                            <button class="icon-button" onclick={closeDialog}>×</button>
+                        </header>
+
+                        <!-- TABS -->
+                        <nav class="tabs-nav" role="tablist">
+                            <button
+                                class={tabSetupClass}
+                                data-tab="setup"
+                                onclick={handleTabClick}
+                                role="tab"
+                                type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                <span>Setup</span>
+                            </button>
+                            <button
+                                class={tabTemplateClass}
+                                data-tab="template"
+                                onclick={handleTabClick}
+                                role="tab"
+                                type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span>Template</span>
+                                <template if:true={form.templateFileId}>
+                                    <span class="tab-dot tab-dot-success"></span>
+                                </template>
+                            </button>
+                            <button
+                                class={tabTagsClass}
+                                data-tab="tags"
+                                onclick={handleTabClick}
+                                role="tab"
+                                type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon">
+                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                </svg>
+                                <span>Tags</span>
+                                <template if:true={hasParsedFields}>
+                                    <span class="tab-count">{parsedFields.length}</span>
+                                </template>
+                                <template if:true={form.lastParseError}>
+                                    <span class="tab-dot tab-dot-error"></span>
+                                </template>
+                            </button>
+
+                            <!-- Signers - template-level signer roster -->
+                            <button
+                                class={tabSignersClass}
+                                data-tab="signers"
+                                onclick={handleTabClick}
+                                disabled={tagStepsDisabled}
+                                role="tab"
+                                type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" class="tab-icon">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                <span>Signers</span>
+                                <template if:true={hasSignerRows}>
+                                    <span class="tab-count">{signerRows.length}</span>
+                                </template>
+                            </button>
+
+                            <!-- Fields - drag-and-drop field placement on the template DOCX -->
+                            <button
+                                class={tabFieldsClass}
+                                data-tab="fields"
+                                onclick={handleTabClick}
+                                disabled={tagStepsDisabled}
+                                role="tab"
+                                type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" class="tab-icon">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                                </svg>
+                                <span>Fields</span>
+                            </button>
+                        </nav>
+
+                        <!-- TAB BODY -->
+                        <div class={bodyTabsClass}>
+                            <!-- Tab content. Sits on the left everywhere except the
+                                 Template tab, where bodyTabsClass flips the order. -->
+                            <div class={leftPaneClass}>
+                                <!-- ── SETUP TAB ──────────────────────────────── -->
+                                <template if:true={isSetupTab}>
+                                    <p class="step-eyebrow">TEMPLATE DETAILS</p>
+                                    <h3 class="section-heading">Configure your template</h3>
+                                    <p class="section-subheading">Set up where this template applies and how generated documents are named.</p>
+
+                                    <div class="form-stack">
+                                        <lightning-input
+                                            label="Template Name"
+                                            value={form.name}
+                                            onchange={handleNameChange}
+                                            required
+                                            variant="label-stacked"
+                                            placeholder="e.g. Q1 Service Agreement">
+                                        </lightning-input>
+
+                                        <lightning-combobox
+                                            label="Target Object"
+                                            value={form.objectApiName}
+                                            options={objectOptions}
+                                            onchange={handleObjectChange}
+                                            required
+                                            variant="label-stacked"
+                                            placeholder="Select an object"
+                                            field-level-help="Choose the kind of record this template is used with, such as Account, Opportunity or Contact. The template will then show up only on that kind of record, and you can pull details from it into your document.">
+                                        </lightning-combobox>
+
+                                        <lightning-textarea
+                                            label="Description (optional)"
+                                            value={form.description}
+                                            onchange={handleDescriptionChange}
+                                            variant="label-stacked"
+                                            placeholder="What this template is for, who uses it, etc.">
+                                        </lightning-textarea>
+
+                                        <div class="form-row">
+                                            <lightning-combobox
+                                                label="Output Format"
+                                                value={form.outputFormat}
+                                                options={formatOptions}
+                                                onchange={handleFormatChange}
+                                                variant="label-stacked">
+                                            </lightning-combobox>
+
+                                            <lightning-input
+                                                label="Filename Pattern"
+                                                value={form.outputFilenamePattern}
+                                                onchange={handleFilenamePatternChange}
+                                                variant="label-stacked"
+                                                placeholder="\{{Name}} - Agreement"
+                                                field-level-help="Supports merge tags. Extension auto-appended.">
+                                            </lightning-input>
+                                        </div>
+
+                                        <div class="toggle-row">
+                                            <div class="toggle-label-card">
+                                                <lightning-input
+                                                    type="checkbox"
+                                                    label="Active"
+                                                    checked={form.active}
+                                                    onchange={handleActiveChange}
+                                                    variant="label-hidden"
+                                                    class="toggle-checkbox">
+                                                </lightning-input>
+                                                <div class="toggle-text">
+                                                    <strong>Active</strong>
+                                                    <span class="toggle-hint">Available for document generation</span>
+                                                </div>
+                                            </div>
+                                            <div class="toggle-label-card">
+                                                <lightning-input
+                                                    type="checkbox"
+                                                    label="Auto Create Agreement"
+                                                    checked={form.autoCreateAgreement}
+                                                    onchange={handleAutoCreateChange}
+                                                    variant="label-hidden"
+                                                    class="toggle-checkbox">
+                                                </lightning-input>
+                                                <div class="toggle-text">
+                                                    <div class="toggle-title-row">
+                                                        <strong>Auto Create Agreement</strong>
+                                                        <lightning-helptext
+                                                            class="toggle-help"
+                                                            content="Turn this on when the document needs to be signed. eSignforce will create it and take you straight to the screen where you add signers and send it out. Leave it off if you only want the finished document saved to the record as a file.">
+                                                        </lightning-helptext>
+                                                    </div>
+                                                    <span class="toggle-hint">Skip Files; route directly to signing</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <template if:true={form.autoCreateAgreement}>
+                                            <lightning-combobox
+                                                label="Default Agreement Type"
+                                                value={form.defaultAgreementType}
+                                                options={agreementTypeOptions}
+                                                onchange={handleAgreementTypeChange}
+                                                variant="label-stacked">
+                                            </lightning-combobox>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <!-- ── TEMPLATE TAB ───────────────────────────── -->
+                                <template if:true={isTemplateTab}>
+                                    <p class="step-eyebrow">UPLOAD TEMPLATE</p>
+                                    <h3 class="section-heading">Upload your DOCX</h3>
+                                    <p class="section-subheading">
+                                        Use &#123;&#123;TagName&#125;&#125; syntax inside the document for fields you want filled in.
+                                        Use the field reference panel on the right to find available tags.
+                                    </p>
+
+                                    <template if:true={form.templateFileId}>
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem;">
+                                            <div class="file-pill" style="margin-bottom: 0;">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pill-icon">
+                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                                </svg>
+                                                <span>Template uploaded</span>
+                                                <template if:true={form.lastParsedDate}>
+                                                    <span class="muted"> • parsed {form.lastParsedDate}</span>
+                                                </template>
+                                            </div>
+                                            <template if:true={form.contentDocumentId}>
+                                                <button class="sf-btn sf-btn_secondary" onclick={handleViewTemplateFile} type="button">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sf-btn-icon" aria-hidden="true">
+                                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                    View
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <div class="upload-block">
+                                        <lightning-file-upload
+                                            label="Upload DOCX (replaces existing)"
+                                            name="templateFile"
+                                            accept=".docx"
+                                            record-id={uploadRecordId}
+                                            onuploadfinished={handleFileUploaded}>
+                                        </lightning-file-upload>
+                                        <template if:true={isParsing}>
+                                            <div class="parsing-indicator">
+                                                <lightning-spinner alternative-text="Parsing..." size="x-small"></lightning-spinner>
+                                                <span>Parsing template…</span>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <template if:true={showPreviewSection}>
+                                        <div class="sf-preview-section slds-m-top_medium" data-preview-anchor="1" style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #f8fafc; padding: 10px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                                <span style="font-weight: 700; color: #475569; font-size: 0.9rem;">Template PDF Preview</span>
+                                                <button class="sf-btn sf-btn_secondary" onclick={handleClosePreview} type="button">
+                                                    Close preview
+                                                </button>
+                                            </div>
+                                            <template if:true={previewLoading}>
+                                                <div style="position: relative; height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                                                    <lightning-spinner alternative-text="Generating preview..." size="small"></lightning-spinner>
+                                                    <span style="color: #64748b; font-size: 0.85rem; margin-top: 25px;">Generating PDF Preview...</span>
+                                                </div>
+                                            </template>
+                                            <template if:false={previewLoading}>
+                                                <template if:true={previewUrl}>
+                                                    <iframe src={previewUrl} onload={handlePreviewFrameLoad} style="width: 100%; height: 450px; border: none; border-radius: 8px;" title="Template Preview"></iframe>
+                                                </template>
+                                                <template if:false={previewUrl}>
+                                                    <div style="height: 100px; display: flex; align-items: center; justify-content: center; color: #ef4444;">
+                                                        Failed to load preview. Please ensure the template is saved.
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <template if:true={form.lastParseError}>
+                                        <div class="parse-error-box">
+                                            <p class="parse-error-title">Last parse error</p>
+                                            <pre class="parse-error-text">{form.lastParseError}</pre>
+                                        </div>
+                                    </template>
+
+                                    <template if:false={form.objectApiName}>
+                                        <div class="info-banner">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="info-icon">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                            </svg>
+                                            <p>Select a target object on the <strong>Setup</strong> tab to see available merge fields here.</p>
+                                        </div>
+                                    </template>
+                                </template>
+
+                                <!-- ── TAGS TAB ───────────────────────────────── -->
+                                <template if:true={isTagsTab}>
+                                    <p class="step-eyebrow">DETECTED MERGE TAGS</p>
+                                    <template if:true={hasParsedFields}>
+                                        <h3 class="section-heading">{parsedFields.length} tags found</h3>
+                                        <p class="section-subheading">
+                                            These will be filled in when you generate documents from this template.
+                                            Re-upload your DOCX to refresh.
+                                        </p>
+
+                                        <template if:true={hasBrokenTags}>
+                                            <div class="tag-alert">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tag-alert-icon">
+                                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                                </svg>
+                                                <div>
+                                                    <p class="tag-alert-title">{brokenTagSummary}</p>
+                                                    <p class="tag-alert-body">
+                                                        They are marked in red below. Check the spelling in your DOCX,
+                                                        or change the Target Object on the Setup tab.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <div class="field-list">
+                                            <template for:each={parsedFields} for:item="field">
+                                                <div key={field.Id} class={field.rowClass}>
+                                                    <span class={field.typeClass}>{field.Field_Type__c}</span>
+                                                    <span class="field-tag">{field.Tag_Name__c}</span>
+                                                    <template if:true={field.Format_Modifier__c}>
+                                                        <span class="field-modifier">:format={field.Format_Modifier__c}</span>
+                                                    </template>
+
+                                                    <!-- What this tag will actually pull in, or why it will pull nothing. -->
+                                                    <template if:true={field.resolvedLabel}>
+                                                        <span class="tag-map">
+                                                            <span class="tag-map-label">{field.resolvedLabel}</span>
+                                                            <span class="tag-map-where">{field.resolvedWhere}</span>
+                                                        </span>
+                                                    </template>
+                                                    <template if:true={field.errorText}>
+                                                        <span class="tag-map tag-map-error">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tag-map-error-icon">
+                                                                <circle cx="12" cy="12" r="10"></circle>
+                                                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                                            </svg>
+                                                            <span>{field.errorText}</span>
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <template if:false={hasParsedFields}>
+                                        <template if:true={form.lastParseError}>
+                                            <h3 class="section-heading">Parsing failed</h3>
+                                            <p class="section-subheading">There was a problem parsing your DOCX. See the error below.</p>
+                                            <div class="parse-error-box">
+                                                <p class="parse-error-title">Parse error</p>
+                                                <pre class="parse-error-text">{form.lastParseError}</pre>
+                                            </div>
+                                        </template>
+
+                                        <template if:false={form.lastParseError}>
+                                            <h3 class="section-heading">No tags yet</h3>
+                                            <p class="section-subheading">
+                                                Upload a DOCX with merge tags on the <strong>Template</strong> tab.
+                                                Tags appear here once parsing completes.
+                                            </p>
+                                        </template>
+                                    </template>
+                                </template>
+
+                                <!-- ── SIGNERS TAB ────────────────────────────── -->
+                                <template if:true={isSignersTab}>
+                                    <p class="step-eyebrow">SIGNERS</p>
+                                    <h3 class="section-heading">Define template signers</h3>
+                                    <p class="section-subheading">
+                                        These signers are created automatically as recipients when an
+                                        agreement is generated from this template.
+                                    </p>
+
+                                    <!-- The old copy here said "Each needs a valid email", which was not
+                                         true: a blank email is deliberately allowed at design time, and
+                                         only a malformed one is rejected. -->
+                                    <div class="signer-note">
+                                        <svg class="signer-note-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                        </svg>
+                                        <div class="signer-note-body">
+                                            <p class="signer-note-title">The email is optional here</p>
+                                            <ul class="signer-note-list">
+                                                <li>
+                                                    <b>Same person every time?</b> Type their email now. Your
+                                                    own countersigner, legal or finance, for example. It is
+                                                    filled in for you on every document made from this template.
+                                                </li>
+                                                <li>
+                                                    <b>Different person every time?</b> Leave it blank. The
+                                                    customer or client changes with each record, so you enter
+                                                    their address when you generate the document.
+                                                </li>
+                                            </ul>
+                                            <p class="signer-note-foot">
+                                                Either way you can change the address at the moment you
+                                                generate. What you type here is a starting point, not a lock.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="signer-editor">
+                                        <template if:true={hasSignerRows}>
+                                            <div class="signer-rows">
+                                                <template for:each={signerRows} for:item="row">
+                                                    <div key={row.key} class="signer-row-card">
+                                                        <div class="signer-row-grid">
+                                                            <lightning-input
+                                                                label="Full Name"
+                                                                value={row.name}
+                                                                data-key={row.key}
+                                                                onchange={handleSignerNameChange}
+                                                                variant="label-stacked"
+                                                                placeholder="Jane Doe"
+                                                                class="signer-field signer-field-name">
+                                                            </lightning-input>
+                                                            <lightning-input
+                                                                type="email"
+                                                                label="Email"
+                                                                value={row.email}
+                                                                data-key={row.key}
+                                                                onchange={handleSignerEmailChange}
+                                                                variant="label-stacked"
+                                                                placeholder="jane@company.com"
+                                                                class="signer-field signer-field-email">
+                                                            </lightning-input>
+                                                            <lightning-combobox
+                                                                label="Role"
+                                                                value={row.role}
+                                                                options={signerRoleOptions}
+                                                                data-key={row.key}
+                                                                onchange={handleSignerRoleChange}
+                                                                variant="label-stacked"
+                                                                class="signer-field signer-field-role">
+                                                            </lightning-combobox>
+                                                            <lightning-input
+                                                                type="number"
+                                                                label="Order"
+                                                                value={row.order}
+                                                                min="1"
+                                                                data-key={row.key}
+                                                                onchange={handleSignerOrderChange}
+                                                                variant="label-stacked"
+                                                                class="signer-field signer-field-order">
+                                                            </lightning-input>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            class="signer-remove-btn"
+                                                            data-key={row.key}
+                                                            onclick={handleRemoveSignerRow}
+                                                            title="Remove signer">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <template if:false={hasSignerRows}>
+                                            <div class="signer-empty">
+                                                <p>No template signers yet. Add the people who should sign or be CC'd on agreements made from this template.</p>
+                                            </div>
+                                        </template>
+
+                                        <div class="signer-add-row">
+                                            <button type="button" class="signer-add-btn" onclick={handleAddSignerRow}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                </svg>
+                                                <span>Add Signer</span>
+                                            </button>
+
+                                            <span class="signer-count-sep">or</span>
+
+                                            <div class="signer-count-box">
+                                                <lightning-input
+                                                    type="number"
+                                                    label="Number of signers"
+                                                    value={signerCount}
+                                                    min="0"
+                                                    max="10"
+                                                    step="1"
+                                                    variant="label-hidden"
+                                                    onchange={handleSignerCountChange}
+                                                    onblur={handleSignerCountBlur}
+                                                    class="signer-count-input">
+                                                </lightning-input>
+                                                <span class="signer-count-hint">signers in total</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- ── FIELDS TAB ─────────────────────────────── -->
+                                <template if:true={isFieldsTab}>
+                                    <p class="step-eyebrow">FIELDS</p>
+                                    <h3 class="section-heading">Place fields on your template</h3>
+                                    <p class="section-subheading">
+                                        Drag fields onto the document and assign each one to a template
+                                        signer. Placements are saved with the template.
+                                    </p>
+
+                                    <template if:false={form.templateFileId}>
+                                        <div class="signer-empty">
+                                            <p>Upload a template DOCX on the Template tab first, then place fields here.</p>
+                                        </div>
+                                    </template>
+
+                                    <template if:true={form.templateFileId}>
+                                        <!-- The sample-data record picker used to sit here. It was there so
+                                             fields could be placed on merged values rather than on {{tags}},
+                                             which the anchor system now handles at generation time. -->
+
+                                        <div class="template-fields-canvas">
+                                            <!-- Editor only mounts once we know which file to render,
+                                                 so it never flashes an empty canvas or double-loads. -->
+                                            <template if:true={fieldsPreviewFileId}>
+                                                <c-template-field-editor
+                                                    template-file-id={fieldsPreviewFileId}
+                                                    signer-options={signerFieldOptions}
+                                                    initial-fields={_layoutFields}
+                                                    onfieldschange={handleTemplateFieldsChange}>
+                                                </c-template-field-editor>
+                                            </template>
+                                            <template if:false={fieldsPreviewFileId}>
+                                                <div class="fields-preparing">
+                                                    <div class="fields-preparing-spinner"></div>
+                                                    <p class="fields-preparing-text">{previewLoadingText}</p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+
+                            <!-- RIGHT pane: field reference (only on Template & Tags tabs) -->
+                            <template if:true={showFieldsPane}>
+                                <div class="modal-fields-pane">
+                                    <template if:false={form.objectApiName}>
+                                        <div class="fields-empty">
+                                            <div class="fields-empty-icon-wrap">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="fields-empty-icon">
+                                                    <circle cx="11" cy="11" r="8"></circle>
+                                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                                </svg>
+                                            </div>
+                                            <h4>Field Reference</h4>
+                                            <p>Select a target object on the Setup tab to browse available merge fields.</p>
+                                        </div>
+                                    </template>
+
+                                    <template if:true={form.objectApiName}>
+                                        <div class="fields-header">
+                                            <p class="fields-eyebrow">FIELD REFERENCE</p>
+                                            <h4 class="fields-title">{fieldTreeLabel}</h4>
+                                            <p class="fields-subtitle">Click any tag to copy. Paste it inside your DOCX to merge values.</p>
+                                        </div>
+
+                                        <div class="fields-search">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                            <input
+                                                type="text"
+                                                placeholder="Search fields…"
+                                                value={fieldSearch}
+                                                oninput={handleFieldSearch}
+                                                class="search-input" />
+                                        </div>
+
+                                        <!-- Browse a related (parent / child) object → see ALL its fields -->
+                                        <template if:true={hasRelatedObjects}>
+                                            <div class="fields-related-picker">
+                                                <div class="related-combo">
+                                                    <button type="button" class="related-combo-trigger" onclick={toggleRelatedDropdown}>
+                                                        <span class="related-combo-value">{relatedTriggerLabel}</span>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="related-combo-chevron">
+                                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                                        </svg>
+                                                    </button>
+                                                    <template if:true={relatedDropdownOpen}>
+                                                        <div class="related-combo-backdrop" onclick={closeRelatedDropdown}></div>
+                                                        <div class="related-combo-panel">
+                                                            <div class="related-combo-search">
+                                                                <input
+                                                                    type="search"
+                                                                    class="related-search-input"
+                                                                    placeholder="Search related objects…"
+                                                                    value={relatedPickerSearch}
+                                                                    oninput={handleRelatedPickerSearch} />
+                                                            </div>
+                                                            <ul class="related-combo-list">
+                                                                <template for:each={relatedDropdownItems} for:item="opt">
+                                                                    <li key={opt.value} class={opt.cssClass} data-value={opt.value} onclick={handleRelatedOptionClick}>{opt.label}</li>
+                                                                </template>
+                                                                <template if:false={hasRelatedDropdownItems}>
+                                                                    <li class="related-combo-empty">No matches</li>
+                                                                </template>
+                                                            </ul>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template if:true={isLoadingFieldTree}>
+                                            <div class="fields-loading">
+                                                <lightning-spinner alternative-text="Loading fields…" size="small"></lightning-spinner>
+                                            </div>
+                                        </template>
+
+                                        <template if:false={isLoadingFieldTree}>
+                                            <div class="fields-scroll">
+                                                <!-- Related object: ALL fields (when one is picked in the dropdown) -->
+                                                <template if:true={isRelatedSelected}>
+                                                    <div class="fields-section-block">
+                                                        <p class="fields-section-title">{relatedObjectLabel} - all fields</p>
+                                                        <template if:true={relatedLoopHint}>
+                                                            <p class="loop-hint-caption">Wrap these in a loop - example:</p>
+                                                            <pre class="loop-hint">{relatedLoopHint}</pre>
+                                                        </template>
+                                                        <template if:true={relatedLoading}>
+                                                            <div class="fields-loading">
+                                                                <lightning-spinner alternative-text="Loading fields…" size="small"></lightning-spinner>
+                                                            </div>
+                                                        </template>
+                                                        <template for:each={visibleRelatedFields} for:item="rf2">
+                                                            <div key={rf2.name} class="field-card" data-tag={rf2.tag} onclick={handleCopyTag}>
+                                                                <div class="field-card-row">
+                                                                    <span class={rf2.typeBadgeClass}>{rf2.typeShort}</span>
+                                                                    <span class="field-card-label">{rf2.label}</span>
+                                                                </div>
+                                                                <code class="field-card-tag">{rf2.tag}</code>
+                                                                <button class="copy-btn" data-tag={rf2.tag} onclick={handleCopyTag} type="button">Copy</button>
+                                                            </div>
+                                                        </template>
+                                                        <template if:false={hasVisibleRelatedFields}>
+                                                            <div class="fields-no-matches"><p>No fields.</p></div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+
+                                                <template if:false={isRelatedSelected}>
+                                                <template if:true={hasVisibleFields}>
+                                                    <div class="fields-section-block">
+                                                        <p class="fields-section-title">Fields</p>
+                                                        <template for:each={visibleFields} for:item="f">
+                                                            <div key={f.name} class="field-card" data-tag={f.tag} onclick={handleCopyTag}>
+                                                                <div class="field-card-row">
+                                                                    <span class={f.typeBadgeClass}>{f.typeShort}</span>
+                                                                    <span class="field-card-label">{f.label}</span>
+                                                                </div>
+                                                                <code class="field-card-tag">{f.tag}</code>
+                                                                <button class="copy-btn" data-tag={f.tag} onclick={handleCopyTag} type="button">Copy</button>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+
+                                                <template if:true={noMatches}>
+                                                    <div class="fields-no-matches">
+                                                        <p>No fields match "{fieldSearch}"</p>
+                                                    </div>
+                                                </template>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <footer class="modal-footer">
+                            <template if:true={isExisting}>
+                                <button class="btn-danger-text" onclick={handleDelete}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon-sm">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                    <span>Delete</span>
+                                </button>
+                            </template>
+                            <button class="btn-secondary" onclick={closeDialog}>
+                                <span>Cancel</span>
+                            </button>
+                            <button class="btn-primary-dark" onclick={handleSave} disabled={saveDisabled}>
+                                <template if:true={isSaving}>
+                                    <lightning-spinner alternative-text="Saving..." size="x-small"></lightning-spinner>
+                                </template>
+                                <span>Save Template</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon-sm">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </button>
+                        </footer>
+                    </div>
+                </section>
+            </template>
+        </div>
+        <c-signforce-chatbot-fab></c-signforce-chatbot-fab>
+
+        <!-- Themed confirm/prompt, in place of the browser's native dialogs.
+             handleDelete queries this element and bails out if the prompt cannot be
+             shown, so leaving it out makes Delete silently do nothing. -->
+        <c-signforce-confirm></c-signforce-confirm>
+    </c-signforce-access-gate>
+</template>

@@ -1,0 +1,397 @@
+<!--
+  @description       : Document Editor - Redesigned UI matching SignForce wizard aesthetic
+  @author            : SignForce
+  @last modified on  : 04-15-2026
+-->
+<template>
+    <c-signforce-access-gate>
+        <div class="sf-editor-root">
+
+            <!-- ══════════════ TOP HEADER BAR ══════════════ -->
+            <template if:false={hideHeader}>
+                <div class="sf-topbar">
+                    <div class="sf-topbar-brand">
+                        <div class="sf-brand-icon">
+                            <lightning-icon icon-name="utility:edit" size="x-small" style="--lwc-colorTextIconDefault: #fff;"></lightning-icon>
+                        </div>
+                        <span class="sf-brand-name">ESIGNFORCE</span>
+                    </div>
+
+                    <div class="sf-topbar-center">
+                        <h2 class="sf-topbar-title">{agreementName}</h2>
+                        <!-- <span class="sf-topbar-badge">{agreementStatus}</span> -->
+                    </div>
+
+                    <div class="sf-topbar-actions">
+                        <button class="sf-btn sf-btn-ghost" onclick={handleCancel}>
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ══════════════ STEP INDICATOR ══════════════ -->
+            <!-- <div class="sf-step-bar">
+                <div class="sf-step sf-step-done">
+                    <div class="sf-step-dot sf-step-dot-done">&#10003;</div>
+                    <span class="sf-step-label">DETAILS</span>
+                </div>
+                <div class="sf-step-line sf-step-line-done"></div>
+                <div class="sf-step sf-step-done">
+                    <div class="sf-step-dot sf-step-dot-done">&#10003;</div>
+                    <span class="sf-step-label">DOCUMENT</span>
+                </div>
+                <div class="sf-step-line sf-step-line-done"></div>
+                <div class="sf-step sf-step-done">
+                    <div class="sf-step-dot sf-step-dot-done">&#10003;</div>
+                    <span class="sf-step-label">SIGNERS</span>
+                </div>
+                <div class="sf-step-line sf-step-line-done"></div>
+                <div class="sf-step sf-step-active">
+                    <div class="sf-step-dot sf-step-dot-active">4</div>
+                    <span class="sf-step-label">FIELDS</span>
+                </div>
+                <div class="sf-step-line"></div>
+                <div class="sf-step">
+                    <div class="sf-step-dot">5</div>
+                    <span class="sf-step-label">REVIEW</span>
+                </div>
+            </div> -->
+
+            <!-- ══════════════ LOADING ══════════════ -->
+            <template if:true={isLoading}>
+                <div class="sf-loading">
+                    <div class="sf-loading-spinner"></div>
+                    <p class="sf-loading-text">Loading document editor...</p>
+                </div>
+            </template>
+
+            <!-- ══════════════ MAIN BODY ══════════════ -->
+            <template if:false={isLoading}>
+
+                <!-- BUG-038 FIX: read-only banner when the agreement is no longer
+                     a Draft. The document + placed fields remain visible for review,
+                     but all editing affordances are gated off in JS. -->
+                <template if:true={isLocked}>
+                    <div class="sf-locked-banner">
+                        <span class="sf-locked-banner-icon">&#128274;</span>
+                        <span class="sf-locked-banner-text">{lockedBannerText}</span>
+                    </div>
+                </template>
+
+                <div class="sf-body">
+
+                    <!-- ────── LEFT PANEL ────── -->
+                    <div class={leftPanelClass}>
+                        <div class="sf-panel-header">
+                            <span class="sf-panel-title">Fields Palette</span>
+                            <button class="sf-panel-close-btn" onclick={toggleLeftPanel} title="Collapse Panel">◂</button>
+                        </div>
+
+                        <!-- Fields Palette -->
+                        <div class="sf-panel-block">
+                            <p class="sf-panel-sub">Drag a field onto the document</p>
+
+                            <div class="sf-palette">
+                                <template for:each={fieldTypes} for:item="ft">
+                                    <div key={ft.type} class={ft.itemClass} data-type={ft.type} draggable="true" ondragstart={handleDragStart} ondragend={handleDragEnd} onpointerdown={handlePalettePointerDown}>
+                                        <span class="sf-palette-icon" aria-hidden="true"></span>
+                                        <span class="sf-palette-label">{ft.label}</span>
+                                        <span class="sf-palette-drag">⠿</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Pages -->
+                        <div class="sf-panel-block">
+                            <h3 class="sf-panel-heading">Pages</h3>
+                            <div class="sf-page-thumbs">
+                                <template for:each={pages} for:item="page">
+                                    <div key={page.num} class={page.thumbClass} data-page={page.num} onclick={handlePageClick}>
+                                        <div class="sf-thumb-inner">
+                                            <lightning-icon icon-name="doctype:pdf" size="x-small" class="sf-thumb-icon"></lightning-icon>
+                                            <span class="sf-thumb-num">Page {page.num}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ────── CENTER CANVAS ────── -->
+                    <div class="sf-center">
+
+                        <!-- Canvas Toolbar -->
+                        <div class="sf-canvas-toolbar">
+                            <div class="sf-toolbar-left">
+                                <template if:true={isLeftCollapsed}>
+                                    <button class="sf-toolbar-toggle-btn sf-toggle--fields" onclick={toggleLeftPanel} title="Show Fields">
+                                        Show Fields
+                                    </button>
+                                    <div class="sf-toolbar-divider"></div>
+                                </template>
+                                <div class="sf-zoom-group">
+                                    <button class="sf-icon-btn" onclick={handleZoomOut} title="Zoom Out">−</button>
+                                    <span class="sf-zoom-label">{zoomLabel}</span>
+                                    <button class="sf-icon-btn" onclick={handleZoomIn} title="Zoom In">+</button>
+                                </div>
+                                <div class="sf-toolbar-divider"></div>
+                                <span class="sf-page-count">
+                                    <lightning-icon icon-name="doctype:pdf" size="xx-small" style="margin-right:4px;"></lightning-icon>
+                                    {totalPages} Page(s)
+                                </span>
+                                <template if:true={isConvertedFromWord}>
+                                    <span class="slds-badge slds-theme_info">
+                                        Converted from {sourceFileType}
+                                    </span>
+                                </template>
+                            </div>
+                            <div class="sf-toolbar-right">
+                                <template if:true={hasDocument}>
+                                    <button type="button" class="sf-view-pdf-link" onclick={handleOpenPdfModal}>
+                                        &#128196; View PDF
+                                    </button>
+                                </template>
+                                <template if:true={isRightCollapsed}>
+                                    <button class="sf-toolbar-toggle-btn sf-toggle--props" onclick={toggleRightPanel} title="Show Properties">
+                                        Show Properties
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Drop Area -->
+                        <div class="sf-canvas-scroll" ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}>
+
+                            <template if:true={hasDocument}>
+                                <!-- BUG-015 FIX: drop-zone now binds dropZoneStyle which
+                                     applies CSS transform:scale based on zoom%. Iframe and
+                                     placed fields both inherit the transformation as one
+                                     unit, so + and − buttons now actually resize the doc. -->
+                                <div class={dropZoneClass} style={dropZoneStyle} onclick={handleCanvasClick}>
+
+                                    <iframe src={safeIframeUrl} class="sf-pdf-frame" height={iframeHeight} scrolling="no" title="Document Preview">
+                                    </iframe>
+
+                                    <!-- Placed Fields -->
+                                    <template for:each={allFields} for:item="field">
+                                        <div key={field.id} class={field.fieldClass} style={field.fieldStyle} data-id={field.id} onpointerdown={handleFieldPointerDown}
+                                            onclick={handleFieldClick}>
+
+                                            <!-- Top signer tag chip (DocuSign-style) -->
+                                            <div class="sf-field-tag">
+                                                <span class="sf-field-tag-dot"></span>
+                                                <span class="sf-field-tag-text">{field.signerName}</span>
+                                            </div>
+
+                                            <!-- Main content: icon + type label -->
+                                            <div class="sf-field-inner">
+                                                <span class="sf-field-icon" aria-hidden="true"></span>
+                                                <span class="sf-field-type">{field.typeLabel}</span>
+                                            </div>
+
+                                            <!-- Bottom-right resize affordance (visual only) -->
+                                            <span class="sf-field-resize"></span>
+
+                                            <!-- Delete button -->
+                                            <button class="sf-field-del" data-id={field.id} onclick={handleDeleteField} title="Delete field">&#215;</button>
+                                        </div>
+                                    </template>
+
+                                </div>
+                            </template>
+
+                            <template if:false={hasDocument}>
+                                <div class="sf-no-doc">
+                                    <div class="sf-no-doc-icon">
+                                        <lightning-icon icon-name="doctype:pdf" size="large"></lightning-icon>
+                                    </div>
+                                    <p class="sf-no-doc-title">No document uploaded</p>
+                                    <p class="sf-no-doc-sub">Upload a PDF from the Agreement record first</p>
+                                </div>
+                            </template>
+
+                        </div>
+                    </div>
+
+                    <!-- ────── RIGHT PANEL ────── -->
+                    <div class={rightPanelClass}>
+                        <div class="sf-panel-header">
+                            <span class="sf-panel-title">Properties</span>
+                            <button class="sf-panel-close-btn" onclick={toggleRightPanel} title="Collapse Panel">▸</button>
+                        </div>
+
+                        <!-- Assign To (moved here from the left palette) -->
+                        <div class="sf-panel-block">
+                            <h3 class="sf-panel-heading">Assign To</h3>
+                            <lightning-combobox label="" value={selectedSignerId} options={signerOptions} onchange={handleSignerChange} placeholder="Select signer" class="sf-combobox">
+                            </lightning-combobox>
+                        </div>
+
+                        <!-- Field Properties (whole block hidden until a field is selected) -->
+                        <template if:true={selectedField}>
+                        <div class="sf-panel-block">
+                            <h3 class="sf-panel-heading">Field Properties</h3>
+
+                                <div class="sf-props-form">
+                                    <div class="sf-prop-row">
+                                        <lightning-input label="Label" value={selectedField.fieldLabel} onchange={handleFieldLabelChange} class="sf-input" disabled={isLocked}>
+                                        </lightning-input>
+                                    </div>
+                                    <div class="sf-prop-row">
+                                        <lightning-combobox label="Assigned To" value={selectedField.signerId} options={signerOptions} onchange={handleFieldSignerChange}
+                                            class="sf-input" disabled={isLocked}>
+                                        </lightning-combobox>
+                                    </div>
+                                    <div class="sf-prop-row sf-prop-row-2col">
+                                        <lightning-input type="number" label="Width" value={selectedField.displayWidth} onchange={handleFieldWidthChange} min="10" class="sf-input"
+                                            disabled={isLocked} field-level-help="Width in pixels (what you see on screen)"></lightning-input>
+                                        <lightning-input type="number" label="Height" value={selectedField.displayHeight} onchange={handleFieldHeightChange} min="10" class="sf-input"
+                                            disabled={isLocked} field-level-help="Height in pixels (what you see on screen)"></lightning-input>
+                                    </div>
+                                    <div class="sf-prop-row">
+                                        <!-- BUG-003 FIX: hide the base component's own label and
+                                             render a separate caption beside the switch inside a
+                                             flex wrapper so ONLY the switch (not the full-width
+                                             text→switch band) is the click target. -->
+                                        <div class="sf-required-toggle">
+                                            <lightning-input type="toggle" label="Required Field" variant="label-hidden"
+                                                message-toggle-active="Required" message-toggle-inactive="Optional"
+                                                checked={selectedField.isRequired} onchange={handleFieldRequiredChange}
+                                                disabled={isLocked} class="sf-input sf-required-toggle-input"></lightning-input>
+                                            <span class="sf-required-toggle-caption">Required Field</span>
+                                        </div>
+                                    </div>
+                                    <template if:true={isCheckboxField}>
+                                        <div class="sf-prop-row sf-checkbox-note">
+                                            <p class="sf-checkbox-note-text">
+                                                The signer must tick this checkbox to confirm agreement. If
+                                                "Required Field" is on, they cannot complete signing until the
+                                                box is checked.
+                                            </p>
+                                        </div>
+                                    </template>
+                                    <!-- TEMP DISABLED (per request): Conditional Display hidden for now.
+                                         Re-enable by uncommenting this block; handlers/getters
+                                         (conditionTypeOptions, handleConditionTypeChange, showConditionFields,
+                                         conditionFieldOptions, handleConditionFieldChange, handleConditionValueChange)
+                                         are all still present in documentEditor.js.
+                                    <div class="sf-prop-row">
+                                        <lightning-combobox label="Conditional Display" value={selectedFieldConditionType} options={conditionTypeOptions}
+                                            onchange={handleConditionTypeChange} class="sf-input">
+                                        </lightning-combobox>
+                                    </div>
+                                    <template if:true={showConditionFields}>
+                                        <div class="sf-prop-row">
+                                            <lightning-combobox label="When this field" value={selectedFieldConditionFieldId} options={conditionFieldOptions}
+                                                onchange={handleConditionFieldChange} class="sf-input">
+                                            </lightning-combobox>
+                                        </div>
+                                        <div class="sf-prop-row">
+                                            <lightning-input label="Has value" value={selectedFieldConditionValue} onchange={handleConditionValueChange}
+                                                placeholder="true / false / any text" class="sf-input">
+                                            </lightning-input>
+                                        </div>
+                                    </template>
+                                    -->
+                                    <template if:false={isLocked}>
+                                        <div class="sf-prop-row">
+                                            <button class="sf-btn sf-btn-primary sf-btn-full" onclick={handleSaveField}>
+                                                Save
+                                            </button>
+                                        </div>
+                                        <div class="sf-prop-row">
+                                            <button class="sf-btn sf-btn-danger sf-btn-full" data-id={selectedField.id} onclick={handleDeleteField}>
+                                                &#128465; Delete Field
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                        </div>
+                        </template>
+
+                        <!-- Fields Summary -->
+                        <div class="sf-panel-block">
+                            <h3 class="sf-panel-heading">Signers Summary</h3>
+
+                            <template for:each={summarySigners} for:item="signer">
+                                <div key={signer.Id} class="sf-signer-row">
+                                    <div class="sf-signer-avatar" style={signer.dotStyle}>
+                                        {signer.initials}
+                                    </div>
+                                    <div class="sf-signer-info">
+                                        <p class="sf-signer-name">{signer.Name}</p>
+                                        <p class="sf-signer-count">{signer.fieldCount} fields placed</p>
+                                    </div>
+                                    <span class="sf-signer-tag">{signer.roleLabel}</span>
+                                </div>
+                            </template>
+
+                            <template if:false={summarySigners.length}>
+                                <p class="sf-panel-sub">No signers added yet</p>
+                            </template>
+                        </div>
+
+                        <!-- Total Fields -->
+                        <div class="sf-panel-block">
+                            <h3 class="sf-panel-heading">Total Fields</h3>
+                            <div class="sf-total-fields">
+                                <span class="sf-total-num">{totalFieldCount}</span>
+                                <span class="sf-total-sub">across {totalPages} page(s)</span>
+                            </div>
+                        </div>
+
+                        <!-- Warnings -->
+                        <template if:true={showNoFieldsWarning}>
+                            <div class="sf-warning-block">
+                                <div class="sf-warning-icon">&#9651;</div>
+                                <div>
+                                    <p class="sf-warning-title">No signature fields placed</p>
+                                    <p class="sf-warning-body">Place at least one Signature field before sending.</p>
+                                </div>
+                            </div>
+                        </template>
+
+                    </div>
+
+                </div>
+
+            </template>
+        </div>
+
+        <!-- BUG-045 + BUG-062 FIX: only show the "Send for Signature" CTA while the
+             agreement is still in Draft. For Sent/Completed/Voided/Closed it must be
+             hidden so it can't be re-sent. The existing hideHeader wrapper is kept. -->
+        <template if:false={hideHeader}>
+            <template if:true={isDraft}>
+                <div class="sf-floating-cta">
+                    <button class="sf-btn sf-btn-primary sf-btn-large" onclick={handleSaveAndSend} disabled={isSending}>
+                        <template if:false={isSending}>
+                            Send for Signature →
+                        </template>
+                        <template if:true={isSending}>
+                            Sending...
+                        </template>
+                    </button>
+                </div>
+            </template>
+        </template>
+
+        <!-- View PDF Modal -->
+        <template if:true={isPdfModalOpen}>
+            <div class="sf-modal-overlay" onclick={handleClosePdfModal}>
+                <div class="sf-modal-container" onclick={handleModalContentClick}>
+                    <div class="sf-modal-header">
+                        <h2 class="sf-modal-title">PDF Preview</h2>
+                        <button class="sf-modal-close" onclick={handleClosePdfModal} title="Close Modal">&#215;</button>
+                    </div>
+                    <div class="sf-modal-body">
+                        <iframe src={pdfModalUrl} class="sf-modal-iframe" title="PDF Preview Modal" onload={handlePdfModalFrameLoad}></iframe>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </c-signforce-access-gate>
+</template>

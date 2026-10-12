@@ -1,0 +1,8 @@
+<apex:page showHeader="false" sidebar="false" id="CommunitiesTemplate">
+  <!-- The stock Communities stylesheet reference is gone: nothing in this
+       package composes with this template (no apex:composition names it), and
+       a non-literal apex:stylesheet value is a standing scanner finding. -->
+  <apex:insert name="header"/>
+  <apex:insert name="body"/>
+  <apex:insert name="footer"/>
+</apex:page>
